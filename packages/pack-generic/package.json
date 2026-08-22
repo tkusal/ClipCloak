@@ -1,0 +1,14 @@
+{
+  "name": "@clipcloak/pack-generic",
+  "version": "0.1.0",
+  "description": "Generic secrets and PII detectors for ClipCloak",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "scripts": {
+    "build": "tsc",
+    "test": "vitest run"
+  },
+  "dependencies": {
+    "@clipcloak/core": "workspace:*"
+  }
+}

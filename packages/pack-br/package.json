@@ -1,0 +1,14 @@
+{
+  "name": "@clipcloak/pack-br",
+  "version": "0.1.0",
+  "description": "Brazilian PII detectors (CPF, CNPJ, PIX) for ClipCloak",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "scripts": {
+    "build": "tsc",
+    "test": "vitest run"
+  },
+  "dependencies": {
+    "@clipcloak/core": "workspace:*"
+  }
+}
