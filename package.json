@@ -22,5 +22,11 @@
     "typescript": "^5.4.5",
     "vitest": "^1.6.0"
   },
-  "version": "0.2.0"
+  "version": "0.2.0",
+  "pnpm": {
+    "onlyBuiltDependencies": [
+      "electron",
+      "esbuild"
+    ]
+  }
 }
