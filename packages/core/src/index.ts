@@ -1,2 +1,4 @@
 export * from './types.js';
-export * from './detect.js';
+export * from './engine.js';
+export * from './overlap.js';
+export * from './redaction.js';

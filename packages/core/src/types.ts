@@ -1,24 +1,44 @@
+export type FindingCategory = "secret" | "credential" | "pii" | "financial";
+export type Severity = "low" | "medium" | "high" | "critical";
+
+export interface DetectionContext {
+  filename?: string;
+  surroundingText?: string;
+}
+
+export interface DetectOptions {
+  packs?: string[];
+  minConfidence?: number;
+  minSeverity?: Severity;
+  context?: DetectionContext;
+}
+
 export interface Finding {
-  type: string;
-  value: string;
-  redacted: string;
-  startIndex: number;
-  endIndex: number;
+  detectorId: string;
   packId: string;
-  confidence: 'HIGH' | 'MEDIUM' | 'LOW';
+  category: FindingCategory;
+  severity: Severity;
+  confidence: number;
+  start: number;
+  end: number;
+  redactedPreview: string;
+  reason: string;
 }
 
 export interface Detector {
   id: string;
-  name: string;
-  detect: (text: string) => Omit<Finding, 'packId'>[];
+  category: FindingCategory;
+  detect: (text: string, context?: DetectionContext) => Omit<Finding, 'packId'>[];
 }
 
-export interface Pack {
+export interface DetectorPack {
   id: string;
   name: string;
-  version: string;
   detectors: Detector[];
 }
 
-export type DetectFunction = (text: string, packs: Pack[]) => Finding[];
+export interface ScanResult {
+  file: string;
+  findings: Finding[];
+  error?: string;
+}
