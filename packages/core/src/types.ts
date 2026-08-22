@@ -6,6 +6,13 @@ export interface DetectionContext {
   surroundingText?: string;
 }
 
+export interface ClipCloakConfig {
+  packs?: string[];
+  minSeverity?: Severity;
+  minConfidence?: number;
+  ignore?: string[];
+}
+
 export interface DetectOptions {
   packs?: string[];
   minConfidence?: number;

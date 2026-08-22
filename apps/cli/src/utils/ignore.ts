@@ -12,8 +12,13 @@ const DEFAULT_IGNORES = [
   '*.jpg', '*.png', '*.mp4', '*.zip', '*.tar.gz', // Common binaries
 ];
 
-export function getIgnoreFilter(cwd: string) {
+export function getIgnoreFilter(cwd: string, extraIgnores: string[] = []) {
   const ig = ignore().add(DEFAULT_IGNORES);
+  
+  if (extraIgnores.length > 0) {
+    ig.add(extraIgnores);
+  }
+
   const ignoreFilePath = path.join(cwd, '.clipcloakignore');
   
   if (fs.existsSync(ignoreFilePath)) {

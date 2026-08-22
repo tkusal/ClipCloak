@@ -30,14 +30,15 @@ export function getPacks(packNames?: string[]): DetectorPack[] {
   return selected;
 }
 
-export function scanText(text: string, filename: string, packs: DetectorPack[]): DetectResult {
+export function scanText(text: string, filename: string, packs: DetectorPack[], customOptions: Omit<DetectOptions, 'context'> = {}): DetectResult {
   const options: DetectOptions = {
+    ...customOptions,
     context: { filename }
   };
   return detect(text, packs, options);
 }
 
-export function scanFile(filepath: string, packs: DetectorPack[]): DetectResult {
+export function scanFile(filepath: string, packs: DetectorPack[], customOptions: Omit<DetectOptions, 'context'> = {}): DetectResult {
   try {
     const stat = fs.statSync(filepath);
     if (stat.size > MAX_FILE_SIZE) {
@@ -46,7 +47,7 @@ export function scanFile(filepath: string, packs: DetectorPack[]): DetectResult 
     }
 
     const content = fs.readFileSync(filepath, 'utf8');
-    return scanText(content, filepath, packs);
+    return scanText(content, filepath, packs, customOptions);
   } catch (err) {
     console.error(`[ERROR] Failed to read ${filepath}: ${err instanceof Error ? err.message : String(err)}`);
     process.exit(2);

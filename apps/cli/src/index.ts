@@ -18,6 +18,8 @@ program
   // .option('--staged', 'Scan git staged files') // TODO: implement later if needed via simple child_process git call
   .option('--packs <packs>', 'Comma-separated list of packs to use (e.g., generic,br,eu)')
   .option('--format <format>', 'Output format (text, json)', 'text')
+  .option('--severity <severity>', 'Minimum severity level (low, medium, high, critical)')
+  .option('--confidence <confidence>', 'Minimum confidence level (0.0 to 1.0)', parseFloat)
   .action(async (target, options) => {
     await runScan(target, options);
   });

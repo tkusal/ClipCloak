@@ -2,27 +2,45 @@ import fs from 'node:fs';
 import path from 'node:path';
 import { getIgnoreFilter, walkDir } from '../utils/ignore.js';
 import { getPacks, scanFile, scanText } from '../utils/scanner.js';
-import type { Finding } from '@clipcloak/core';
+import type { Finding, Severity } from '@clipcloak/core';
+import { resolveConfig } from '@clipcloak/core';
+import { loadConfigFile } from '../utils/config.js';
 
 export interface ScanOptions {
   packs?: string;
   stdin?: boolean;
   format?: string;
+  severity?: Severity;
+  confidence?: number;
 }
 
 export async function runScan(target: string | undefined, options: ScanOptions) {
   const cwd = process.cwd();
-  const ig = getIgnoreFilter(cwd);
   
-  const packNames = options.packs ? options.packs.split(',') : undefined;
-  const packs = getPacks(packNames);
+  const fileConfig = loadConfigFile(cwd);
+  
+  const cliOptions: any = {};
+  if (options.packs) cliOptions.packs = options.packs.split(',');
+  if (options.severity) cliOptions.minSeverity = options.severity;
+  if (options.confidence !== undefined) cliOptions.minConfidence = options.confidence;
+  
+  const config = resolveConfig(fileConfig, cliOptions);
+  
+  const ig = getIgnoreFilter(cwd, config.ignore);
+  
+  const packs = getPacks(config.packs);
   
   const allFindings: { file: string; findings: Finding[] }[] = [];
+
+  const detectOptions = {
+    minSeverity: config.minSeverity,
+    minConfidence: config.minConfidence
+  };
 
   // Handle stdin
   if (options.stdin) {
     const text = fs.readFileSync(0, 'utf-8'); // Read from stdin
-    const { findings } = scanText(text, 'stdin', packs);
+    const { findings } = scanText(text, 'stdin', packs, detectOptions);
     if (findings.length > 0) {
       allFindings.push({ file: 'stdin', findings });
     }
@@ -39,7 +57,7 @@ export async function runScan(target: string | undefined, options: ScanOptions) 
     if (stat.isDirectory()) {
       const files = walkDir(fullPath, ig, cwd);
       for (const file of files) {
-        const { findings } = scanFile(file, packs);
+        const { findings } = scanFile(file, packs, detectOptions);
         if (findings.length > 0) {
           allFindings.push({ file, findings });
         }
@@ -48,7 +66,7 @@ export async function runScan(target: string | undefined, options: ScanOptions) 
       // Check if the single file is ignored anyway
       const relPath = path.relative(cwd, fullPath);
       if (!ig.ignores(relPath)) {
-        const { findings } = scanFile(fullPath, packs);
+        const { findings } = scanFile(fullPath, packs, detectOptions);
         if (findings.length > 0) {
           allFindings.push({ file: fullPath, findings });
         }
