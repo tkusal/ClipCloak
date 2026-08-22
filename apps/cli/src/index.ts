@@ -1,10 +1,7 @@
 #!/usr/bin/env node
 
 import { Command } from 'commander';
-import { detect } from '@clipcloak/core';
-import genericPack from '@clipcloak/pack-generic';
-import brPack from '@clipcloak/pack-br';
-import euPack from '@clipcloak/pack-eu';
+import { runScan } from './commands/scan.js';
 
 const program = new Command();
 
@@ -16,10 +13,13 @@ program
 program
   .command('scan')
   .description('Scan text or file for sensitive data')
-  .argument('[file]', 'file to scan')
-  .action((file) => {
-    // TODO: implement CLI logic
-    console.log(`Scanning ${file}... (WIP)`);
+  .argument('[target]', 'file or directory to scan')
+  .option('--stdin', 'Scan from standard input')
+  // .option('--staged', 'Scan git staged files') // TODO: implement later if needed via simple child_process git call
+  .option('--packs <packs>', 'Comma-separated list of packs to use (e.g., generic,br,eu)')
+  .option('--format <format>', 'Output format (text, json)', 'text')
+  .action(async (target, options) => {
+    await runScan(target, options);
   });
 
 program.parse();

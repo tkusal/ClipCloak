@@ -12,9 +12,10 @@
   },
   "dependencies": {
     "@clipcloak/core": "workspace:*",
-    "@clipcloak/pack-generic": "workspace:*",
     "@clipcloak/pack-br": "workspace:*",
     "@clipcloak/pack-eu": "workspace:*",
-    "commander": "^12.0.0"
+    "@clipcloak/pack-generic": "workspace:*",
+    "commander": "^12.0.0",
+    "ignore": "^7.0.6"
   }
 }
