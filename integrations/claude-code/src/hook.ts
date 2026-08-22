@@ -48,7 +48,9 @@ export function handlePreToolUse(event: PreToolUseEvent, cwd: string = process.c
     const stat = fs.statSync(fullPath);
     // Skip very large files to prevent freezing the agent
     if (stat.size > 5 * 1024 * 1024) {
-      return { status: 'ALLOW' }; 
+      return mode === 'strict'
+        ? { status: 'BLOCK', message: 'ClipCloak strict mode: File is too large to scan safely.' }
+        : { status: 'ALLOW' }; 
     }
 
     const content = fs.readFileSync(fullPath, 'utf8');

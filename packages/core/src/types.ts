@@ -11,6 +11,8 @@ export interface ClipCloakConfig {
   minSeverity?: Severity;
   minConfidence?: number;
   ignore?: string[];
+  blockMinSeverity?: Severity;
+  blockCategories?: FindingCategory[];
 }
 
 export interface DetectOptions {

@@ -32,10 +32,8 @@ describe('CLI: scanner utils', () => {
       expect(packs.some(p => p.id === 'br')).toBe(true);
     });
 
-    it('should ignore invalid packs', () => {
-      const packs = getPacks(['generic', 'invalid']);
-      expect(packs).toHaveLength(1);
-      expect(warnSpy).toHaveBeenCalledWith(expect.stringContaining('not found'));
+    it('should throw on invalid packs', () => {
+      expect(() => getPacks(['generic', 'invalid'])).toThrow('Pack \'invalid\' not found');
     });
   });
 
@@ -55,10 +53,11 @@ describe('CLI: scanner utils', () => {
       expect(result.findings).toBeDefined();
     });
 
-    it('should fail gracefully on read error', () => {
+    it('should return error on read error', () => {
       vi.mocked(fs.statSync).mockImplementation(() => { throw new Error('Cannot stat'); });
       const result = scanFile('test.txt', []);
-      expect(warnSpy).toHaveBeenCalled();
+      expect(result.errors).toHaveLength(1);
+      expect(result.errors[0].errorMessage).toContain('Cannot stat');
       expect(exitSpy).not.toHaveBeenCalled();
       expect(result.findings).toHaveLength(0);
     });

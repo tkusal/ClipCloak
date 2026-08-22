@@ -14,17 +14,14 @@ export function shannonEntropy(str: string): number {
   return entropy;
 }
 
-export function isDummyString(str: string): boolean {
+export function isObviousDummyString(str: string): boolean {
   const lower = str.toLowerCase();
   
-  // Exact or obvious mock matches
   if (lower.includes('example') || 
       lower.includes('dummy') || 
       lower.includes('fake') || 
       lower.includes('your_') || 
       lower.includes('xxxx') ||
-      lower.includes('12345678') ||
-      lower.includes('abcdef') ||
       lower === 'pass' ||
       lower === 'password' ||
       lower === 'secret' ||
@@ -32,6 +29,17 @@ export function isDummyString(str: string): boolean {
   ) {
     return true;
   }
-  
   return false;
+}
+
+export function isSoftDummyString(str: string): boolean {
+  const lower = str.toLowerCase();
+  if (lower.includes('12345678') || lower.includes('abcdef')) {
+    return true;
+  }
+  return false;
+}
+
+export function isDummyString(str: string): boolean {
+  return isObviousDummyString(str) || isSoftDummyString(str);
 }

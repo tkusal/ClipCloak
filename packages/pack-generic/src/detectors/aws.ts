@@ -1,7 +1,7 @@
 import type { Detector, DetectionContext } from '@clipcloak/core';
 import { createRedactedPreview } from '@clipcloak/core';
 
-import { isDummyString, shannonEntropy } from '../utils/entropy.js';
+import { isObviousDummyString, isSoftDummyString, shannonEntropy } from '../utils/entropy.js';
 
 export const awsDetector: Detector = {
   id: 'aws-access-key',
@@ -14,12 +14,17 @@ export const awsDetector: Detector = {
     while ((match = regex.exec(text)) !== null) {
       const token = match[0];
       
-      if (isDummyString(token)) {
+      if (isObviousDummyString(token)) {
         continue;
+      }
+
+      let confidence = 0.9;
+      if (isSoftDummyString(token)) {
+        confidence = 0.7;
       }
       
       const entropy = shannonEntropy(token.slice(4)); // Check entropy of the random part
-      if (entropy < 2.5) { // Needs some reasonable randomness
+      if (entropy < 2.5 && confidence === 0.9) { // Needs some reasonable randomness, but don't skip if already flagged as dummy/low-confidence (to avoid double skip)
         continue;
       }
 
@@ -27,7 +32,7 @@ export const awsDetector: Detector = {
         detectorId: this.id,
         category: this.category,
         severity: 'critical' as const,
-        confidence: 0.9,
+        confidence,
         start: match.index,
         end: match.index + token.length,
         redactedPreview: createRedactedPreview(token, this.id, { strategy: 'partial' }),

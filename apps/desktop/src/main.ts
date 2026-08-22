@@ -5,6 +5,8 @@ import genericPack from '@clipcloak/pack-generic';
 import brPack from '@clipcloak/pack-br';
 import euPack from '@clipcloak/pack-eu';
 
+import crypto from 'node:crypto';
+
 const ALL_PACKS = [genericPack, brPack, euPack];
 
 const t = {
@@ -24,53 +26,68 @@ const t = {
 };
 
 let tray: Tray | null = null;
-let lastClipboardText = '';
+let lastClipboardHash = '';
+
+function getFingerprint(text: string): string {
+  return crypto.createHash('sha256').update(text).digest('hex');
+}
 
 function checkClipboard() {
   const text = clipboard.readText();
-  if (text && text !== lastClipboardText) {
-    lastClipboardText = text;
-    
-    const { findings } = detect(text, ALL_PACKS, {
-      minSeverity: 'medium',
-      context: { filename: 'clipboard' }
-    });
+  if (text) {
+    const hash = getFingerprint(text);
+    if (hash !== lastClipboardHash) {
+      lastClipboardHash = hash;
+      
+      const { findings } = detect(text, ALL_PACKS, {
+        minSeverity: 'medium',
+        context: { filename: 'clipboard' }
+      });
 
-    if (findings.length > 0) {
-      const worst = findings.reduce((prev, current) => {
-        if (current.severity === 'critical') return current;
-        if (current.severity === 'high' && prev.severity !== 'critical') return current;
-        return prev;
-      }, findings[0]);
+      if (findings.length > 0) {
+        const worst = findings.reduce((prev, current) => {
+          if (current.severity === 'critical') return current;
+          if (current.severity === 'high' && prev.severity !== 'critical') return current;
+          return prev;
+        }, findings[0]);
 
-      console.log(`\n[ClipCloak Desktop] Secret Copied: ${worst.packId}/${worst.detectorId}`);
+        console.log(`\n[ClipCloak Desktop] Secret Copied: ${worst.packId}/${worst.detectorId}`);
 
-      if (Notification.isSupported()) {
-        const notif = new Notification({
-          title: i18n.get('alertTitle', t),
-          body: i18n.get('alertBody', t, worst.packId, worst.detectorId, worst.severity.toUpperCase()),
-          actions: [
-            { type: 'button', text: i18n.get('btnClear', t) },
-            { type: 'button', text: i18n.get('btnRedact', t) }
-          ]
-        });
-        
-        notif.on('action', (event, index) => {
-          if (index === 0) { // Clear
-            clipboard.writeText('');
-            console.log(i18n.get('logCleared', t));
-          } else if (index === 1) { // Redact
-            import('@clipcloak/core').then(({ applyRedaction }) => {
-              const safeText = applyRedaction(text, findings);
-              clipboard.writeText(safeText);
-              console.log(i18n.get('logRedacted', t));
-            });
-          }
-        });
-        
-        notif.show();
-      } else {
-        console.log(`[ClipCloak] Secret copied: ${worst.detectorId}`);
+        if (Notification.isSupported()) {
+          const notif = new Notification({
+            title: i18n.get('alertTitle', t),
+            body: i18n.get('alertBody', t, worst.packId, worst.detectorId, worst.severity.toUpperCase()),
+            actions: [
+              { type: 'button', text: i18n.get('btnClear', t) },
+              { type: 'button', text: i18n.get('btnRedact', t) }
+            ]
+          });
+          
+          const alertHash = hash;
+          
+          notif.on('action', (event, index) => {
+            const currentText = clipboard.readText();
+            if (getFingerprint(currentText) !== alertHash) {
+              console.log('[ClipCloak] Clipboard changed since notification was shown. Action ignored.');
+              return;
+            }
+
+            if (index === 0) { // Clear
+              clipboard.writeText('');
+              console.log(i18n.get('logCleared', t));
+            } else if (index === 1) { // Redact
+              import('@clipcloak/core').then(({ applyRedaction }) => {
+                const safeText = applyRedaction(currentText, findings);
+                clipboard.writeText(safeText);
+                console.log(i18n.get('logRedacted', t));
+              });
+            }
+          });
+          
+          notif.show();
+        } else {
+          console.log(`[ClipCloak] Secret copied: ${worst.detectorId}`);
+        }
       }
     }
   }

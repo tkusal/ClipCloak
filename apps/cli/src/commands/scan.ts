@@ -1,10 +1,10 @@
 import fs from 'node:fs';
 import path from 'node:path';
-import { execSync } from 'node:child_process';
+import { execFileSync } from 'node:child_process';
 import { getIgnoreFilter, walkDir } from '../utils/ignore.js';
-import { getPacks, scanFile, scanText } from '../utils/scanner.js';
+import { getPacks, scanFile, scanBuffer, scanText } from '../utils/scanner.js';
 import type { Finding, Severity } from '@clipcloak/core';
-import { resolveConfig } from '@clipcloak/core';
+import { resolveConfig, validateConfig } from '@clipcloak/core';
 import { loadConfigFile } from '../utils/config.js';
 
 export interface ScanOptions {
@@ -20,19 +20,42 @@ export async function runScan(target: string | undefined, options: ScanOptions) 
   const cwd = process.cwd();
   
   const fileConfig = loadConfigFile(cwd);
+  if (fileConfig) {
+    const configErrors = validateConfig(fileConfig);
+    if (configErrors.length > 0) {
+      console.error('❌ [ERROR] Invalid configuration in .clipcloak.json:');
+      for (const err of configErrors) {
+        console.error(`  - ${err}`);
+      }
+      process.exit(2);
+    }
+  }
   
   const cliOptions: any = {};
   if (options.packs) cliOptions.packs = options.packs.split(',');
   if (options.severity) cliOptions.minSeverity = options.severity;
   if (options.confidence !== undefined) cliOptions.minConfidence = options.confidence;
   
-  const config = resolveConfig(fileConfig, cliOptions);
+  let config;
+  try {
+    config = resolveConfig(fileConfig, cliOptions);
+  } catch (err: any) {
+    console.error(`❌ [ERROR] Config resolution failed: ${err.message}`);
+    process.exit(2);
+  }
   
   const ig = getIgnoreFilter(cwd, config.ignore);
   
-  const packs = getPacks(config.packs);
+  let packs;
+  try {
+    packs = getPacks(config.packs);
+  } catch (err: any) {
+    console.error(`❌ [ERROR] Pack resolution failed: ${err.message}`);
+    process.exit(2);
+  }
   
   const allFindings: { file: string; findings: Finding[] }[] = [];
+  const allErrors: { file: string; errors: any[] }[] = [];
 
   const detectOptions = {
     minSeverity: config.minSeverity,
@@ -41,41 +64,55 @@ export async function runScan(target: string | undefined, options: ScanOptions) 
 
   // Handle stdin
   if (options.stdin) {
-    const text = fs.readFileSync(0, 'utf-8'); // Read from stdin
-    const { findings } = scanText(text, 'stdin', packs, detectOptions);
-    if (findings.length > 0) {
-      allFindings.push({ file: 'stdin', findings });
+    try {
+      const text = fs.readFileSync(0, 'utf-8'); // Read from stdin
+      const { findings, errors } = scanText(text, 'stdin', packs, detectOptions);
+      if (errors && errors.length > 0) {
+        allErrors.push({ file: 'stdin', errors });
+      }
+      if (findings.length > 0) {
+        allFindings.push({ file: 'stdin', findings });
+      }
+    } catch (err: any) {
+      allErrors.push({
+        file: 'stdin',
+        errors: [{ packId: 'core', detectorId: 'stdin-reader', errorMessage: err.message }]
+      });
     }
   }
   // Handle staged files
   else if (options.staged) {
     try {
-      const gitOutput = execSync('git diff --cached --name-only --diff-filter=ACMR').toString();
-      const files = gitOutput.split('\n').map(s => s.trim()).filter(Boolean);
+      const gitOutput = execFileSync('git', ['diff', '--cached', '--name-only', '-z', '--diff-filter=ACMR'], { cwd }).toString();
+      const files = gitOutput.split('\0').filter(Boolean);
       for (const file of files) {
         const fullPath = path.resolve(cwd, file);
-        if (fs.existsSync(fullPath)) {
-          const relPath = path.relative(cwd, fullPath);
-          if (!ig.ignores(relPath)) {
-            // Read exact staged content using git show :<file>
-            try {
-              const content = execSync(`git show :${file}`, { stdio: ['pipe', 'pipe', 'ignore'] }).toString();
-              const { findings } = scanText(content, fullPath, packs, detectOptions);
-              if (findings.length > 0) {
-                allFindings.push({ file: fullPath, findings });
-              }
-            } catch (err) {
-              // Fallback to normal file read if git show fails (e.g., deleted file or renamed)
-              const { findings } = scanFile(fullPath, packs, detectOptions);
-              if (findings.length > 0) {
-                allFindings.push({ file: fullPath, findings });
-              }
+        const relPath = path.relative(cwd, fullPath);
+        if (!ig.ignores(relPath)) {
+          // Read exact staged content directly from the index using git show :<file>
+          try {
+            const buffer = execFileSync('git', ['show', `:${file}`], { cwd, stdio: ['pipe', 'pipe', 'pipe'] });
+            const { findings, errors } = scanBuffer(buffer, fullPath, packs, detectOptions);
+            if (errors && errors.length > 0) {
+              allErrors.push({ file: fullPath, errors });
+            }
+            if (findings.length > 0) {
+              allFindings.push({ file: fullPath, findings });
+            }
+          } catch (err) {
+            // Fallback to normal file read if git show fails (e.g. untracked or deleted from staging index somehow)
+            const { findings, errors } = scanFile(fullPath, packs, detectOptions);
+            if (errors && errors.length > 0) {
+              allErrors.push({ file: fullPath, errors });
+            }
+            if (findings.length > 0) {
+              allFindings.push({ file: fullPath, findings });
             }
           }
         }
       }
-    } catch (err) {
-      console.error('[ERROR] Failed to get staged files. Are you in a git repository?');
+    } catch (err: any) {
+      console.error(`❌ [ERROR] Failed to scan staged files: ${err.message}`);
       process.exit(2);
     }
   }
@@ -83,34 +120,67 @@ export async function runScan(target: string | undefined, options: ScanOptions) 
   else if (target) {
     const fullPath = path.resolve(cwd, target);
     if (!fs.existsSync(fullPath)) {
-      console.error(`[ERROR] Target not found: ${fullPath}`);
+      console.error(`❌ [ERROR] Target not found: ${fullPath}`);
       process.exit(2);
     }
 
-    const stat = fs.statSync(fullPath);
-    if (stat.isDirectory()) {
-      const files = walkDir(fullPath, ig, cwd);
-      for (const file of files) {
-        const { findings } = scanFile(file, packs, detectOptions);
-        if (findings.length > 0) {
-          allFindings.push({ file, findings });
+    try {
+      const stat = fs.statSync(fullPath);
+      if (stat.isDirectory()) {
+        const files = walkDir(fullPath, ig, cwd);
+        for (const file of files) {
+          const { findings, errors } = scanFile(file, packs, detectOptions);
+          if (errors && errors.length > 0) {
+            allErrors.push({ file, errors });
+          }
+          if (findings.length > 0) {
+            allFindings.push({ file, findings });
+          }
+        }
+      } else {
+        const relPath = path.relative(cwd, fullPath);
+        if (!ig.ignores(relPath)) {
+          const { findings, errors } = scanFile(fullPath, packs, detectOptions);
+          if (errors && errors.length > 0) {
+            allErrors.push({ file: fullPath, errors });
+          }
+          if (findings.length > 0) {
+            allFindings.push({ file: fullPath, findings });
+          }
         }
       }
-    } else {
-      // Check if the single file is ignored anyway
-      const relPath = path.relative(cwd, fullPath);
-      if (!ig.ignores(relPath)) {
-        const { findings } = scanFile(fullPath, packs, detectOptions);
-        if (findings.length > 0) {
-          allFindings.push({ file: fullPath, findings });
-        }
-      }
+    } catch (err: any) {
+      allErrors.push({
+        file: fullPath,
+        errors: [{ packId: 'core', detectorId: 'target-scanner', errorMessage: err.message }]
+      });
     }
   } 
   else {
-    console.error('[ERROR] Please specify a file/directory or use --stdin');
+    console.error('❌ [ERROR] Please specify a file/directory or use --stdin/--staged');
     process.exit(2);
   }
+
+  // Handle failure-closed logic on scanner errors
+  if (allErrors.length > 0) {
+    console.error(`\n❌ [ERROR] ClipCloak encountered errors during scan:`);
+    for (const errObj of allErrors) {
+      console.error(`  - In ${errObj.file}:`);
+      for (const err of errObj.errors) {
+        console.error(`    * ${err.errorMessage}`);
+      }
+    }
+    process.exit(2);
+  }
+
+  const blockSeverityWeight = { low: 1, medium: 2, high: 3, critical: 4 };
+  const minBlockW = blockSeverityWeight[config.blockMinSeverity || 'high'];
+  const blockCategories = config.blockCategories || ['credential', 'secret'];
+
+  // Check which findings are blocking
+  const blockableFindings = allFindings.flatMap(r => r.findings).filter(f => {
+    return blockSeverityWeight[f.severity] >= minBlockW && blockCategories.includes(f.category);
+  });
 
   // Print results
   if (options.format === 'json') {
@@ -146,23 +216,24 @@ export async function runScan(target: string | undefined, options: ScanOptions) 
     const t = {
       file: { en: 'File:', pt: 'Arquivo:' },
       confidence: { en: 'confidence:', pt: 'confiança:' },
-      found: { en: '❌ Found {0} potential secret(s).', pt: '❌ Encontrado {0} potencial(is) segredo(s).' },
-      clean: { en: '✅ No secrets found.', pt: '✅ Nenhum segredo encontrado.' }
+      found: { en: '❌ Found {0} blocking secret(s) ({1} total findings).', pt: '❌ Encontrado {0} segredo(s) impeditivo(s) ({1} total).' },
+      clean: { en: '✅ No blocking secrets found.', pt: '✅ Nenhum segredo impeditivo encontrado.' }
     };
     
-    let total = 0;
     for (const result of allFindings) {
       if (result.findings.length > 0) {
         console.log(`\n🛡️  ${i18n.get('file', t)} ${result.file}`);
         for (const f of result.findings) {
-          total++;
-          console.log(`  - [${f.severity.toUpperCase()}] ${f.detectorId}: ${f.redactedPreview} (${i18n.get('confidence', t)} ${f.confidence})`);
+          const isBlockable = blockSeverityWeight[f.severity] >= minBlockW && blockCategories.includes(f.category);
+          const prefix = isBlockable ? '❌ [BLOCK]' : '⚠️ [WARN]';
+          console.log(`  - ${prefix} ${f.detectorId}: ${f.redactedPreview} (${i18n.get('confidence', t)} ${f.confidence})`);
         }
       }
     }
     
-    if (total > 0) {
-      console.log(`\n${i18n.get('found', t, total.toString())}`);
+    if (blockableFindings.length > 0) {
+      const totalFindings = allFindings.reduce((acc, curr) => acc + curr.findings.length, 0);
+      console.log(`\n${i18n.get('found', t, blockableFindings.length.toString(), totalFindings.toString())}`);
       process.exit(1);
     } else {
       console.log(i18n.get('clean', t));
@@ -170,7 +241,5 @@ export async function runScan(target: string | undefined, options: ScanOptions) 
     }
   }
 
-  // Exit appropriately for JSON as well
-  const totalFindings = allFindings.reduce((acc, curr) => acc + curr.findings.length, 0);
-  process.exit(totalFindings > 0 ? 1 : 0);
+  process.exit(blockableFindings.length > 0 ? 1 : 0);
 }

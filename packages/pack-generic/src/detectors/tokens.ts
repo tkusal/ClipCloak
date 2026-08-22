@@ -1,6 +1,6 @@
 import type { Detector, DetectionContext, Finding } from '@clipcloak/core';
 import { createRedactedPreview } from '@clipcloak/core';
-import { isDummyString } from '../utils/entropy.js';
+import { isObviousDummyString, isSoftDummyString } from '../utils/entropy.js';
 
 export const tokensDetector: Detector = {
   id: 'api-tokens',
@@ -18,15 +18,20 @@ export const tokensDetector: Detector = {
       while ((match = regex.exec(text)) !== null) {
         const token = match[0];
         
-        if (isDummyString(token)) {
+        if (isObviousDummyString(token)) {
           continue;
+        }
+
+        let confidence = 0.95;
+        if (isSoftDummyString(token)) {
+          confidence = 0.75;
         }
 
         findings.push({
           detectorId: id,
           category: this.category,
           severity: 'critical' as const,
-          confidence: 0.95,
+          confidence,
           start: match.index,
           end: match.index + token.length,
           redactedPreview: createRedactedPreview(token, id, { strategy: 'partial' }),

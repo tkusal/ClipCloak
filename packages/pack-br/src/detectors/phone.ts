@@ -19,6 +19,8 @@ export const phoneBrDetector: Detector = {
       // Basic sanity check on length (10 digits for landline with DDD, 11 for mobile, +2 for 55)
       // Exclude simple sequences that are likely false positives (e.g., 00000000000)
       if (/^(\d)\1+$/.test(clean)) continue;
+      // Exclude sequential digits in the phone body (last 8 digits) (e.g., (11) 00000-0000)
+      if (clean.length >= 8 && /^(\d)\1+$/.test(clean.slice(-8))) continue;
       
       let isValidLength = false;
       if (clean.length === 10 || clean.length === 11) isValidLength = true; // Without country code

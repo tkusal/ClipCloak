@@ -47,8 +47,8 @@ Currently, ClipCloak is in its MVP phase and not yet published to npm. To test i
 
 1. **Clone and Install:**
    ```bash
-   git clone https://github.com/your-username/clipcloak.git
-   cd clipcloak
+   git clone https://github.com/tkusal/ClipCloak.git
+   cd ClipCloak
    pnpm install
    pnpm run build
    ```
@@ -66,13 +66,13 @@ Currently, ClipCloak is in its MVP phase and not yet published to npm. To test i
    ```
 
 ### Next Steps & Roadmap
-Currently in **v0.2.0 (Core Production-Ready)**. The detection engine is stable and supports `.clipcloak.json` configuration and robust scanning (symlinks, binaries, large files).
+Currently in **v0.2.0 (Core & CLI Preview)**. The detection engine is stable, supporting local scanning, staged files, configurations, and environment checks.
 
-- [x] **v0.2.0**: Core Production-Ready (Robust scanner, `.clipcloak.json` config, false-positive reduction via Shannon entropy).
-- [ ] **v0.3.0**: CLI Completa (Add `--staged` for Git hooks, `init`, `doctor`).
+- [x] **v0.2.0**: Core & CLI Preview (Robust scanner, `.clipcloak.json` config, Shannon entropy checks, CLI staged scans, `init`, `doctor`).
+- [ ] **v0.3.0**: Stable CLI (Config validation, fail-closed CLI exits, dynamic Git hook installer, Claude Code integration command).
 - [ ] **v0.4.0**: Publish to npm registry.
-- [ ] **v0.5.0**: Git pre-commit hooks and Claude Code Integration Release.
-- [ ] **v0.6.0+**: Desktop App, VS Code Extensions, and more regional detector packs.
+- [ ] **v0.5.0**: AI Agents hooks and Desktop Beta (Electron 43, clipboard fingerprinting, tray controls).
+- [ ] **v0.6.0+**: VS Code Extensions, more regional detector packs.
 
 ### Contributing
 We welcome contributions! Please see our [CONTRIBUTING.md](./CONTRIBUTING.md) for details.
@@ -123,8 +123,8 @@ Atualmente, o ClipCloak está em fase MVP e ainda não foi publicado no npm. Par
 
 1. **Clonar e Instalar:**
    ```bash
-   git clone https://github.com/your-username/clipcloak.git
-   cd clipcloak
+   git clone https://github.com/tkusal/ClipCloak.git
+   cd ClipCloak
    pnpm install
    pnpm run build
    ```
@@ -142,13 +142,13 @@ Atualmente, o ClipCloak está em fase MVP e ainda não foi publicado no npm. Par
    ```
 
 ### Próximas Etapas e Roadmap
-Atualmente na **v0.2.0 (Core Production-Ready)**. O motor de detecção é estável, suporta a configuração `.clipcloak.json` e faz escaneamento robusto (ignora binários, symlinks e arquivos gigantes de forma segura).
+Atualmente na **v0.2.0 (Core & CLI Preview)**. O motor de detecção é estável, suportando escaneamento local, arquivos staged, configurações e diagnósticos de ambiente.
 
-- [x] **v0.2.0**: Core Production-Ready (Scanner robusto, config `.clipcloak.json`, redução de falsos positivos via entropia de Shannon).
-- [ ] **v0.3.0**: CLI Completa (Suporte a `--staged` para Git hooks, `init`, `doctor`).
+- [x] **v0.2.0**: Core & CLI Preview (Scanner robusto, config `.clipcloak.json`, entropia de Shannon, escaneamento de staged, `init`, `doctor`).
+- [ ] **v0.3.0**: CLI Estável (Validação de config, saída fail-closed, instalador de Git hook dinâmico, comando de integração Claude Code).
 - [ ] **v0.4.0**: Publicação no npm registry.
-- [ ] **v0.5.0**: Integração robusta com Git pre-commit e Claude Code.
-- [ ] **v0.6.0+**: App Desktop, extensões VS Code e mais pacotes regionais.
+- [ ] **v0.5.0**: Integração estável de IA e Desktop Beta (Electron 43, clipboard fingerprinting, bandeja).
+- [ ] **v0.6.0+**: Extensões VS Code, mais pacotes de detectores regionais.
 
 ### Contribuindo
 Aceitamos contribuições! Veja nosso [CONTRIBUTING.md](./CONTRIBUTING.md) para detalhes.

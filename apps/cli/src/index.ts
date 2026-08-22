@@ -45,6 +45,20 @@ program
   });
 
 program
+  .command('hook')
+  .description('Hook script for integrations (e.g. claude-code)')
+  .argument('<target>', 'Integration target (claude-code)')
+  .action(async (target) => {
+    if (target === 'claude-code') {
+      const { runClaudeCodeHook } = await import('./commands/hook.js');
+      await runClaudeCodeHook();
+    } else {
+      console.error(`Unknown hook target: ${target}`);
+      process.exit(1);
+    }
+  });
+
+program
   .command('init')
   .description('Create a default .clipcloak.json configuration file in the current directory')
   .action(async () => {

@@ -24,7 +24,7 @@ export function getPacks(packNames?: string[]): DetectorPack[] {
     if (ALL_PACKS[trimmed]) {
       selected.push(ALL_PACKS[trimmed]);
     } else {
-      console.warn(`[WARN] Pack '${trimmed}' not found. Ignoring.`);
+      throw new Error(`Pack '${trimmed}' not found. Available packs: ${Object.keys(ALL_PACKS).join(', ')}`);
     }
   }
   return selected;
@@ -56,6 +56,41 @@ export function isBinaryFileSync(filepath: string): boolean {
   }
 }
 
+export function scanBuffer(
+  buffer: Buffer,
+  filepath: string,
+  packs: DetectorPack[],
+  customOptions: Omit<DetectOptions, 'context'> = {}
+): DetectResult {
+  try {
+    if (buffer.length > MAX_FILE_SIZE) {
+      console.warn(`[SKIP] File ${filepath} is too large (${(buffer.length/1024/1024).toFixed(2)} MB)`);
+      return { findings: [], errors: [] };
+    }
+
+    // Binary check: search first 4KB for NUL byte
+    const bytesToCheck = Math.min(buffer.length, 4096);
+    for (let i = 0; i < bytesToCheck; i++) {
+      if (buffer[i] === 0) {
+        return { findings: [], errors: [] };
+      }
+    }
+
+    const content = buffer.toString('utf8');
+    return scanText(content, filepath, packs, customOptions);
+  } catch (err: any) {
+    const errMsg = err instanceof Error ? err.message : String(err);
+    return {
+      findings: [],
+      errors: [{
+        packId: 'core',
+        detectorId: 'buffer-scanner',
+        errorMessage: `Failed to scan buffer for ${filepath}: ${errMsg}`
+      }]
+    };
+  }
+}
+
 export function scanFile(filepath: string, packs: DetectorPack[], customOptions: Omit<DetectOptions, 'context'> = {}): DetectResult {
   try {
     const stat = fs.statSync(filepath);
@@ -65,21 +100,21 @@ export function scanFile(filepath: string, packs: DetectorPack[], customOptions:
     }
 
     if (isBinaryFileSync(filepath)) {
-      // We don't log every single binary skip as it would be too noisy, 
-      // but maybe verbose mode later. For now just skip silently.
       return { findings: [], errors: [] };
     }
 
     const content = fs.readFileSync(filepath, 'utf8');
     return scanText(content, filepath, packs, customOptions);
   } catch (err: any) {
-    if (err.code === 'EACCES' || err.code === 'EPERM' || err.code === 'ENOENT') {
-      console.warn(`[WARN] Failed to read ${filepath} (Permission denied or not found). Skipping.`);
-      return { findings: [], errors: [] };
-    }
-    
-    // For other weird IO errors, log but do not crash the whole process
-    console.warn(`[ERROR] Unexpected error reading ${filepath}: ${err instanceof Error ? err.message : String(err)}`);
-    return { findings: [], errors: [] };
+    const errMsg = err instanceof Error ? err.message : String(err);
+    const code = err.code || 'UNKNOWN';
+    return {
+      findings: [],
+      errors: [{
+        packId: 'core',
+        detectorId: 'file-reader',
+        errorMessage: `Failed to read ${filepath} (${code}): ${errMsg}`
+      }]
+    };
   }
 }
