@@ -6,7 +6,7 @@ describe('Generic Pack: Credit Card Detector', () => {
     // Standard test VISA
     const text = 'My card is 4111 1111 1111 1111.';
     const findings = creditCardDetector.detect(text);
-    
+
     expect(findings).toHaveLength(1);
     expect(findings[0].detectorId).toBe('credit-card');
   });
@@ -14,7 +14,7 @@ describe('Generic Pack: Credit Card Detector', () => {
   it('should ignore numbers failing Luhn check', () => {
     const text = 'My card is 4111 1111 1111 1112.';
     const findings = creditCardDetector.detect(text);
-    
+
     expect(findings).toHaveLength(0);
   });
 

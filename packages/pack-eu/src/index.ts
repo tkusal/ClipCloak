@@ -5,10 +5,7 @@ import { vatDetector } from './detectors/vat.js';
 export const euPack: DetectorPack = {
   id: 'eu',
   name: 'European PII & Financial',
-  detectors: [
-    ibanDetector,
-    vatDetector,
-  ],
+  detectors: [ibanDetector, vatDetector],
 };
 
 export default euPack;

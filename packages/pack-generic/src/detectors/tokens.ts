@@ -17,7 +17,7 @@ export const tokensDetector: Detector = {
       let match;
       while ((match = regex.exec(text)) !== null) {
         const token = match[0];
-        
+
         if (isObviousDummyString(token)) {
           continue;
         }

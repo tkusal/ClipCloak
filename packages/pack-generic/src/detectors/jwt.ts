@@ -16,7 +16,7 @@ export const jwtDetector: Detector = {
       const token = match[0];
       const parts = token.split('.');
       const signature = parts[2];
-      
+
       if (shannonEntropy(signature) < 3.0) {
         continue;
       }

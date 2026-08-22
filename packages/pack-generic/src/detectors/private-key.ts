@@ -5,7 +5,8 @@ export const privateKeyDetector: Detector = {
   category: 'credential',
   detect(text: string, _context?: DetectionContext) {
     const findings = [];
-    const regex = /-----BEGIN (?:RSA|DSA|EC|OPENSSH|PGP|ED25519|ENCRYPTED)? ?PRIVATE KEY-----\r?\n[A-Za-z0-9+/\n\r=]+-----END (?:RSA|DSA|EC|OPENSSH|PGP|ED25519|ENCRYPTED)? ?PRIVATE KEY-----/g;
+    const regex =
+      /-----BEGIN (?:RSA|DSA|EC|OPENSSH|PGP|ED25519|ENCRYPTED)? ?PRIVATE KEY-----\r?\n[A-Za-z0-9+/\n\r=]+-----END (?:RSA|DSA|EC|OPENSSH|PGP|ED25519|ENCRYPTED)? ?PRIVATE KEY-----/g;
     let match;
 
     while ((match = regex.exec(text)) !== null) {

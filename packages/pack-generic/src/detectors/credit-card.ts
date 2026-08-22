@@ -31,7 +31,7 @@ export const creditCardDetector: Detector = {
     // This regex looks for blocks of 4 digits, but is generic enough to catch most formats
     // Using positive lookahead to ensure we have enough digits total, then capturing.
     // simpler approach: find groups of digits/spaces/dashes that contain 13-19 digits total.
-    
+
     // This regex looks for a boundary, a digit, followed by 12-18 combinations of digits, spaces, or dashes, ending in a digit and boundary.
     const regex = /\b(?:\d[ -]*?){13,19}\b/g;
     let match;
@@ -39,7 +39,7 @@ export const creditCardDetector: Detector = {
     while ((match = regex.exec(text)) !== null) {
       const candidate = match[0];
       const cleanCandidate = candidate.replace(/[ -]/g, '');
-      
+
       // Ensure it's not a generic sequence like 0000000000000000 or 1234567890123456
       if (/^(\d)\1+$/.test(cleanCandidate)) {
         continue;

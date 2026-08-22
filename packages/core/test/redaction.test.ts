@@ -43,12 +43,26 @@ describe('Core Redaction', () => {
     it('should handle multiple findings safely', () => {
       const text = 'IP: 192.168.1.1 and email: test@example.com';
       const f1: Finding = {
-        detectorId: 'ip', packId: 'test', category: 'pii', severity: 'low', confidence: 0.9,
-        start: 4, end: 15, redactedPreview: '[REDACTED:IP]', reason: 'test'
+        detectorId: 'ip',
+        packId: 'test',
+        category: 'pii',
+        severity: 'low',
+        confidence: 0.9,
+        start: 4,
+        end: 15,
+        redactedPreview: '[REDACTED:IP]',
+        reason: 'test',
       };
       const f2: Finding = {
-        detectorId: 'email', packId: 'test', category: 'pii', severity: 'low', confidence: 0.9,
-        start: 27, end: 43, redactedPreview: '[REDACTED:EMAIL]', reason: 'test'
+        detectorId: 'email',
+        packId: 'test',
+        category: 'pii',
+        severity: 'low',
+        confidence: 0.9,
+        start: 27,
+        end: 43,
+        redactedPreview: '[REDACTED:EMAIL]',
+        reason: 'test',
       };
 
       const result = applyRedaction(text, [f1, f2]);

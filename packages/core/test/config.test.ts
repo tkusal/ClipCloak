@@ -12,11 +12,11 @@ describe('Configuration Utilities', () => {
       packs: ['generic', 'br'],
       minSeverity: 'high' as const,
       minConfidence: 0.8,
-      ignore: ['*.txt']
+      ignore: ['*.txt'],
     };
-    
+
     const config = resolveConfig(fileConfig, {});
-    
+
     expect(config.packs).toEqual(['generic', 'br']);
     expect(config.minSeverity).toBe('high');
     expect(config.minConfidence).toBe(0.8);
@@ -29,16 +29,16 @@ describe('Configuration Utilities', () => {
     const fileConfig = {
       packs: ['generic', 'br'],
       minSeverity: 'high' as const,
-      minConfidence: 0.8
+      minConfidence: 0.8,
     };
 
     const cliConfig = {
       packs: ['generic'],
-      minSeverity: 'critical' as const
+      minSeverity: 'critical' as const,
     };
-    
+
     const config = resolveConfig(fileConfig, cliConfig);
-    
+
     expect(config.packs).toEqual(['generic']);
     expect(config.minSeverity).toBe('critical');
     // From file config

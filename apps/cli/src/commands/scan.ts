@@ -18,7 +18,7 @@ export interface ScanOptions {
 
 export async function runScan(target: string | undefined, options: ScanOptions) {
   const cwd = process.cwd();
-  
+
   const fileConfig = loadConfigFile(cwd);
   if (fileConfig) {
     const configErrors = validateConfig(fileConfig);
@@ -30,12 +30,12 @@ export async function runScan(target: string | undefined, options: ScanOptions) 
       process.exit(2);
     }
   }
-  
+
   const cliOptions: any = {};
   if (options.packs) cliOptions.packs = options.packs.split(',');
   if (options.severity) cliOptions.minSeverity = options.severity;
   if (options.confidence !== undefined) cliOptions.minConfidence = options.confidence;
-  
+
   let config;
   try {
     config = resolveConfig(fileConfig, cliOptions);
@@ -43,9 +43,9 @@ export async function runScan(target: string | undefined, options: ScanOptions) 
     console.error(`❌ [ERROR] Config resolution failed: ${err.message}`);
     process.exit(2);
   }
-  
+
   const ig = getIgnoreFilter(cwd, config.ignore);
-  
+
   let packs;
   try {
     packs = getPacks(config.packs);
@@ -53,13 +53,13 @@ export async function runScan(target: string | undefined, options: ScanOptions) 
     console.error(`❌ [ERROR] Pack resolution failed: ${err.message}`);
     process.exit(2);
   }
-  
+
   const allFindings: { file: string; findings: Finding[] }[] = [];
   const allErrors: { file: string; errors: any[] }[] = [];
 
   const detectOptions = {
     minSeverity: config.minSeverity,
-    minConfidence: config.minConfidence
+    minConfidence: config.minConfidence,
   };
 
   // Handle stdin
@@ -76,14 +76,18 @@ export async function runScan(target: string | undefined, options: ScanOptions) 
     } catch (err: any) {
       allErrors.push({
         file: 'stdin',
-        errors: [{ packId: 'core', detectorId: 'stdin-reader', errorMessage: err.message }]
+        errors: [{ packId: 'core', detectorId: 'stdin-reader', errorMessage: err.message }],
       });
     }
   }
   // Handle staged files
   else if (options.staged) {
     try {
-      const gitOutput = execFileSync('git', ['diff', '--cached', '--name-only', '-z', '--diff-filter=ACMR'], { cwd }).toString();
+      const gitOutput = execFileSync(
+        'git',
+        ['diff', '--cached', '--name-only', '-z', '--diff-filter=ACMR'],
+        { cwd },
+      ).toString();
       const files = gitOutput.split('\0').filter(Boolean);
       for (const file of files) {
         const fullPath = path.resolve(cwd, file);
@@ -91,7 +95,10 @@ export async function runScan(target: string | undefined, options: ScanOptions) 
         if (!ig.ignores(relPath)) {
           // Read exact staged content directly from the index using git show :<file>
           try {
-            const buffer = execFileSync('git', ['show', `:${file}`], { cwd, stdio: ['pipe', 'pipe', 'pipe'] });
+            const buffer = execFileSync('git', ['show', `:${file}`], {
+              cwd,
+              stdio: ['pipe', 'pipe', 'pipe'],
+            });
             const { findings, errors } = scanBuffer(buffer, fullPath, packs, detectOptions);
             if (errors && errors.length > 0) {
               allErrors.push({ file: fullPath, errors });
@@ -152,11 +159,10 @@ export async function runScan(target: string | undefined, options: ScanOptions) 
     } catch (err: any) {
       allErrors.push({
         file: fullPath,
-        errors: [{ packId: 'core', detectorId: 'target-scanner', errorMessage: err.message }]
+        errors: [{ packId: 'core', detectorId: 'target-scanner', errorMessage: err.message }],
       });
     }
-  } 
-  else {
+  } else {
     console.error('❌ [ERROR] Please specify a file/directory or use --stdin/--staged');
     process.exit(2);
   }
@@ -178,9 +184,11 @@ export async function runScan(target: string | undefined, options: ScanOptions) 
   const blockCategories = config.blockCategories || ['credential', 'secret'];
 
   // Check which findings are blocking
-  const blockableFindings = allFindings.flatMap(r => r.findings).filter(f => {
-    return blockSeverityWeight[f.severity] >= minBlockW && blockCategories.includes(f.category);
-  });
+  const blockableFindings = allFindings
+    .flatMap((r) => r.findings)
+    .filter((f) => {
+      return blockSeverityWeight[f.severity] >= minBlockW && blockCategories.includes(f.category);
+    });
 
   // Print results
   if (options.format === 'json') {
@@ -188,26 +196,33 @@ export async function runScan(target: string | undefined, options: ScanOptions) 
   } else if (options.format === 'sarif') {
     const sarif = {
       version: '2.1.0',
-      $schema: 'https://raw.githubusercontent.com/oasis-tcs/sarif-spec/master/Schemata/sarif-schema-2.1.0.json',
-      runs: [{
-        tool: {
-          driver: {
-            name: 'ClipCloak',
-            version: '0.2.0',
-            informationUri: 'https://github.com/tkusal/ClipCloak'
-          }
+      $schema:
+        'https://raw.githubusercontent.com/oasis-tcs/sarif-spec/master/Schemata/sarif-schema-2.1.0.json',
+      runs: [
+        {
+          tool: {
+            driver: {
+              name: 'ClipCloak',
+              version: '0.2.0',
+              informationUri: 'https://github.com/tkusal/ClipCloak',
+            },
+          },
+          results: allFindings.flatMap((r) =>
+            r.findings.map((f) => ({
+              ruleId: f.detectorId,
+              message: { text: f.reason },
+              locations: [
+                {
+                  physicalLocation: {
+                    artifactLocation: { uri: r.file },
+                    region: { charOffset: f.start, charLength: f.end - f.start },
+                  },
+                },
+              ],
+            })),
+          ),
         },
-        results: allFindings.flatMap(r => r.findings.map(f => ({
-          ruleId: f.detectorId,
-          message: { text: f.reason },
-          locations: [{
-            physicalLocation: {
-              artifactLocation: { uri: r.file },
-              region: { charOffset: f.start, charLength: f.end - f.start }
-            }
-          }]
-        })))
-      }]
+      ],
     };
     console.log(JSON.stringify(sarif, null, 2));
   } else {
@@ -216,24 +231,35 @@ export async function runScan(target: string | undefined, options: ScanOptions) 
     const t = {
       file: { en: 'File:', pt: 'Arquivo:' },
       confidence: { en: 'confidence:', pt: 'confiança:' },
-      found: { en: '❌ Found {0} blocking secret(s) ({1} total findings).', pt: '❌ Encontrado {0} segredo(s) impeditivo(s) ({1} total).' },
-      clean: { en: '✅ No blocking secrets found.', pt: '✅ Nenhum segredo impeditivo encontrado.' }
+      found: {
+        en: '❌ Found {0} blocking secret(s) ({1} total findings).',
+        pt: '❌ Encontrado {0} segredo(s) impeditivo(s) ({1} total).',
+      },
+      clean: {
+        en: '✅ No blocking secrets found.',
+        pt: '✅ Nenhum segredo impeditivo encontrado.',
+      },
     };
-    
+
     for (const result of allFindings) {
       if (result.findings.length > 0) {
         console.log(`\n🛡️  ${i18n.get('file', t)} ${result.file}`);
         for (const f of result.findings) {
-          const isBlockable = blockSeverityWeight[f.severity] >= minBlockW && blockCategories.includes(f.category);
+          const isBlockable =
+            blockSeverityWeight[f.severity] >= minBlockW && blockCategories.includes(f.category);
           const prefix = isBlockable ? '❌ [BLOCK]' : '⚠️ [WARN]';
-          console.log(`  - ${prefix} ${f.detectorId}: ${f.redactedPreview} (${i18n.get('confidence', t)} ${f.confidence})`);
+          console.log(
+            `  - ${prefix} ${f.detectorId}: ${f.redactedPreview} (${i18n.get('confidence', t)} ${f.confidence})`,
+          );
         }
       }
     }
-    
+
     if (blockableFindings.length > 0) {
       const totalFindings = allFindings.reduce((acc, curr) => acc + curr.findings.length, 0);
-      console.log(`\n${i18n.get('found', t, blockableFindings.length.toString(), totalFindings.toString())}`);
+      console.log(
+        `\n${i18n.get('found', t, blockableFindings.length.toString(), totalFindings.toString())}`,
+      );
       process.exit(1);
     } else {
       console.log(i18n.get('clean', t));

@@ -9,30 +9,34 @@ const DEFAULT_IGNORES = [
   'build/',
   'coverage/',
   '.vendor/',
-  '*.jpg', '*.png', '*.mp4', '*.zip', '*.tar.gz', // Common binaries
+  '*.jpg',
+  '*.png',
+  '*.mp4',
+  '*.zip',
+  '*.tar.gz', // Common binaries
 ];
 
 export function getIgnoreFilter(cwd: string, extraIgnores: string[] = []) {
   const ig = ignore().add(DEFAULT_IGNORES);
-  
+
   if (extraIgnores.length > 0) {
     ig.add(extraIgnores);
   }
 
   const ignoreFilePath = path.join(cwd, '.clipcloakignore');
-  
+
   if (fs.existsSync(ignoreFilePath)) {
     const ignoreContent = fs.readFileSync(ignoreFilePath, 'utf8');
     ig.add(ignoreContent);
   }
-  
+
   return ig;
 }
 
 export function walkDir(dir: string, ig: ReturnType<typeof ignore>, cwd: string): string[] {
   const results: string[] = [];
   let list: string[] = [];
-  
+
   try {
     list = fs.readdirSync(dir);
   } catch (err: any) {
@@ -42,21 +46,21 @@ export function walkDir(dir: string, ig: ReturnType<typeof ignore>, cwd: string)
     }
     throw err;
   }
-  
+
   for (const file of list) {
     const fullPath = path.join(dir, file);
     const relPath = path.relative(cwd, fullPath);
-    
+
     if (ig.ignores(relPath)) continue;
 
     try {
       const stat = fs.lstatSync(fullPath);
-      
+
       // Skip symlinks to avoid infinite loops and scanning external files
       if (stat.isSymbolicLink()) {
         continue;
       }
-      
+
       if (stat.isDirectory()) {
         // Recurse
         results.push(...walkDir(fullPath, ig, cwd));
@@ -71,6 +75,6 @@ export function walkDir(dir: string, ig: ReturnType<typeof ignore>, cwd: string)
       throw err;
     }
   }
-  
+
   return results;
 }

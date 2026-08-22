@@ -6,11 +6,7 @@ import { phoneBrDetector } from './detectors/phone.js';
 export const brPack: DetectorPack = {
   id: 'br',
   name: 'Brazilian PII',
-  detectors: [
-    cpfCnpjDetector,
-    pixDetector,
-    phoneBrDetector,
-  ],
+  detectors: [cpfCnpjDetector, pixDetector, phoneBrDetector],
 };
 
 export default brPack;

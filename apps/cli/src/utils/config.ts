@@ -20,7 +20,7 @@ export function loadConfigFile(cwd: string = process.cwd()): Partial<ClipCloakCo
         return null;
       }
     }
-    
+
     const parentDir = path.dirname(currentDir);
     if (parentDir === currentDir) {
       reachedRoot = true;
@@ -28,6 +28,6 @@ export function loadConfigFile(cwd: string = process.cwd()): Partial<ClipCloakCo
       currentDir = parentDir;
     }
   }
-  
+
   return null;
 }

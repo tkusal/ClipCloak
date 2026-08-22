@@ -6,7 +6,7 @@ describe('EU Pack: VAT Detector', () => {
     // German VAT number example: DE123456789
     const text = 'My company VAT number is DE123456789.';
     const findings = vatDetector.detect(text);
-    
+
     expect(findings).toHaveLength(1);
     expect(findings[0].detectorId).toBe('eu-vat');
     expect(findings[0].severity).toBe('low');
@@ -16,14 +16,14 @@ describe('EU Pack: VAT Detector', () => {
     // French VAT number format: FR + 11 characters
     const text = 'Invoices should be billed under FR12345678901';
     const findings = vatDetector.detect(text);
-    
+
     expect(findings).toHaveLength(1);
   });
 
   it('should ignore fake/zeroed VAT numbers', () => {
     const text = 'Avoid mock values like DE000000 or FR00000000';
     const findings = vatDetector.detect(text);
-    
+
     expect(findings).toHaveLength(0);
   });
 

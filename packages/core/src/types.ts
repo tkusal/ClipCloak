@@ -1,5 +1,5 @@
-export type FindingCategory = "secret" | "credential" | "pii" | "financial";
-export type Severity = "low" | "medium" | "high" | "critical";
+export type FindingCategory = 'secret' | 'credential' | 'pii' | 'financial';
+export type Severity = 'low' | 'medium' | 'high' | 'critical';
 
 export interface DetectionContext {
   filename?: string;

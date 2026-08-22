@@ -26,7 +26,7 @@ export async function runRedact(target: string) {
   const content = fs.readFileSync(fullPath, 'utf-8');
   const { findings } = scanText(content, fullPath, packs, {
     minSeverity: config.minSeverity,
-    minConfidence: config.minConfidence
+    minConfidence: config.minConfidence,
   });
 
   if (findings.length === 0) {
@@ -35,12 +35,12 @@ export async function runRedact(target: string) {
   }
 
   const redactedContent = applyRedaction(content, findings);
-  
+
   const parsedPath = path.parse(fullPath);
   const newPath = path.join(parsedPath.dir, `${parsedPath.name}.redacted${parsedPath.ext}`);
-  
+
   fs.writeFileSync(newPath, redactedContent, 'utf-8');
-  
+
   console.log(`✅ Redacted ${findings.length} secret(s).`);
   console.log(`💾 Saved to: ${newPath}`);
   process.exit(0);

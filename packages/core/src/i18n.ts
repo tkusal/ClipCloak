@@ -9,7 +9,7 @@ export function getSystemLanguage(): SupportedLanguage {
   } catch (e) {
     // fallback
   }
-  
+
   // Check env vars as fallback
   const envLang = process.env.LANG || process.env.LANGUAGE || '';
   if (envLang.toLowerCase().startsWith('pt')) {
@@ -38,7 +38,7 @@ export class I18n {
     if (!entry) return key;
 
     let text = entry[this.lang] || entry['en'];
-    
+
     // Replace {0}, {1}, etc.
     args.forEach((arg, index) => {
       text = text.replace(new RegExp(`\\{${index}\\}`, 'g'), arg);

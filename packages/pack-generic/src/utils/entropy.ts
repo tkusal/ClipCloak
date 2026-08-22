@@ -16,16 +16,17 @@ export function shannonEntropy(str: string): number {
 
 export function isObviousDummyString(str: string): boolean {
   const lower = str.toLowerCase();
-  
-  if (lower.includes('example') || 
-      lower.includes('dummy') || 
-      lower.includes('fake') || 
-      lower.includes('your_') || 
-      lower.includes('xxxx') ||
-      lower === 'pass' ||
-      lower === 'password' ||
-      lower === 'secret' ||
-      /^([a-z0-9])\1+$/.test(lower) // Repeated characters like 'aaaaa' or '00000000000'
+
+  if (
+    lower.includes('example') ||
+    lower.includes('dummy') ||
+    lower.includes('fake') ||
+    lower.includes('your_') ||
+    lower.includes('xxxx') ||
+    lower === 'pass' ||
+    lower === 'password' ||
+    lower === 'secret' ||
+    /^([a-z0-9])\1+$/.test(lower) // Repeated characters like 'aaaaa' or '00000000000'
   ) {
     return true;
   }

@@ -4,7 +4,12 @@ import { execSync } from 'node:child_process';
 
 function getGitHooksDir(cwd: string): string | null {
   try {
-    const relativePath = execSync('git rev-parse --git-path hooks', { cwd, stdio: ['ignore', 'pipe', 'ignore'] }).toString().trim();
+    const relativePath = execSync('git rev-parse --git-path hooks', {
+      cwd,
+      stdio: ['ignore', 'pipe', 'ignore'],
+    })
+      .toString()
+      .trim();
     return path.resolve(cwd, relativePath);
   } catch {
     return null;
@@ -16,10 +21,10 @@ function installClaudeHookInSettings(cwd: string) {
   if (!fs.existsSync(claudeDir)) {
     fs.mkdirSync(claudeDir, { recursive: true });
   }
-  
+
   const settingsPath = path.join(claudeDir, 'settings.json');
   let settings: any = {};
-  
+
   if (fs.existsSync(settingsPath)) {
     try {
       const content = fs.readFileSync(settingsPath, 'utf8');
@@ -28,33 +33,34 @@ function installClaudeHookInSettings(cwd: string) {
       console.warn(`[WARN] Failed to parse existing .claude/settings.json. Overwriting.`, err);
     }
   }
-  
+
   if (!settings.hooks) {
     settings.hooks = {};
   }
   if (!settings.hooks.PreToolUse) {
     settings.hooks.PreToolUse = [];
   }
-  
+
   const newHookEntry = {
-    matcher: "Read|ViewFile|View|fs_read_file|readFile|cat",
+    matcher: 'Read|ViewFile|View|fs_read_file|readFile|cat',
     hooks: [
       {
-        type: "command",
-        command: "clipcloak hook claude-code"
-      }
-    ]
+        type: 'command',
+        command: 'clipcloak hook claude-code',
+      },
+    ],
   };
-  
+
   // Check if our command is already registered
-  const exists = settings.hooks.PreToolUse.some((entry: any) => 
-    entry.hooks && entry.hooks.some((h: any) => h.command === "clipcloak hook claude-code")
+  const exists = settings.hooks.PreToolUse.some(
+    (entry: any) =>
+      entry.hooks && entry.hooks.some((h: any) => h.command === 'clipcloak hook claude-code'),
   );
-  
+
   if (!exists) {
     settings.hooks.PreToolUse.push(newHookEntry);
   }
-  
+
   fs.writeFileSync(settingsPath, JSON.stringify(settings, null, 2), 'utf8');
   console.log(`✅ Registered ClipCloak tool hook in ${settingsPath}`);
 }
@@ -68,11 +74,11 @@ export async function runInstall(target: string) {
       console.error('❌ [ERROR] Not a git repository (or git is not installed in PATH).');
       process.exit(1);
     }
-    
+
     if (!fs.existsSync(hooksDir)) {
       fs.mkdirSync(hooksDir, { recursive: true });
     }
-    
+
     const preCommitPath = path.join(hooksDir, 'pre-commit');
     const hookBody = `
 # --- ClipCloak Git Hook ---
@@ -99,7 +105,7 @@ fi
         console.log('✅ ClipCloak pre-commit hook is already installed in pre-commit.');
         process.exit(0);
       }
-      
+
       try {
         fs.appendFileSync(preCommitPath, `\n${hookBody}`);
         console.log('✅ Appended ClipCloak scan to existing git pre-commit hook.');
@@ -125,13 +131,13 @@ fi
     const configPath = path.join(cwd, 'claude-clipcloak.config.json');
     const config = {
       mode: 'standard', // or 'strict'
-      description: "ClipCloak hook configuration for Claude Code"
+      description: 'ClipCloak hook configuration for Claude Code',
     };
     fs.writeFileSync(configPath, JSON.stringify(config, null, 2));
     console.log(`✅ Config file created at: ${configPath}`);
     console.log('   In `strict` mode, any scanner crash or unrecognized tool blocks access.');
     console.log('   In `standard` mode, we fail-open to preserve agent flow.');
-    
+
     try {
       installClaudeHookInSettings(cwd);
       console.log('✅ Installed Claude Code integration successfully.');

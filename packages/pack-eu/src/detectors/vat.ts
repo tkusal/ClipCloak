@@ -6,19 +6,20 @@ export const vatDetector: Detector = {
   category: 'pii', // Or financial depending on interpretation
   detect(text: string, _context?: DetectionContext) {
     const findings = [];
-    
-    // Covers the most common European VAT formats. 
+
+    // Covers the most common European VAT formats.
     // Usually starts with a 2-letter country code followed by 2-13 alphanumeric characters.
     // e.g. DE123456789, FR12123456789
-    // For MVP, we use a slightly restrictive list of country prefixes to avoid false positives 
+    // For MVP, we use a slightly restrictive list of country prefixes to avoid false positives
     // with random hex strings or IDs.
-    const euCountries = 'AT|BE|BG|CY|CZ|DE|DK|EE|EL|ES|FI|FR|GB|HR|HU|IE|IT|LT|LU|LV|MT|NL|PL|PT|RO|SE|SI|SK';
+    const euCountries =
+      'AT|BE|BG|CY|CZ|DE|DK|EE|EL|ES|FI|FR|GB|HR|HU|IE|IT|LT|LU|LV|MT|NL|PL|PT|RO|SE|SI|SK';
     const regex = new RegExp(`\\b(${euCountries})[0-9A-Z]{2,13}\\b`, 'g');
-    
+
     let match;
     while ((match = regex.exec(text)) !== null) {
       const candidate = match[0];
-      
+
       // Exclude simple sequences
       if (/^[A-Z]{2}0{5,}$/.test(candidate)) continue;
 

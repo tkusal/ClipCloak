@@ -10,18 +10,36 @@ const ALL_PACKS = [genericPack, brPack, euPack];
 
 const t = {
   alertTitle: { en: 'ClipCloak Alert', pt: 'Alerta ClipCloak' },
-  alertBody: { 
+  alertBody: {
     en: 'Sensitive data copied: {0}/{1} ({2})\nWe recommend not pasting this in untrusted apps.',
-    pt: 'Dado sensível copiado: {0}/{1} ({2})\nRecomendamos não colar isso em apps não confiáveis.'
+    pt: 'Dado sensível copiado: {0}/{1} ({2})\nRecomendamos não colar isso em apps não confiáveis.',
   },
   btnClear: { en: 'Clear', pt: 'Limpar' },
   btnRedact: { en: 'Redact', pt: 'Censurar' },
-  logCleared: { en: '[ClipCloak] User cleared the clipboard.', pt: '[ClipCloak] Usuário limpou a área de transferência.' },
-  logRedacted: { en: '[ClipCloak] User redacted the clipboard content.', pt: '[ClipCloak] Usuário censurou a área de transferência.' },
-  safePasteInvoked: { en: '[ClipCloak] Safe Paste invoked. Clipboard was redacted.', pt: '[ClipCloak] Safe Paste acionado. Área de transferência censurada.' },
-  safePasteNotif: { en: 'Clipboard safely redacted. You can now press Ctrl+V to paste.', pt: 'Censurado com segurança. Você já pode pressionar Ctrl+V para colar.' },
-  safePasteNoSecrets: { en: '[ClipCloak] Safe Paste invoked. No secrets found.', pt: '[ClipCloak] Safe Paste acionado. Nenhum segredo encontrado.' },
-  desktopRunning: { en: '[ClipCloak] Desktop Alpha is running and monitoring clipboard...', pt: '[ClipCloak] Desktop Alpha rodando e monitorando área de transferência...' },
+  logCleared: {
+    en: '[ClipCloak] User cleared the clipboard.',
+    pt: '[ClipCloak] Usuário limpou a área de transferência.',
+  },
+  logRedacted: {
+    en: '[ClipCloak] User redacted the clipboard content.',
+    pt: '[ClipCloak] Usuário censurou a área de transferência.',
+  },
+  safePasteInvoked: {
+    en: '[ClipCloak] Safe Paste invoked. Clipboard was redacted.',
+    pt: '[ClipCloak] Safe Paste acionado. Área de transferência censurada.',
+  },
+  safePasteNotif: {
+    en: 'Clipboard safely redacted. You can now press Ctrl+V to paste.',
+    pt: 'Censurado com segurança. Você já pode pressionar Ctrl+V para colar.',
+  },
+  safePasteNoSecrets: {
+    en: '[ClipCloak] Safe Paste invoked. No secrets found.',
+    pt: '[ClipCloak] Safe Paste acionado. Nenhum segredo encontrado.',
+  },
+  desktopRunning: {
+    en: '[ClipCloak] Desktop Alpha is running and monitoring clipboard...',
+    pt: '[ClipCloak] Desktop Alpha rodando e monitorando área de transferência...',
+  },
 };
 
 let lastClipboardHash = '';
@@ -36,10 +54,10 @@ function checkClipboard() {
     const hash = getFingerprint(text);
     if (hash !== lastClipboardHash) {
       lastClipboardHash = hash;
-      
+
       const { findings } = detect(text, ALL_PACKS, {
         minSeverity: 'medium',
-        context: { filename: 'clipboard' }
+        context: { filename: 'clipboard' },
       });
 
       if (findings.length > 0) {
@@ -54,26 +72,36 @@ function checkClipboard() {
         if (Notification.isSupported()) {
           const notif = new Notification({
             title: i18n.get('alertTitle', t),
-            body: i18n.get('alertBody', t, worst.packId, worst.detectorId, worst.severity.toUpperCase()),
+            body: i18n.get(
+              'alertBody',
+              t,
+              worst.packId,
+              worst.detectorId,
+              worst.severity.toUpperCase(),
+            ),
             actions: [
               { type: 'button', text: i18n.get('btnClear', t) },
-              { type: 'button', text: i18n.get('btnRedact', t) }
-            ]
+              { type: 'button', text: i18n.get('btnRedact', t) },
+            ],
           });
-          
+
           const alertHash = hash;
-          
+
           notif.on('action', (event, index) => {
             const currentText = clipboard.readText();
             if (getFingerprint(currentText) !== alertHash) {
-              console.log('[ClipCloak] Clipboard changed since notification was shown. Action ignored.');
+              console.log(
+                '[ClipCloak] Clipboard changed since notification was shown. Action ignored.',
+              );
               return;
             }
 
-            if (index === 0) { // Clear
+            if (index === 0) {
+              // Clear
               clipboard.writeText('');
               console.log(i18n.get('logCleared', t));
-            } else if (index === 1) { // Redact
+            } else if (index === 1) {
+              // Redact
               import('@clipcloak/core').then(({ applyRedaction }) => {
                 const safeText = applyRedaction(currentText, findings);
                 clipboard.writeText(safeText);
@@ -81,7 +109,7 @@ function checkClipboard() {
               });
             }
           });
-          
+
           notif.show();
         } else {
           console.log(`[ClipCloak] Secret copied: ${worst.detectorId}`);

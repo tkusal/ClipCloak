@@ -29,11 +29,11 @@ describe('CLI: scanner utils', () => {
     it('should return specific packs', () => {
       const packs = getPacks(['br', 'eu']);
       expect(packs).toHaveLength(2);
-      expect(packs.some(p => p.id === 'br')).toBe(true);
+      expect(packs.some((p) => p.id === 'br')).toBe(true);
     });
 
     it('should throw on invalid packs', () => {
-      expect(() => getPacks(['generic', 'invalid'])).toThrow('Pack \'invalid\' not found');
+      expect(() => getPacks(['generic', 'invalid'])).toThrow("Pack 'invalid' not found");
     });
   });
 
@@ -54,7 +54,9 @@ describe('CLI: scanner utils', () => {
     });
 
     it('should return error on read error', () => {
-      vi.mocked(fs.statSync).mockImplementation(() => { throw new Error('Cannot stat'); });
+      vi.mocked(fs.statSync).mockImplementation(() => {
+        throw new Error('Cannot stat');
+      });
       const result = scanFile('test.txt', []);
       expect(result.errors).toHaveLength(1);
       expect(result.errors[0].errorMessage).toContain('Cannot stat');

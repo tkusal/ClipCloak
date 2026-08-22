@@ -6,7 +6,7 @@ describe('BR Pack: CPF & CNPJ Detector', () => {
     // Valid generated test CPF
     const text = 'Meu CPF é 123.456.789-09.';
     const findings = cpfCnpjDetector.detect(text);
-    
+
     expect(findings).toHaveLength(1);
     expect(findings[0].detectorId).toBe('cpf');
     expect(findings[0].redactedPreview).toBe('123.***.***-09');
@@ -22,7 +22,7 @@ describe('BR Pack: CPF & CNPJ Detector', () => {
     // Valid generated test CNPJ
     const text = 'Empresa: 11.222.333/0001-81';
     const findings = cpfCnpjDetector.detect(text);
-    
+
     expect(findings).toHaveLength(1);
     expect(findings[0].detectorId).toBe('cnpj');
   });

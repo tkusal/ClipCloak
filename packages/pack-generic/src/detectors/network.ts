@@ -31,7 +31,8 @@ export const ipv4Detector: Detector = {
   detect(text: string, _context?: DetectionContext) {
     const findings = [];
     // Standard IPv4 regex (0-255 octets)
-    const regex = /\b(?:(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.){3}(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\b/g;
+    const regex =
+      /\b(?:(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.){3}(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\b/g;
     let match;
 
     while ((match = regex.exec(text)) !== null) {

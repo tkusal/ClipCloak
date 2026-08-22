@@ -16,7 +16,7 @@ export const connectionStringDetector: Detector = {
     while ((match = regex.exec(text)) !== null) {
       const fullMatch = match[0];
       const password = match[2];
-      
+
       // If it looks like a variable interpolation like ${DB_PASS}, skip it, it's not the actual secret
       if (password.includes('${') || password.includes('<') || isDummyString(password)) {
         continue;

@@ -18,7 +18,7 @@ export function activate(context: vscode.ExtensionContext) {
     const text = document.getText();
     const { findings } = detect(text, ALL_PACKS, {
       minSeverity: 'medium',
-      context: { filename: document.fileName }
+      context: { filename: document.fileName },
     });
 
     const diagnostics: vscode.Diagnostic[] = [];
@@ -47,8 +47,8 @@ export function activate(context: vscode.ExtensionContext) {
   // Scan on open and on change
   context.subscriptions.push(
     vscode.workspace.onDidOpenTextDocument(scanDocument),
-    vscode.workspace.onDidChangeTextDocument(e => scanDocument(e.document)),
-    vscode.workspace.onDidSaveTextDocument(scanDocument)
+    vscode.workspace.onDidChangeTextDocument((e) => scanDocument(e.document)),
+    vscode.workspace.onDidSaveTextDocument(scanDocument),
   );
 
   // Command to run manually

@@ -8,19 +8,21 @@ describe('Core Engine', () => {
     category: 'secret',
     detect(text: string) {
       if (text.includes('secret')) {
-        return [{
-          detectorId: 'dummy',
-          category: 'secret',
-          severity: 'high',
-          confidence: 0.9,
-          start: text.indexOf('secret'),
-          end: text.indexOf('secret') + 6,
-          redactedPreview: '***',
-          reason: 'found secret',
-        }];
+        return [
+          {
+            detectorId: 'dummy',
+            category: 'secret',
+            severity: 'high',
+            confidence: 0.9,
+            start: text.indexOf('secret'),
+            end: text.indexOf('secret') + 6,
+            redactedPreview: '***',
+            reason: 'found secret',
+          },
+        ];
       }
       return [];
-    }
+    },
   };
 
   const dummyPack: DetectorPack = {
@@ -46,9 +48,11 @@ describe('Core Engine', () => {
     const crashingDetector: Detector = {
       id: 'crash',
       category: 'secret',
-      detect() { throw new Error('Regex too complex'); }
+      detect() {
+        throw new Error('Regex too complex');
+      },
     };
-    
+
     const crashPack: DetectorPack = {
       id: 'crash-pack',
       name: 'Crash',
@@ -59,7 +63,7 @@ describe('Core Engine', () => {
     const { findings, errors } = detect('secret', [crashPack]);
     expect(findings).toHaveLength(1);
     expect(findings[0].detectorId).toBe('dummy');
-    
+
     // It should accumulate errors
     expect(errors).toHaveLength(1);
     expect(errors[0].detectorId).toBe('crash');

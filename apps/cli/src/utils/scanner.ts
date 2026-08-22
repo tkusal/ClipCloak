@@ -17,23 +17,30 @@ export function getPacks(packNames?: string[]): DetectorPack[] {
   if (!packNames || packNames.length === 0) {
     return Object.values(ALL_PACKS);
   }
-  
+
   const selected: DetectorPack[] = [];
   for (const name of packNames) {
     const trimmed = name.trim();
     if (ALL_PACKS[trimmed]) {
       selected.push(ALL_PACKS[trimmed]);
     } else {
-      throw new Error(`Pack '${trimmed}' not found. Available packs: ${Object.keys(ALL_PACKS).join(', ')}`);
+      throw new Error(
+        `Pack '${trimmed}' not found. Available packs: ${Object.keys(ALL_PACKS).join(', ')}`,
+      );
     }
   }
   return selected;
 }
 
-export function scanText(text: string, filename: string, packs: DetectorPack[], customOptions: Omit<DetectOptions, 'context'> = {}): DetectResult {
+export function scanText(
+  text: string,
+  filename: string,
+  packs: DetectorPack[],
+  customOptions: Omit<DetectOptions, 'context'> = {},
+): DetectResult {
   const options: DetectOptions = {
     ...customOptions,
-    context: { filename }
+    context: { filename },
   };
   return detect(text, packs, options);
 }
@@ -44,7 +51,7 @@ export function isBinaryFileSync(filepath: string): boolean {
     const buffer = Buffer.alloc(4096);
     const bytesRead = fs.readSync(fd, buffer, 0, 4096, 0);
     fs.closeSync(fd);
-    
+
     for (let i = 0; i < bytesRead; i++) {
       if (buffer[i] === 0) {
         return true;
@@ -60,11 +67,13 @@ export function scanBuffer(
   buffer: Buffer,
   filepath: string,
   packs: DetectorPack[],
-  customOptions: Omit<DetectOptions, 'context'> = {}
+  customOptions: Omit<DetectOptions, 'context'> = {},
 ): DetectResult {
   try {
     if (buffer.length > MAX_FILE_SIZE) {
-      console.warn(`[SKIP] File ${filepath} is too large (${(buffer.length/1024/1024).toFixed(2)} MB)`);
+      console.warn(
+        `[SKIP] File ${filepath} is too large (${(buffer.length / 1024 / 1024).toFixed(2)} MB)`,
+      );
       return { findings: [], errors: [] };
     }
 
@@ -82,20 +91,28 @@ export function scanBuffer(
     const errMsg = err instanceof Error ? err.message : String(err);
     return {
       findings: [],
-      errors: [{
-        packId: 'core',
-        detectorId: 'buffer-scanner',
-        errorMessage: `Failed to scan buffer for ${filepath}: ${errMsg}`
-      }]
+      errors: [
+        {
+          packId: 'core',
+          detectorId: 'buffer-scanner',
+          errorMessage: `Failed to scan buffer for ${filepath}: ${errMsg}`,
+        },
+      ],
     };
   }
 }
 
-export function scanFile(filepath: string, packs: DetectorPack[], customOptions: Omit<DetectOptions, 'context'> = {}): DetectResult {
+export function scanFile(
+  filepath: string,
+  packs: DetectorPack[],
+  customOptions: Omit<DetectOptions, 'context'> = {},
+): DetectResult {
   try {
     const stat = fs.statSync(filepath);
     if (stat.size > MAX_FILE_SIZE) {
-      console.warn(`[SKIP] File ${filepath} is too large (${(stat.size/1024/1024).toFixed(2)} MB)`);
+      console.warn(
+        `[SKIP] File ${filepath} is too large (${(stat.size / 1024 / 1024).toFixed(2)} MB)`,
+      );
       return { findings: [], errors: [] };
     }
 
@@ -110,11 +127,13 @@ export function scanFile(filepath: string, packs: DetectorPack[], customOptions:
     const code = err.code || 'UNKNOWN';
     return {
       findings: [],
-      errors: [{
-        packId: 'core',
-        detectorId: 'file-reader',
-        errorMessage: `Failed to read ${filepath} (${code}): ${errMsg}`
-      }]
+      errors: [
+        {
+          packId: 'core',
+          detectorId: 'file-reader',
+          errorMessage: `Failed to read ${filepath} (${code}): ${errMsg}`,
+        },
+      ],
     };
   }
 }

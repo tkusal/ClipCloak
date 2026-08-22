@@ -33,7 +33,7 @@ export async function runDoctor() {
   } else {
     console.log('ℹ️ No .clipcloak.json found. Using defaults.');
   }
-  
+
   const config = resolveConfig(fileConfig, {});
   console.log(`Resolved minSeverity: ${config.minSeverity}`);
   console.log(`Resolved minConfidence: ${config.minConfidence}`);
@@ -43,7 +43,9 @@ export async function runDoctor() {
   console.log('--- Git & Hooks ---');
   let isGitRepo = false;
   try {
-    const gitDir = execSync('git rev-parse --git-dir', { stdio: ['ignore', 'pipe', 'ignore'] }).toString().trim();
+    const gitDir = execSync('git rev-parse --git-dir', { stdio: ['ignore', 'pipe', 'ignore'] })
+      .toString()
+      .trim();
     console.log(`✅ Git repository detected. Git dir: ${gitDir}`);
     isGitRepo = true;
   } catch (err) {
@@ -52,14 +54,19 @@ export async function runDoctor() {
 
   if (isGitRepo) {
     try {
-      const hooksDir = path.resolve(cwd, execSync('git rev-parse --git-path hooks').toString().trim());
+      const hooksDir = path.resolve(
+        cwd,
+        execSync('git rev-parse --git-path hooks').toString().trim(),
+      );
       const preCommitPath = path.join(hooksDir, 'pre-commit');
       if (fs.existsSync(preCommitPath)) {
         const content = fs.readFileSync(preCommitPath, 'utf8');
         if (content.includes('clipcloak') || content.includes('ClipCloak')) {
           console.log(`✅ Pre-commit hook is installed at: ${preCommitPath}`);
         } else {
-          console.log(`ℹ️ Pre-commit hook exists at ${preCommitPath} but does not contain ClipCloak scanning.`);
+          console.log(
+            `ℹ️ Pre-commit hook exists at ${preCommitPath} but does not contain ClipCloak scanning.`,
+          );
         }
       } else {
         console.log('ℹ️ No pre-commit hook installed.');
@@ -83,7 +90,7 @@ export async function runDoctor() {
     const testText = `This is a test block containing a mock OpenAI key: ${testSecret}`;
     const { findings, errors } = scanText(testText, 'synthetic_test.txt', packs, {
       minSeverity: 'low',
-      minConfidence: 0.1
+      minConfidence: 0.1,
     });
 
     if (errors && errors.length > 0) {
@@ -95,10 +102,14 @@ export async function runDoctor() {
     } else if (findings.length > 0) {
       console.log('✅ Synthetic scan succeeded. Detectors are functioning properly.');
       const testFinding = findings[0];
-      console.log(`   Captured synthetic match: [${testFinding.severity.toUpperCase()}] ${testFinding.detectorId} -> ${testFinding.redactedPreview}`);
+      console.log(
+        `   Captured synthetic match: [${testFinding.severity.toUpperCase()}] ${testFinding.detectorId} -> ${testFinding.redactedPreview}`,
+      );
     } else {
       issuesFound = true;
-      console.log('❌ Synthetic scan failed to find the mock secret. Detectors might be disabled or misconfigured.');
+      console.log(
+        '❌ Synthetic scan failed to find the mock secret. Detectors might be disabled or misconfigured.',
+      );
     }
   } catch (err: any) {
     issuesFound = true;

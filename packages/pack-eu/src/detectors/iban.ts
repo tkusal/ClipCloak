@@ -4,12 +4,13 @@ import type { Detector, DetectionContext } from '@clipcloak/core';
 function isValidIban(iban: string): boolean {
   // Move first 4 characters to the end
   const rearranged = iban.substring(4) + iban.substring(0, 4);
-  
+
   // Convert letters to numbers (A=10, B=11, ... Z=35)
   let numericIban = '';
   for (let i = 0; i < rearranged.length; i++) {
     const charCode = rearranged.charCodeAt(i);
-    if (charCode >= 65 && charCode <= 90) { // A-Z
+    if (charCode >= 65 && charCode <= 90) {
+      // A-Z
       numericIban += (charCode - 55).toString();
     } else {
       numericIban += rearranged.charAt(i);
@@ -30,7 +31,7 @@ export const ibanDetector: Detector = {
   category: 'financial',
   detect(text: string, _context?: DetectionContext) {
     const findings = [];
-    
+
     // IBAN format: 2 letters (country), 2 digits (check), then up to 30 alphanumeric characters
     // Matches blocks of alphanumeric characters with optional spaces
     const regex = /\b[A-Z]{2}\d{2}(?:[\s]*[A-Z0-9]){11,30}\b/g;
@@ -39,7 +40,7 @@ export const ibanDetector: Detector = {
     while ((match = regex.exec(text)) !== null) {
       const candidate = match[0];
       const cleanCandidate = candidate.replace(/\s/g, '').toUpperCase();
-      
+
       // Basic sanity length checks per ISO 13616 (max 34 chars)
       if (cleanCandidate.length >= 15 && cleanCandidate.length <= 34) {
         if (isValidIban(cleanCandidate)) {

@@ -10,9 +10,9 @@ export interface RedactOptions {
  * This is used inside the detector to generate the `redactedPreview` without keeping the raw string.
  */
 export function createRedactedPreview(
-  rawSecret: string, 
+  rawSecret: string,
   detectorId: string,
-  options: RedactOptions = {}
+  options: RedactOptions = {},
 ): string {
   const mask = options.maskChar || '*';
   const strategy = options.strategy || 'partial';
@@ -24,7 +24,7 @@ export function createRedactedPreview(
 
   // Partial strategy: show some prefix/suffix if long enough, but heavily mask
   // e.g. sk-proj-123456789 -> sk-proj-********6789
-  
+
   if (rawSecret.startsWith('sk-')) {
     // Standard OpenAI/Anthropic format
     const parts = rawSecret.split('-');
@@ -56,12 +56,12 @@ export function applyRedaction(text: string, findings: Finding[]): string {
 
   // Ensure findings are sorted by start index
   const sorted = [...findings].sort((a, b) => a.start - b.start);
-  
+
   let result = '';
   let lastIndex = 0;
 
   for (const finding of sorted) {
-    // Skip if findings overlap (overlap resolution should have handled this, 
+    // Skip if findings overlap (overlap resolution should have handled this,
     // but defensive programming in case consumer passed raw findings)
     if (finding.start < lastIndex) continue;
 

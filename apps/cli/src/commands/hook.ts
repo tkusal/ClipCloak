@@ -22,8 +22,8 @@ function getClaudeHookMode(): 'standard' | 'strict' {
 function outputDecision(decision: 'allow' | 'deny', reason?: string) {
   const result: any = {
     hookSpecificOutput: {
-      permissionDecision: decision
-    }
+      permissionDecision: decision,
+    },
   };
   if (reason) {
     result.hookSpecificOutput.permissionDecisionReason = reason;
@@ -34,7 +34,7 @@ function outputDecision(decision: 'allow' | 'deny', reason?: string) {
 
 export async function runClaudeCodeHook() {
   const mode = getClaudeHookMode();
-  
+
   try {
     let input = '';
     try {
@@ -74,7 +74,12 @@ export async function runClaudeCodeHook() {
       outputDecision('allow');
     }
 
-    const filePath = toolInput.file_path || toolInput.filePath || toolInput.path || toolInput.file || toolInput.filename;
+    const filePath =
+      toolInput.file_path ||
+      toolInput.filePath ||
+      toolInput.path ||
+      toolInput.file ||
+      toolInput.filename;
 
     if (!filePath || typeof filePath !== 'string') {
       if (mode === 'strict') {
@@ -96,7 +101,10 @@ export async function runClaudeCodeHook() {
     // Skip/Block very large files
     if (stat.size > 5 * 1024 * 1024) {
       if (mode === 'strict') {
-        outputDecision('deny', `ClipCloak strict mode: File ${filePath} is too large to scan safely (> 5 MB).`);
+        outputDecision(
+          'deny',
+          `ClipCloak strict mode: File ${filePath} is too large to scan safely (> 5 MB).`,
+        );
       } else {
         outputDecision('allow');
       }
@@ -118,12 +126,15 @@ export async function runClaudeCodeHook() {
     const { findings, errors } = detect(content, packs, {
       context: { filename: filePath },
       minSeverity: config.minSeverity || 'high',
-      minConfidence: config.minConfidence || 0.5
+      minConfidence: config.minConfidence || 0.5,
     });
 
     if (errors && errors.length > 0) {
       if (mode === 'strict') {
-        outputDecision('deny', `ClipCloak strict mode: Internal scanner error: ${errors[0].errorMessage}`);
+        outputDecision(
+          'deny',
+          `ClipCloak strict mode: Internal scanner error: ${errors[0].errorMessage}`,
+        );
       } else {
         outputDecision('allow');
       }
@@ -142,7 +153,6 @@ export async function runClaudeCodeHook() {
     }
 
     outputDecision('allow');
-
   } catch (err: any) {
     if (mode === 'strict') {
       outputDecision('deny', `ClipCloak strict mode: Hook crash: ${err.message}`);

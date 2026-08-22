@@ -6,14 +6,7 @@ export const DEFAULT_CONFIG: ClipCloakConfig = {
   minConfidence: 0.5,
   blockMinSeverity: 'high',
   blockCategories: ['credential', 'secret'],
-  ignore: [
-    'node_modules/**',
-    'dist/**',
-    'build/**',
-    '.git/**',
-    '*.example',
-    '*.sample'
-  ],
+  ignore: ['node_modules/**', 'dist/**', 'build/**', '.git/**', '*.example', '*.sample'],
 };
 
 /**
@@ -41,14 +34,25 @@ export function validateConfig(config: any): string[] {
 
   if (config.minSeverity !== undefined) {
     const validSeverities: Severity[] = ['low', 'medium', 'high', 'critical'];
-    if (typeof config.minSeverity !== 'string' || !validSeverities.includes(config.minSeverity as Severity)) {
-      errors.push(`Invalid minSeverity: "${config.minSeverity}". Allowed values: ${validSeverities.join(', ')}.`);
+    if (
+      typeof config.minSeverity !== 'string' ||
+      !validSeverities.includes(config.minSeverity as Severity)
+    ) {
+      errors.push(
+        `Invalid minSeverity: "${config.minSeverity}". Allowed values: ${validSeverities.join(', ')}.`,
+      );
     }
   }
 
   if (config.minConfidence !== undefined) {
-    if (typeof config.minConfidence !== 'number' || config.minConfidence < 0 || config.minConfidence > 1) {
-      errors.push(`Invalid minConfidence: ${config.minConfidence}. Must be a number between 0 and 1.`);
+    if (
+      typeof config.minConfidence !== 'number' ||
+      config.minConfidence < 0 ||
+      config.minConfidence > 1
+    ) {
+      errors.push(
+        `Invalid minConfidence: ${config.minConfidence}. Must be a number between 0 and 1.`,
+      );
     }
   }
 
@@ -66,8 +70,13 @@ export function validateConfig(config: any): string[] {
 
   if (config.blockMinSeverity !== undefined) {
     const validSeverities: Severity[] = ['low', 'medium', 'high', 'critical'];
-    if (typeof config.blockMinSeverity !== 'string' || !validSeverities.includes(config.blockMinSeverity as Severity)) {
-      errors.push(`Invalid blockMinSeverity: "${config.blockMinSeverity}". Allowed values: ${validSeverities.join(', ')}.`);
+    if (
+      typeof config.blockMinSeverity !== 'string' ||
+      !validSeverities.includes(config.blockMinSeverity as Severity)
+    ) {
+      errors.push(
+        `Invalid blockMinSeverity: "${config.blockMinSeverity}". Allowed values: ${validSeverities.join(', ')}.`,
+      );
     }
   }
 
@@ -78,7 +87,9 @@ export function validateConfig(config: any): string[] {
       const validCategories: FindingCategory[] = ['secret', 'credential', 'pii', 'financial'];
       for (const cat of config.blockCategories) {
         if (typeof cat !== 'string' || !validCategories.includes(cat as FindingCategory)) {
-          errors.push(`Invalid block category: "${cat}". Allowed categories are: ${validCategories.join(', ')}.`);
+          errors.push(
+            `Invalid block category: "${cat}". Allowed categories are: ${validCategories.join(', ')}.`,
+          );
         }
       }
     }
@@ -93,14 +104,15 @@ export function validateConfig(config: any): string[] {
  */
 export function resolveConfig(
   fileConfig: Partial<ClipCloakConfig> | null,
-  cliOptions: Partial<ClipCloakConfig>
+  cliOptions: Partial<ClipCloakConfig>,
 ): ClipCloakConfig {
   const mergedConfig = { ...DEFAULT_CONFIG };
 
   if (fileConfig) {
     if (fileConfig.packs) mergedConfig.packs = fileConfig.packs;
     if (fileConfig.minSeverity) mergedConfig.minSeverity = fileConfig.minSeverity;
-    if (fileConfig.minConfidence !== undefined) mergedConfig.minConfidence = fileConfig.minConfidence;
+    if (fileConfig.minConfidence !== undefined)
+      mergedConfig.minConfidence = fileConfig.minConfidence;
     if (fileConfig.blockMinSeverity) mergedConfig.blockMinSeverity = fileConfig.blockMinSeverity;
     if (fileConfig.blockCategories) mergedConfig.blockCategories = fileConfig.blockCategories;
     if (fileConfig.ignore) {
@@ -111,7 +123,8 @@ export function resolveConfig(
   if (cliOptions) {
     if (cliOptions.packs) mergedConfig.packs = cliOptions.packs;
     if (cliOptions.minSeverity) mergedConfig.minSeverity = cliOptions.minSeverity;
-    if (cliOptions.minConfidence !== undefined) mergedConfig.minConfidence = cliOptions.minConfidence;
+    if (cliOptions.minConfidence !== undefined)
+      mergedConfig.minConfidence = cliOptions.minConfidence;
     if (cliOptions.blockMinSeverity) mergedConfig.blockMinSeverity = cliOptions.blockMinSeverity;
     if (cliOptions.blockCategories) mergedConfig.blockCategories = cliOptions.blockCategories;
     if (cliOptions.ignore) {

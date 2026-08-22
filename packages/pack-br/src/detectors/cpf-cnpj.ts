@@ -35,7 +35,7 @@ function validateCNPJ(cnpj: string): boolean {
     sum += parseInt(numbers.charAt(size - i)) * pos--;
     if (pos < 2) pos = 9;
   }
-  
+
   let result = sum % 11 < 2 ? 0 : 11 - (sum % 11);
   if (result !== parseInt(digits.charAt(0))) return false;
 
@@ -43,12 +43,12 @@ function validateCNPJ(cnpj: string): boolean {
   numbers = cnpj.substring(0, size);
   sum = 0;
   pos = size - 7;
-  
+
   for (let i = size; i >= 1; i--) {
     sum += parseInt(numbers.charAt(size - i)) * pos--;
     if (pos < 2) pos = 9;
   }
-  
+
   result = sum % 11 < 2 ? 0 : 11 - (sum % 11);
   if (result !== parseInt(digits.charAt(1))) return false;
 
@@ -60,11 +60,12 @@ export const cpfCnpjDetector: Detector = {
   category: 'pii',
   detect(text: string, _context?: DetectionContext) {
     const findings = [];
-    
+
     // Captures CPF (with or without formatting) and CNPJ (with or without formatting)
     // Limits matches to boundaries to prevent capturing a subset of a long id.
-    const regex = /\b(?:\d{3}[.\s]?\d{3}[.\s]?\d{3}[-.\s]?\d{2}|\d{2}[.\s]?\d{3}[.\s]?\d{3}[/.\s]?\d{4}[-.\s]?\d{2})\b/g;
-    
+    const regex =
+      /\b(?:\d{3}[.\s]?\d{3}[.\s]?\d{3}[-.\s]?\d{2}|\d{2}[.\s]?\d{3}[.\s]?\d{3}[/.\s]?\d{4}[-.\s]?\d{2})\b/g;
+
     let match;
     while ((match = regex.exec(text)) !== null) {
       const candidate = match[0];
@@ -81,7 +82,7 @@ export const cpfCnpjDetector: Detector = {
 
       if (isCPF || isCNPJ) {
         // Redact format: show only first 3 and last 2 digits for CPF, similar for CNPJ
-        const redacted = isCPF 
+        const redacted = isCPF
           ? `${cleanCandidate.slice(0, 3)}.***.***-${cleanCandidate.slice(9)}`
           : `${cleanCandidate.slice(0, 2)}.***.***/****-${cleanCandidate.slice(12)}`;
 

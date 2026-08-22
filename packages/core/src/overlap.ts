@@ -18,7 +18,7 @@ export function resolveOverlaps(findings: Finding[]): Finding[] {
   });
 
   const resolved: Finding[] = [];
-  
+
   for (const current of sorted) {
     if (resolved.length === 0) {
       resolved.push(current);
@@ -48,7 +48,7 @@ export function resolveOverlaps(findings: Finding[]): Finding[] {
 
 function shouldKeepCurrent(prev: Finding, current: Finding): boolean {
   const severityWeight = { low: 1, medium: 2, high: 3, critical: 4 };
-  
+
   // 1. Compare severity
   const wPrev = severityWeight[prev.severity];
   const wCurr = severityWeight[current.severity];

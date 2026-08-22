@@ -13,7 +13,7 @@ export const awsDetector: Detector = {
 
     while ((match = regex.exec(text)) !== null) {
       const token = match[0];
-      
+
       if (isObviousDummyString(token)) {
         continue;
       }
@@ -22,9 +22,10 @@ export const awsDetector: Detector = {
       if (isSoftDummyString(token)) {
         confidence = 0.7;
       }
-      
+
       const entropy = shannonEntropy(token.slice(4)); // Check entropy of the random part
-      if (entropy < 2.5 && confidence === 0.9) { // Needs some reasonable randomness, but don't skip if already flagged as dummy/low-confidence (to avoid double skip)
+      if (entropy < 2.5 && confidence === 0.9) {
+        // Needs some reasonable randomness, but don't skip if already flagged as dummy/low-confidence (to avoid double skip)
         continue;
       }
 

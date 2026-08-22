@@ -13,7 +13,7 @@ export const githubDetector: Detector = {
 
     while ((match = regex.exec(text)) !== null) {
       const token = match[0];
-      
+
       if (isDummyString(token)) {
         continue;
       }

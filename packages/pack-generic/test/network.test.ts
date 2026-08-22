@@ -6,7 +6,7 @@ describe('Generic Pack: Network Detectors', () => {
     it('should detect valid emails', () => {
       const text = 'Contact john.doe@example.com for more info or admin@domain.org.';
       const findings = emailDetector.detect(text);
-      
+
       expect(findings).toHaveLength(2);
       expect(findings[0].detectorId).toBe('email');
       expect(findings[0].severity).toBe('low');
@@ -24,7 +24,7 @@ describe('Generic Pack: Network Detectors', () => {
     it('should detect valid IPs', () => {
       const text = 'Connect to 192.168.1.15 or 8.8.8.8';
       const findings = ipv4Detector.detect(text);
-      
+
       expect(findings).toHaveLength(2);
       expect(findings[0].detectorId).toBe('ipv4');
       expect(findings[0].severity).toBe('low');
@@ -34,7 +34,7 @@ describe('Generic Pack: Network Detectors', () => {
     it('should ignore standard loopback/broadcast IPs to reduce noise', () => {
       const text = 'IPs: 127.0.0.1, 0.0.0.0, 255.255.255.255';
       const findings = ipv4Detector.detect(text);
-      
+
       expect(findings).toHaveLength(0);
     });
 
