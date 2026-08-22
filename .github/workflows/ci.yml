@@ -26,8 +26,8 @@ jobs:
     - name: Install dependencies
       run: pnpm install
       
-    - name: Typecheck
-      run: pnpm run build # Will run tsc across packages due to references
+    - name: Build
+      run: pnpm build
       
     - name: Lint
       run: pnpm lint
