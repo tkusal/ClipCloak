@@ -31,7 +31,17 @@ export function getIgnoreFilter(cwd: string, extraIgnores: string[] = []) {
 
 export function walkDir(dir: string, ig: ReturnType<typeof ignore>, cwd: string): string[] {
   const results: string[] = [];
-  const list = fs.readdirSync(dir);
+  let list: string[] = [];
+  
+  try {
+    list = fs.readdirSync(dir);
+  } catch (err: any) {
+    if (err.code === 'EACCES' || err.code === 'EPERM') {
+      console.warn(`[WARN] Permission denied: ${dir}`);
+      return results;
+    }
+    throw err;
+  }
   
   for (const file of list) {
     const fullPath = path.join(dir, file);
@@ -39,12 +49,26 @@ export function walkDir(dir: string, ig: ReturnType<typeof ignore>, cwd: string)
     
     if (ig.ignores(relPath)) continue;
 
-    const stat = fs.statSync(fullPath);
-    if (stat && stat.isDirectory()) {
-      // Recurse
-      results.push(...walkDir(fullPath, ig, cwd));
-    } else {
-      results.push(fullPath);
+    try {
+      const stat = fs.lstatSync(fullPath);
+      
+      // Skip symlinks to avoid infinite loops and scanning external files
+      if (stat.isSymbolicLink()) {
+        continue;
+      }
+      
+      if (stat.isDirectory()) {
+        // Recurse
+        results.push(...walkDir(fullPath, ig, cwd));
+      } else if (stat.isFile()) {
+        results.push(fullPath);
+      }
+    } catch (err: any) {
+      if (err.code === 'EACCES' || err.code === 'EPERM' || err.code === 'ENOENT') {
+        console.warn(`[WARN] Skipping unreadable file/directory: ${fullPath}`);
+        continue;
+      }
+      throw err;
     }
   }
   

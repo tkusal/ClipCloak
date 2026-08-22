@@ -38,6 +38,24 @@ export function scanText(text: string, filename: string, packs: DetectorPack[], 
   return detect(text, packs, options);
 }
 
+export function isBinaryFileSync(filepath: string): boolean {
+  try {
+    const fd = fs.openSync(filepath, 'r');
+    const buffer = Buffer.alloc(4096);
+    const bytesRead = fs.readSync(fd, buffer, 0, 4096, 0);
+    fs.closeSync(fd);
+    
+    for (let i = 0; i < bytesRead; i++) {
+      if (buffer[i] === 0) {
+        return true;
+      }
+    }
+    return false;
+  } catch {
+    return false; // If we can't read it, let the next step try and fail gracefully
+  }
+}
+
 export function scanFile(filepath: string, packs: DetectorPack[], customOptions: Omit<DetectOptions, 'context'> = {}): DetectResult {
   try {
     const stat = fs.statSync(filepath);
@@ -46,10 +64,22 @@ export function scanFile(filepath: string, packs: DetectorPack[], customOptions:
       return { findings: [], errors: [] };
     }
 
+    if (isBinaryFileSync(filepath)) {
+      // We don't log every single binary skip as it would be too noisy, 
+      // but maybe verbose mode later. For now just skip silently.
+      return { findings: [], errors: [] };
+    }
+
     const content = fs.readFileSync(filepath, 'utf8');
     return scanText(content, filepath, packs, customOptions);
-  } catch (err) {
-    console.error(`[ERROR] Failed to read ${filepath}: ${err instanceof Error ? err.message : String(err)}`);
-    process.exit(2);
+  } catch (err: any) {
+    if (err.code === 'EACCES' || err.code === 'EPERM' || err.code === 'ENOENT') {
+      console.warn(`[WARN] Failed to read ${filepath} (Permission denied or not found). Skipping.`);
+      return { findings: [], errors: [] };
+    }
+    
+    // For other weird IO errors, log but do not crash the whole process
+    console.warn(`[ERROR] Unexpected error reading ${filepath}: ${err instanceof Error ? err.message : String(err)}`);
+    return { findings: [], errors: [] };
   }
 }
