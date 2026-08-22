@@ -4,14 +4,16 @@ import { scanFile, getPacks, MAX_FILE_SIZE } from '../src/utils/scanner.js';
 
 vi.mock('node:fs');
 
+import type { MockInstance } from 'vitest';
+
 describe('CLI: scanner utils', () => {
-  let exitSpy: any;
-  let errorSpy: any;
-  let warnSpy: any;
+  let exitSpy: MockInstance;
+  let errorSpy: MockInstance;
+  let warnSpy: MockInstance;
 
   beforeEach(() => {
     vi.resetAllMocks();
-    exitSpy = vi.spyOn(process, 'exit').mockImplementation((() => {}) as any);
+    exitSpy = vi.spyOn(process, 'exit').mockImplementation((() => {}) as never);
     errorSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
     warnSpy = vi.spyOn(console, 'warn').mockImplementation(() => {});
   });
@@ -41,14 +43,14 @@ describe('CLI: scanner utils', () => {
 
   describe('scanFile', () => {
     it('should skip file if larger than MAX_FILE_SIZE', () => {
-      vi.mocked(fs.statSync).mockReturnValue({ size: MAX_FILE_SIZE + 100 } as any);
+      vi.mocked(fs.statSync).mockReturnValue({ size: MAX_FILE_SIZE + 100 } as unknown as fs.Stats);
       const result = scanFile('large.txt', []);
       expect(result.findings).toHaveLength(0);
       expect(warnSpy).toHaveBeenCalledWith(expect.stringContaining('too large'));
     });
 
     it('should scan normal file', () => {
-      vi.mocked(fs.statSync).mockReturnValue({ size: 1024 } as any);
+      vi.mocked(fs.statSync).mockReturnValue({ size: 1024 } as unknown as fs.Stats);
       vi.mocked(fs.readFileSync).mockReturnValue('normal text');
       const packs = getPacks();
       const result = scanFile('test.txt', packs);

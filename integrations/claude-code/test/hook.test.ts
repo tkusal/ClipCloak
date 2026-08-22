@@ -24,14 +24,14 @@ describe('Claude Code Hook: handlePreToolUse', () => {
 
   it('should ALLOW if file is too large', () => {
     vi.mocked(fs.existsSync).mockReturnValue(true);
-    vi.mocked(fs.statSync).mockReturnValue({ size: 10 * 1024 * 1024 } as any); // 10MB
+    vi.mocked(fs.statSync).mockReturnValue({ size: 10 * 1024 * 1024 } as unknown as fs.Stats); // 10MB
     const result = handlePreToolUse({ toolName: 'readFile', toolArgs: { path: 'big.txt' } }, mockCwd);
     expect(result.status).toBe('ALLOW');
   });
 
   it('should BLOCK if file contains high severity secret', () => {
     vi.mocked(fs.existsSync).mockReturnValue(true);
-    vi.mocked(fs.statSync).mockReturnValue({ size: 1024 } as any);
+    vi.mocked(fs.statSync).mockReturnValue({ size: 1024 } as unknown as fs.Stats);
     // Simulate an AWS key which is high/critical severity (using a generic regex match if possible, or JWT)
     vi.mocked(fs.readFileSync).mockReturnValue('Here is my key: AKIAIOSFODNN7EXAMPLE');
     
@@ -42,7 +42,7 @@ describe('Claude Code Hook: handlePreToolUse', () => {
 
   it('should ALLOW if no secret is found', () => {
     vi.mocked(fs.existsSync).mockReturnValue(true);
-    vi.mocked(fs.statSync).mockReturnValue({ size: 1024 } as any);
+    vi.mocked(fs.statSync).mockReturnValue({ size: 1024 } as unknown as fs.Stats);
     vi.mocked(fs.readFileSync).mockReturnValue('Just normal text here.');
     
     const result = handlePreToolUse({ toolName: 'readFile', toolArgs: { path: 'readme.md' } }, mockCwd);

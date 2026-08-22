@@ -5,7 +5,7 @@ export const tokensDetector: Detector = {
   id: 'api-tokens',
   category: 'credential',
   detect(text: string, _context?: DetectionContext) {
-    const findings: Finding[] = [];
+    const findings: Omit<Finding, 'packId'>[] = [];
 
     // Better regex for OpenAI (sk-proj... and normal sk-...)
     const openaiRegex = /\bsk-(?!ant-)(?:proj-)?[A-Za-z0-9\-_]{20,}\b/g;

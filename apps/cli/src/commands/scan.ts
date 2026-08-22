@@ -4,7 +4,13 @@ import { getIgnoreFilter, walkDir } from '../utils/ignore.js';
 import { getPacks, scanFile, scanText } from '../utils/scanner.js';
 import type { Finding } from '@clipcloak/core';
 
-export async function runScan(target: string | undefined, options: Record<string, any>) {
+export interface ScanOptions {
+  packs?: string;
+  stdin?: boolean;
+  format?: string;
+}
+
+export async function runScan(target: string | undefined, options: ScanOptions) {
   const cwd = process.cwd();
   const ig = getIgnoreFilter(cwd);
   
