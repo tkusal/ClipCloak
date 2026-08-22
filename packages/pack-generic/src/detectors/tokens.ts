@@ -5,7 +5,7 @@ export const tokensDetector: Detector = {
   id: 'api-tokens',
   category: 'credential',
   detect(text: string, _context?: DetectionContext) {
-    const findings = [];
+    const findings: any[] = [];
     
     // OpenAI: sk-proj-... or sk-...
     // Anthropic: sk-ant-...
@@ -17,7 +17,7 @@ export const tokensDetector: Detector = {
     ] as const;
 
     // Better regex for OpenAI (sk-proj... and normal sk-...)
-    const openaiRegex = /\bsk-(?:proj-)?[A-Za-z0-9\-_]{20,}\b/g;
+    const openaiRegex = /\bsk-(?!ant-)(?:proj-)?[A-Za-z0-9\-_]{20,}\b/g;
     const anthropicRegex = /\bsk-ant-[A-Za-z0-9\-_]{20,}\b/g;
     const githubRegex = /\bgh[pousr]_[A-Za-z0-9]{36}\b/g;
 
