@@ -8,13 +8,11 @@ import type { MockInstance } from 'vitest';
 
 describe('CLI: scanner utils', () => {
   let exitSpy: MockInstance;
-  let errorSpy: MockInstance;
   let warnSpy: MockInstance;
 
   beforeEach(() => {
     vi.resetAllMocks();
     exitSpy = vi.spyOn(process, 'exit').mockImplementation((() => {}) as never);
-    errorSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
     warnSpy = vi.spyOn(console, 'warn').mockImplementation(() => {});
   });
 

@@ -7,7 +7,8 @@ import type { ClipCloakConfig } from '@clipcloak/core';
  */
 export function loadConfigFile(cwd: string = process.cwd()): Partial<ClipCloakConfig> | null {
   let currentDir = cwd;
-  while (true) {
+  let reachedRoot = false;
+  while (!reachedRoot) {
     const configPath = path.join(currentDir, '.clipcloak.json');
     if (fs.existsSync(configPath)) {
       try {
@@ -22,9 +23,10 @@ export function loadConfigFile(cwd: string = process.cwd()): Partial<ClipCloakCo
     
     const parentDir = path.dirname(currentDir);
     if (parentDir === currentDir) {
-      break; // Reached root
+      reachedRoot = true;
+    } else {
+      currentDir = parentDir;
     }
-    currentDir = parentDir;
   }
   
   return null;

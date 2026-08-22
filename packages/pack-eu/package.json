@@ -1,6 +1,6 @@
 {
   "name": "@clipcloak/pack-eu",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "description": "European PII detectors (IBAN, VAT) for ClipCloak",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",

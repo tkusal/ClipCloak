@@ -1,6 +1,6 @@
 export function shannonEntropy(str: string): number {
   if (!str) return 0;
-  let map: Record<string, number> = {};
+  const map: Record<string, number> = {};
   for (let i = 0; i < str.length; i++) {
     const char = str[i];
     map[char] = (map[char] || 0) + 1;

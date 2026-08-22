@@ -65,12 +65,14 @@ Currently, ClipCloak is in its MVP phase and not yet published to npm. To test i
    pnpm run test
    ```
 
-### Next Steps (Post-MVP Roadmap)
-- [ ] **Publish to npm:** Publish `@clipcloak/cli` and core packages to npm registry.
-- [ ] **Desktop App / Clipboard Monitor:** Build a Rust (Tauri) or Electron background app to monitor the OS clipboard and warn the user before pasting into a browser.
-- [ ] **IDE Extensions:** Create VSCode and JetBrains extensions to provide real-time alerts.
-- [ ] **Claude Code Integration Release:** Finalize and test the `claude-code` integration hook.
-- [ ] **Expanded Detectors:** Add more regional packs (e.g., UK, US-specific PII) and more generic token formats.
+### Next Steps & Roadmap
+Currently in **v0.2.0 (Core Production-Ready)**. The detection engine is stable and supports `.clipcloak.json` configuration and robust scanning (symlinks, binaries, large files).
+
+- [x] **v0.2.0**: Core Production-Ready (Robust scanner, `.clipcloak.json` config, false-positive reduction via Shannon entropy).
+- [ ] **v0.3.0**: CLI Completa (Add `--staged` for Git hooks, `init`, `doctor`).
+- [ ] **v0.4.0**: Publish to npm registry.
+- [ ] **v0.5.0**: Git pre-commit hooks and Claude Code Integration Release.
+- [ ] **v0.6.0+**: Desktop App, VS Code Extensions, and more regional detector packs.
 
 ### Contributing
 We welcome contributions! Please see our [CONTRIBUTING.md](./CONTRIBUTING.md) for details.
@@ -139,12 +141,14 @@ Atualmente, o ClipCloak está em fase MVP e ainda não foi publicado no npm. Par
    pnpm run test
    ```
 
-### Próximas Etapas (Roadmap Pós-MVP)
-- [ ] **Publicar no npm:** Publicar `@clipcloak/cli` e os pacotes core no registro do npm.
-- [ ] **App Desktop / Monitor de Área de Transferência:** Criar um app em Rust (Tauri) ou Electron para monitorar o clipboard do sistema e avisar o usuário antes de colar em um navegador.
-- [ ] **Extensões de IDE:** Criar extensões para VSCode e JetBrains para alertas em tempo real.
-- [ ] **Release da Integração com Claude Code:** Finalizar e testar o hook de integração com o `claude-code`.
-- [ ] **Expandir Detectores:** Adicionar mais pacotes regionais (ex: PII do Reino Unido, EUA) e mais formatos de tokens genéricos.
+### Próximas Etapas e Roadmap
+Atualmente na **v0.2.0 (Core Production-Ready)**. O motor de detecção é estável, suporta a configuração `.clipcloak.json` e faz escaneamento robusto (ignora binários, symlinks e arquivos gigantes de forma segura).
+
+- [x] **v0.2.0**: Core Production-Ready (Scanner robusto, config `.clipcloak.json`, redução de falsos positivos via entropia de Shannon).
+- [ ] **v0.3.0**: CLI Completa (Suporte a `--staged` para Git hooks, `init`, `doctor`).
+- [ ] **v0.4.0**: Publicação no npm registry.
+- [ ] **v0.5.0**: Integração robusta com Git pre-commit e Claude Code.
+- [ ] **v0.6.0+**: App Desktop, extensões VS Code e mais pacotes regionais.
 
 ### Contribuindo
 Aceitamos contribuições! Veja nosso [CONTRIBUTING.md](./CONTRIBUTING.md) para detalhes.

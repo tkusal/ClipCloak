@@ -1,3 +1,4 @@
+/* eslint-disable */
 import { someUtility } from './utils';
 
 export function calculateTotal(items: { price: number }[]): number {
