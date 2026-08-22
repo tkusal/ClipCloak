@@ -1,7 +1,7 @@
 {
   "name": "clipcloak-vscode",
   "displayName": "ClipCloak",
-  "version": "0.2.0",
+  "version": "1.0.0",
   "description": "ClipCloak VS Code Extension - Find and hide secrets locally.",
   "publisher": "tkusal",
   "engines": {
