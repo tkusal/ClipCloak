@@ -6,11 +6,15 @@ export function detect(
   packs: DetectorPack[],
   options: DetectOptions = {}
 ): DetectResult {
+  if (typeof text !== 'string') {
+    return { findings: [], errors: [{ packId: 'core', detectorId: 'engine', errorMessage: 'Input text must be a string' }] };
+  }
+
   let allFindings: Finding[] = [];
   const errors: DetectorError[] = [];
 
   // Filter packs if requested
-  const activePacks = options.packs
+  const activePacks = Array.isArray(options.packs)
     ? packs.filter(p => options.packs!.includes(p.id))
     : packs;
 
