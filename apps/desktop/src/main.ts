@@ -26,11 +26,11 @@ function checkClipboard() {
         if (current.severity === 'high' && prev.severity !== 'critical') return current;
         return prev;
       }, findings[0]);
-      console.log(`\n🚨 [ClipCloak Desktop] Secret Copied: ${worst.packId}/${worst.detectorId}`);
+      console.log(`\n[ClipCloak Desktop] Secret Copied: ${worst.packId}/${worst.detectorId}`);
 
       if (Notification.isSupported()) {
         const notif = new Notification({
-          title: '🛡️ ClipCloak Alert',
+          title: 'ClipCloak Alert',
           body: `Sensitive data copied: ${worst.packId}/${worst.detectorId} (${worst.severity.toUpperCase()})\nWe recommend not pasting this in untrusted apps.`,
           actions: [
             { type: 'button', text: 'Clear' },
@@ -82,7 +82,7 @@ app.whenReady().then(() => {
           // We don't simulate the paste keystroke because of OS security limitations,
           // but we notify the user that it's safe to paste normally now.
           if (Notification.isSupported()) {
-            new Notification({ title: '🛡️ ClipCloak', body: 'Clipboard safely redacted. You can now press Ctrl+V to paste.' }).show();
+            new Notification({ title: 'ClipCloak', body: 'Clipboard safely redacted. You can now press Ctrl+V to paste.' }).show();
           }
         });
       } else {
@@ -94,7 +94,7 @@ app.whenReady().then(() => {
 
   // Start polling clipboard every 1 second
   setInterval(checkClipboard, 1000);
-  console.log('🛡️ ClipCloak Desktop Alpha is running and monitoring clipboard...');
+  console.log('[ClipCloak] Desktop Alpha is running and monitoring clipboard...');
 });
 
 // Keep app running in background
