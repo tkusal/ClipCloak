@@ -1,5 +1,6 @@
 import type { Detector, DetectionContext, Finding } from '@clipcloak/core';
 import { createRedactedPreview } from '@clipcloak/core';
+import { isDummyString } from '../utils/entropy.js';
 
 export const tokensDetector: Detector = {
   id: 'api-tokens',
@@ -15,14 +16,20 @@ export const tokensDetector: Detector = {
     const runPattern = (regex: RegExp, id: string, name: string) => {
       let match;
       while ((match = regex.exec(text)) !== null) {
+        const token = match[0];
+        
+        if (isDummyString(token)) {
+          continue;
+        }
+
         findings.push({
           detectorId: id,
           category: this.category,
           severity: 'critical' as const,
           confidence: 0.95,
           start: match.index,
-          end: match.index + match[0].length,
-          redactedPreview: createRedactedPreview(match[0], id, { strategy: 'partial' }),
+          end: match.index + token.length,
+          redactedPreview: createRedactedPreview(token, id, { strategy: 'partial' }),
           reason: `Matches ${name} pattern`,
         });
       }

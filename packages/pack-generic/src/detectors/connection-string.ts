@@ -1,5 +1,6 @@
 import type { Detector, DetectionContext } from '@clipcloak/core';
 import { createRedactedPreview } from '@clipcloak/core';
+import { isDummyString } from '../utils/entropy.js';
 
 export const connectionStringDetector: Detector = {
   id: 'connection-string',
@@ -17,7 +18,7 @@ export const connectionStringDetector: Detector = {
       const password = match[2];
       
       // If it looks like a variable interpolation like ${DB_PASS}, skip it, it's not the actual secret
-      if (password.includes('${') || password.includes('<')) {
+      if (password.includes('${') || password.includes('<') || isDummyString(password)) {
         continue;
       }
 

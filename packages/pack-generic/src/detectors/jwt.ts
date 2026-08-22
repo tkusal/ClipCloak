@@ -1,5 +1,6 @@
 import type { Detector, DetectionContext } from '@clipcloak/core';
 import { createRedactedPreview } from '@clipcloak/core';
+import { shannonEntropy } from '../utils/entropy.js';
 
 export const jwtDetector: Detector = {
   id: 'jwt',
@@ -12,14 +13,22 @@ export const jwtDetector: Detector = {
     let match;
 
     while ((match = regex.exec(text)) !== null) {
+      const token = match[0];
+      const parts = token.split('.');
+      const signature = parts[2];
+      
+      if (shannonEntropy(signature) < 3.0) {
+        continue;
+      }
+
       findings.push({
         detectorId: this.id,
         category: this.category,
         severity: 'high' as const,
         confidence: 0.8, // JWTs might just be session state, but often contain PII or act as auth
         start: match.index,
-        end: match.index + match[0].length,
-        redactedPreview: createRedactedPreview(match[0], this.id, { strategy: 'partial' }),
+        end: match.index + token.length,
+        redactedPreview: createRedactedPreview(token, this.id, { strategy: 'partial' }),
         reason: 'Matches JWT structure (Base64Url Header.Payload.Signature)',
       });
     }
