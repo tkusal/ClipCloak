@@ -8,23 +8,28 @@ on:
 
 jobs:
   build-and-test:
-    runs-on: ubuntu-latest
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: [ubuntu-latest, windows-latest, macos-latest]
+        node-version: [20.x, 22.x]
     
     steps:
-    - uses: actions/checkout@v5
+    - uses: actions/checkout@v4
     
-    - name: Install Node.js
-      uses: actions/setup-node@v5
-      with:
-        node-version: 24
-        
     - name: Install pnpm
-      uses: pnpm/action-setup@v6
+      uses: pnpm/action-setup@v3
       with:
         version: 9
         
+    - name: Install Node.js ${{ matrix.node-version }}
+      uses: actions/setup-node@v4
+      with:
+        node-version: ${{ matrix.node-version }}
+        cache: 'pnpm'
+        
     - name: Install dependencies
-      run: pnpm install
+      run: pnpm install --frozen-lockfile
       
     - name: Build
       run: pnpm build
@@ -34,3 +39,6 @@ jobs:
       
     - name: Test
       run: pnpm test
+      
+    - name: Smoke Test CLI
+      run: node apps/cli/dist/index.js doctor

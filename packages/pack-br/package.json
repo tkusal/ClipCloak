@@ -10,5 +10,16 @@
   },
   "dependencies": {
     "@clipcloak/core": "workspace:*"
+  },
+  "publishConfig": {
+    "access": "public"
+  },
+  "files": [
+    "dist"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/tkusal/ClipCloak.git",
+    "directory": "packages/pack-br"
   }
 }

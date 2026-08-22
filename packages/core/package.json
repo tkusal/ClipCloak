@@ -7,5 +7,16 @@
   "scripts": {
     "build": "tsc -b",
     "test": "vitest run"
+  },
+  "publishConfig": {
+    "access": "public"
+  },
+  "files": [
+    "dist"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/tkusal/ClipCloak.git",
+    "directory": "packages/core"
   }
 }
