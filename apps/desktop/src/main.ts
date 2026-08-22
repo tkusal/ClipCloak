@@ -1,5 +1,4 @@
-import { app, clipboard, Notification, Tray, Menu, globalShortcut } from 'electron';
-import path from 'path';
+import { app, clipboard, Notification, globalShortcut } from 'electron';
 import { detect, i18n } from '@clipcloak/core';
 import genericPack from '@clipcloak/pack-generic';
 import brPack from '@clipcloak/pack-br';
@@ -25,7 +24,6 @@ const t = {
   desktopRunning: { en: '[ClipCloak] Desktop Alpha is running and monitoring clipboard...', pt: '[ClipCloak] Desktop Alpha rodando e monitorando área de transferência...' },
 };
 
-let tray: Tray | null = null;
 let lastClipboardHash = '';
 
 function getFingerprint(text: string): string {

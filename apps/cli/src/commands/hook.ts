@@ -13,7 +13,9 @@ function getClaudeHookMode(): 'standard' | 'strict' {
         return 'strict';
       }
     }
-  } catch {}
+  } catch {
+    // Ignore and fallback to standard mode
+  }
   return 'standard';
 }
 
