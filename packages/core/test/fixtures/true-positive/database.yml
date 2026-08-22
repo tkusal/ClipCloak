@@ -1,0 +1,4 @@
+production:
+  url: postgresql://admin:superSecretP4ssw0rd@db.production.com:5432/my_database
+  pool: 5
+  timeout: 5000

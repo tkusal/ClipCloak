@@ -1,0 +1,12 @@
+{
+  "user": {
+    "name": "Maria da Silva",
+    "cpf": "123.456.789-09",
+    "payment": {
+      "type": "credit_card",
+      "number": "4111222233334444",
+      "cvv": "123"
+    },
+    "pix_key": "12345678909"
+  }
+}
