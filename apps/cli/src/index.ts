@@ -36,6 +36,15 @@ program
   });
 
 program
+  .command('install')
+  .description('Install integrations (git-hook, claude-code)')
+  .argument('<target>', 'Integration to install (git-hook, claude-code)')
+  .action(async (target) => {
+    const { runInstall } = await import('./commands/install.js');
+    await runInstall(target);
+  });
+
+program
   .command('init')
   .description('Create a default .clipcloak.json configuration file in the current directory')
   .action(async () => {

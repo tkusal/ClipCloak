@@ -23,7 +23,7 @@ const ALL_PACKS: DetectorPack[] = [genericPack, brPack, euPack];
  * Hook handler designed to be registered via Claude Code's extension system.
  * It intercepts file reading tools and scans the content before the LLM sees it.
  */
-export function handlePreToolUse(event: PreToolUseEvent, cwd: string = process.cwd()): HookDecision {
+export function handlePreToolUse(event: PreToolUseEvent, cwd: string = process.cwd(), mode: 'standard' | 'strict' = 'standard'): HookDecision {
   // We only care about file reading tools for this layer of protection
   const readTools = ['fs_read_file', 'readFile', 'cat', 'ViewFile'];
   
@@ -35,7 +35,7 @@ export function handlePreToolUse(event: PreToolUseEvent, cwd: string = process.c
   const targetFile = event.toolArgs?.path || event.toolArgs?.file || event.toolArgs?.filename;
   
   if (!targetFile || typeof targetFile !== 'string') {
-    return { status: 'ALLOW' }; // Unrecognized args, let it pass (or could fail safe)
+    return mode === 'strict' ? { status: 'BLOCK', message: 'ClipCloak strict mode: Unknown arguments in read tool.' } : { status: 'ALLOW' };
   }
 
   const fullPath = path.resolve(cwd, targetFile);
@@ -86,8 +86,10 @@ The sensitive value was not displayed to protect your credentials.`;
     return { status: 'ALLOW' };
 
   } catch (err) {
-    // Failsafe: if the scanner crashes, we allow the read to not break the user's flow
-    // In a strict mode, we might want to BLOCK here.
+    // Failsafe: if the scanner crashes, we allow the read to not break the user's flow in standard mode
+    if (mode === 'strict') {
+      return { status: 'BLOCK', message: 'ClipCloak strict mode: Internal scanner error prevented safe reading.' };
+    }
     return { status: 'ALLOW' };
   }
 }
