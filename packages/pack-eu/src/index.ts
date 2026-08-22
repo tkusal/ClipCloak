@@ -1,11 +1,13 @@
-import type { Pack } from '@clipcloak/core';
+import type { DetectorPack } from '@clipcloak/core';
+import { ibanDetector } from './detectors/iban.js';
+import { vatDetector } from './detectors/vat.js';
 
-export const euPack: Pack = {
+export const euPack: DetectorPack = {
   id: 'eu',
-  name: 'European PII',
-  version: '0.1.0',
+  name: 'European PII & Financial',
   detectors: [
-    // TODO: implement IBAN, VAT
+    ibanDetector,
+    vatDetector,
   ],
 };
 
