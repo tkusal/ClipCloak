@@ -3,17 +3,17 @@ import { tokensDetector } from '../src/detectors/tokens.js';
 
 describe('Generic Pack: Tokens Detector', () => {
   it('should detect OpenAI sk-proj format', () => {
-    const text = 'Here is my key: sk-proj-1234567890abcdef1234567890abcdef';
+    const text = 'Here is my key: sk-proj-aB3cD4eF5gH6iJ7kL8mN9oP0qR1sT2uV';
     const findings = tokensDetector.detect(text);
     
     expect(findings).toHaveLength(1);
     expect(findings[0].detectorId).toBe('openai-api-key');
     expect(findings[0].severity).toBe('critical');
-    expect(findings[0].redactedPreview).toBe('sk-proj-********cdef');
+    expect(findings[0].redactedPreview).toBe('sk-proj-********T2uV');
   });
 
   it('should detect Anthropic sk-ant format', () => {
-    const text = 'sk-ant-1234567890abcdef1234567890abcdef';
+    const text = 'sk-ant-Z9yX8wV7uT6sR5qP4oN3mJ2kL1hG0fE';
     const findings = tokensDetector.detect(text);
     
     expect(findings).toHaveLength(1);
@@ -21,7 +21,8 @@ describe('Generic Pack: Tokens Detector', () => {
   });
 
   it('should detect GitHub PAT format', () => {
-    const text = 'Use this ghp_ABCdefGHIjklMNOpqrSTUvwxYZ0123456789';
+    // 36 character string
+    const text = 'Use this ghp_8uF3hN9rL2kP5qW4xT7mJ1cV6bZ9nQ3yX5w0';
     const findings = tokensDetector.detect(text);
     
     expect(findings).toHaveLength(1);

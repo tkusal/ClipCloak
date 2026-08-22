@@ -33,7 +33,7 @@ describe('Claude Code Hook: handlePreToolUse', () => {
     vi.mocked(fs.existsSync).mockReturnValue(true);
     vi.mocked(fs.statSync).mockReturnValue({ size: 1024 } as unknown as fs.Stats);
     // Simulate an AWS key which is high/critical severity (using a generic regex match if possible, or JWT)
-    vi.mocked(fs.readFileSync).mockReturnValue('Here is my key: AKIAIOSFODNN7EXAMPLE');
+    vi.mocked(fs.readFileSync).mockReturnValue('Here is my key: AKIAYQ3Q4ZQ4O5Z6V7W8');
     
     const result = handlePreToolUse({ toolName: 'readFile', toolArgs: { path: '.env' } }, mockCwd);
     expect(result.status).toBe('BLOCK');

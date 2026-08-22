@@ -57,11 +57,12 @@ describe('CLI: scanner utils', () => {
       expect(result.findings).toBeDefined();
     });
 
-    it('should fail fast on read error', () => {
+    it('should fail gracefully on read error', () => {
       vi.mocked(fs.statSync).mockImplementation(() => { throw new Error('Cannot stat'); });
-      scanFile('test.txt', []);
-      expect(errorSpy).toHaveBeenCalled();
-      expect(exitSpy).toHaveBeenCalledWith(2);
+      const result = scanFile('test.txt', []);
+      expect(warnSpy).toHaveBeenCalled();
+      expect(exitSpy).not.toHaveBeenCalled();
+      expect(result.findings).toHaveLength(0);
     });
   });
 });
