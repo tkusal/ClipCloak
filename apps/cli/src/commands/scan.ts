@@ -142,22 +142,30 @@ export async function runScan(target: string | undefined, options: ScanOptions) 
     console.log(JSON.stringify(sarif, null, 2));
   } else {
     // Text output
+    const { i18n } = await import('@clipcloak/core');
+    const t = {
+      file: { en: 'File:', pt: 'Arquivo:' },
+      confidence: { en: 'confidence:', pt: 'confiança:' },
+      found: { en: '❌ Found {0} potential secret(s).', pt: '❌ Encontrado {0} potencial(is) segredo(s).' },
+      clean: { en: '✅ No secrets found.', pt: '✅ Nenhum segredo encontrado.' }
+    };
+    
     let total = 0;
     for (const result of allFindings) {
       if (result.findings.length > 0) {
-        console.log(`\n🛡️  File: ${result.file}`);
+        console.log(`\n🛡️  ${i18n.get('file', t)} ${result.file}`);
         for (const f of result.findings) {
           total++;
-          console.log(`  - [${f.severity.toUpperCase()}] ${f.detectorId}: ${f.redactedPreview} (confidence: ${f.confidence})`);
+          console.log(`  - [${f.severity.toUpperCase()}] ${f.detectorId}: ${f.redactedPreview} (${i18n.get('confidence', t)} ${f.confidence})`);
         }
       }
     }
     
     if (total > 0) {
-      console.log(`\n❌ Found ${total} potential secret(s).`);
+      console.log(`\n${i18n.get('found', t, total.toString())}`);
       process.exit(1);
     } else {
-      console.log('✅ No secrets found.');
+      console.log(i18n.get('clean', t));
       process.exit(0);
     }
   }

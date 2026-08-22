@@ -1,11 +1,27 @@
 import { app, clipboard, Notification, Tray, Menu, globalShortcut } from 'electron';
 import path from 'path';
-import { detect } from '@clipcloak/core';
+import { detect, i18n } from '@clipcloak/core';
 import genericPack from '@clipcloak/pack-generic';
 import brPack from '@clipcloak/pack-br';
 import euPack from '@clipcloak/pack-eu';
 
 const ALL_PACKS = [genericPack, brPack, euPack];
+
+const t = {
+  alertTitle: { en: 'ClipCloak Alert', pt: 'Alerta ClipCloak' },
+  alertBody: { 
+    en: 'Sensitive data copied: {0}/{1} ({2})\nWe recommend not pasting this in untrusted apps.',
+    pt: 'Dado sensível copiado: {0}/{1} ({2})\nRecomendamos não colar isso em apps não confiáveis.'
+  },
+  btnClear: { en: 'Clear', pt: 'Limpar' },
+  btnRedact: { en: 'Redact', pt: 'Censurar' },
+  logCleared: { en: '[ClipCloak] User cleared the clipboard.', pt: '[ClipCloak] Usuário limpou a área de transferência.' },
+  logRedacted: { en: '[ClipCloak] User redacted the clipboard content.', pt: '[ClipCloak] Usuário censurou a área de transferência.' },
+  safePasteInvoked: { en: '[ClipCloak] Safe Paste invoked. Clipboard was redacted.', pt: '[ClipCloak] Safe Paste acionado. Área de transferência censurada.' },
+  safePasteNotif: { en: 'Clipboard safely redacted. You can now press Ctrl+V to paste.', pt: 'Censurado com segurança. Você já pode pressionar Ctrl+V para colar.' },
+  safePasteNoSecrets: { en: '[ClipCloak] Safe Paste invoked. No secrets found.', pt: '[ClipCloak] Safe Paste acionado. Nenhum segredo encontrado.' },
+  desktopRunning: { en: '[ClipCloak] Desktop Alpha is running and monitoring clipboard...', pt: '[ClipCloak] Desktop Alpha rodando e monitorando área de transferência...' },
+};
 
 let tray: Tray | null = null;
 let lastClipboardText = '';
@@ -26,27 +42,28 @@ function checkClipboard() {
         if (current.severity === 'high' && prev.severity !== 'critical') return current;
         return prev;
       }, findings[0]);
+
       console.log(`\n[ClipCloak Desktop] Secret Copied: ${worst.packId}/${worst.detectorId}`);
 
       if (Notification.isSupported()) {
         const notif = new Notification({
-          title: 'ClipCloak Alert',
-          body: `Sensitive data copied: ${worst.packId}/${worst.detectorId} (${worst.severity.toUpperCase()})\nWe recommend not pasting this in untrusted apps.`,
+          title: i18n.get('alertTitle', t),
+          body: i18n.get('alertBody', t, worst.packId, worst.detectorId, worst.severity.toUpperCase()),
           actions: [
-            { type: 'button', text: 'Clear' },
-            { type: 'button', text: 'Redact' }
+            { type: 'button', text: i18n.get('btnClear', t) },
+            { type: 'button', text: i18n.get('btnRedact', t) }
           ]
         });
         
         notif.on('action', (event, index) => {
           if (index === 0) { // Clear
             clipboard.writeText('');
-            console.log('[ClipCloak] User cleared the clipboard.');
+            console.log(i18n.get('logCleared', t));
           } else if (index === 1) { // Redact
             import('@clipcloak/core').then(({ applyRedaction }) => {
               const safeText = applyRedaction(text, findings);
               clipboard.writeText(safeText);
-              console.log('[ClipCloak] User redacted the clipboard content.');
+              console.log(i18n.get('logRedacted', t));
             });
           }
         });
@@ -64,11 +81,6 @@ app.whenReady().then(() => {
     app.dock.hide(); // Hide from macOS dock
   }
 
-  // Tray icon
-  // For alpha, we use a default blank icon or a simple native image. 
-  // We'll skip the actual file and let Electron use a default if null, or just a small colored square?
-  // Electron requires a NativeImage or path. For simplicity we skip Tray in MVP or create a dummy NativeImage.
-  
   // Safe Paste Global Shortcut
   globalShortcut.register('CommandOrControl+Shift+V', () => {
     const text = clipboard.readText();
@@ -78,23 +90,20 @@ app.whenReady().then(() => {
         import('@clipcloak/core').then(({ applyRedaction }) => {
           const safeText = applyRedaction(text, findings);
           clipboard.writeText(safeText);
-          console.log('[ClipCloak] Safe Paste invoked. Clipboard was redacted.');
-          // We don't simulate the paste keystroke because of OS security limitations,
-          // but we notify the user that it's safe to paste normally now.
+          console.log(i18n.get('safePasteInvoked', t));
           if (Notification.isSupported()) {
-            new Notification({ title: 'ClipCloak', body: 'Clipboard safely redacted. You can now press Ctrl+V to paste.' }).show();
+            new Notification({ title: 'ClipCloak', body: i18n.get('safePasteNotif', t) }).show();
           }
         });
       } else {
-        // If it's already safe, maybe just notify?
-        console.log('[ClipCloak] Safe Paste invoked. No secrets found.');
+        console.log(i18n.get('safePasteNoSecrets', t));
       }
     }
   });
 
   // Start polling clipboard every 1 second
   setInterval(checkClipboard, 1000);
-  console.log('[ClipCloak] Desktop Alpha is running and monitoring clipboard...');
+  console.log(i18n.get('desktopRunning', t));
 });
 
 // Keep app running in background
