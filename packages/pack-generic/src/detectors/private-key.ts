@@ -1,5 +1,4 @@
 import type { Detector, DetectionContext } from '@clipcloak/core';
-import { createRedactedPreview } from '@clipcloak/core';
 
 export const privateKeyDetector: Detector = {
   id: 'private-key',

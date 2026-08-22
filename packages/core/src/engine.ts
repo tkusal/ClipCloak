@@ -25,11 +25,11 @@ export function detect(
             packId: pack.id,
           });
         }
-      } catch (err: any) {
+      } catch (err) {
         errors.push({
           packId: pack.id,
           detectorId: detector.id,
-          errorMessage: err.message || String(err),
+          errorMessage: err instanceof Error ? err.message : String(err),
         });
       }
     }

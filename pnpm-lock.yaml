@@ -47,6 +47,24 @@ importers:
       commander:
         specifier: ^12.0.0
         version: 12.1.0
+      ignore:
+        specifier: ^7.0.6
+        version: 7.0.6
+
+  integrations/claude-code:
+    dependencies:
+      '@clipcloak/core':
+        specifier: workspace:*
+        version: link:../../packages/core
+      '@clipcloak/pack-br':
+        specifier: workspace:*
+        version: link:../../packages/pack-br
+      '@clipcloak/pack-eu':
+        specifier: workspace:*
+        version: link:../../packages/pack-eu
+      '@clipcloak/pack-generic':
+        specifier: workspace:*
+        version: link:../../packages/pack-generic
 
   packages/core: {}
 
@@ -727,6 +745,10 @@ packages:
 
   ignore@5.3.2:
     resolution: {integrity: sha512-hsBTNUqQTDwkWtcdYI2i06Y/nUBEsNEDJKjWdigLvegy8kDuJAS8uRlpkkcQpyEXL0Z/pjDy5HBmMjRCJ2gq+g==}
+    engines: {node: '>= 4'}
+
+  ignore@7.0.6:
+    resolution: {integrity: sha512-BAg6QkE8W+TuQLrrw0Ugr7HegXduRuuj8/ti2kSOc+jz1dmx8/WNcjr6XGnq5YpDWxFwwaavqD0+jIUOKelTsw==}
     engines: {node: '>= 4'}
 
   import-fresh@3.3.1:
@@ -1776,6 +1798,8 @@ snapshots:
   human-signals@5.0.0: {}
 
   ignore@5.3.2: {}
+
+  ignore@7.0.6: {}
 
   import-fresh@3.3.1:
     dependencies:

@@ -4,14 +4,14 @@ import { getIgnoreFilter, walkDir } from '../utils/ignore.js';
 import { getPacks, scanFile, scanText } from '../utils/scanner.js';
 import type { Finding } from '@clipcloak/core';
 
-export async function runScan(target: string | undefined, options: any) {
+export async function runScan(target: string | undefined, options: Record<string, any>) {
   const cwd = process.cwd();
   const ig = getIgnoreFilter(cwd);
   
   const packNames = options.packs ? options.packs.split(',') : undefined;
   const packs = getPacks(packNames);
   
-  let allFindings: { file: string; findings: Finding[] }[] = [];
+  const allFindings: { file: string; findings: Finding[] }[] = [];
 
   // Handle stdin
   if (options.stdin) {

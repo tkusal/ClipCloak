@@ -2,7 +2,7 @@ import { detect } from '@clipcloak/core';
 import genericPack from '@clipcloak/pack-generic';
 import brPack from '@clipcloak/pack-br';
 import euPack from '@clipcloak/pack-eu';
-import type { DetectorPack, Finding, DetectOptions, DetectResult } from '@clipcloak/core';
+import type { DetectorPack, DetectOptions, DetectResult } from '@clipcloak/core';
 import fs from 'node:fs';
 
 const ALL_PACKS: Record<string, DetectorPack> = {
@@ -47,8 +47,8 @@ export function scanFile(filepath: string, packs: DetectorPack[]): DetectResult 
 
     const content = fs.readFileSync(filepath, 'utf8');
     return scanText(content, filepath, packs);
-  } catch (err: any) {
-    console.error(`[ERROR] Failed to read ${filepath}: ${err.message}`);
+  } catch (err) {
+    console.error(`[ERROR] Failed to read ${filepath}: ${err instanceof Error ? err.message : String(err)}`);
     process.exit(2);
   }
 }

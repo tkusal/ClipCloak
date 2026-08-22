@@ -3,7 +3,7 @@ import { resolveOverlaps } from '../src/overlap.js';
 import type { Finding } from '../src/types.js';
 
 describe('Core Overlap Resolution', () => {
-  const createMockFinding = (start: number, end: number, severity: any = 'low', confidence: number = 0.5): Finding => ({
+  const createMockFinding = (start: number, end: number, severity: Finding['severity'] = 'low', confidence: number = 0.5): Finding => ({
     detectorId: 'test',
     packId: 'test',
     category: 'secret',

@@ -4,12 +4,12 @@ import { detect } from '@clipcloak/core';
 import genericPack from '@clipcloak/pack-generic';
 import brPack from '@clipcloak/pack-br';
 import euPack from '@clipcloak/pack-eu';
-import type { DetectorPack, Finding } from '@clipcloak/core';
+import type { DetectorPack } from '@clipcloak/core';
 
 // Claude Code Hook Types (Conceptual based on the official spec)
 export interface PreToolUseEvent {
   toolName: string;
-  toolArgs: Record<string, any>;
+  toolArgs: Record<string, unknown>;
 }
 
 export interface HookDecision {
@@ -54,14 +54,14 @@ export function handlePreToolUse(event: PreToolUseEvent, cwd: string = process.c
     const content = fs.readFileSync(fullPath, 'utf8');
     
     // Scan using the core engine
-    const { findings, errors } = detect(content, ALL_PACKS, {
+    const { findings } = detect(content, ALL_PACKS, {
       context: { filename: targetFile },
       minSeverity: 'high', // We only block for High or Critical to avoid interrupting vibe coding too much
     });
 
     if (findings.length > 0) {
       // Sort findings by severity so we highlight the worst one
-      const worstFinding = [...findings].sort((a, b) => 
+      const worstFinding = [...findings].sort((a, _b) => 
         a.severity === 'critical' ? -1 : 1
       )[0];
 
@@ -85,7 +85,7 @@ The sensitive value was not displayed to protect your credentials.`;
 
     return { status: 'ALLOW' };
 
-  } catch (err: any) {
+  } catch (err) {
     // Failsafe: if the scanner crashes, we allow the read to not break the user's flow
     // In a strict mode, we might want to BLOCK here.
     return { status: 'ALLOW' };

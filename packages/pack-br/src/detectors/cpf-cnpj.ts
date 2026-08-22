@@ -1,5 +1,4 @@
 import type { Detector, DetectionContext } from '@clipcloak/core';
-import { createRedactedPreview } from '@clipcloak/core';
 
 function validateCPF(cpf: string): boolean {
   if (/^(\d)\1{10}$/.test(cpf)) return false; // Reject repeated digits (e.g. 11111111111)

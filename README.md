@@ -42,18 +42,35 @@ The project is built as a modular monorepo using TypeScript and `pnpm workspaces
 - `apps/cli`: Command Line Interface for on-demand scanning.
 - `integrations/claude-code`: Native hook for Claude Code to block sensitive file reads.
 
-### How to Install & Use
-*(CLI MVP in development)*
-```bash
-# Scan a specific file
-clipcloak scan .env
+### How to Install, Use & Test Locally
+Currently, ClipCloak is in its MVP phase and not yet published to npm. To test it locally:
 
-# Scan a directory
-clipcloak scan src/
+1. **Clone and Install:**
+   ```bash
+   git clone https://github.com/your-username/clipcloak.git
+   cd clipcloak
+   pnpm install
+   pnpm run build
+   ```
 
-# Scan staged files before a commit
-clipcloak scan --staged
-```
+2. **Test the CLI (Local execution):**
+   You can run the CLI directly from the source using `node`:
+   ```bash
+   node apps/cli/dist/index.js scan .env
+   node apps/cli/dist/index.js scan src/
+   ```
+
+3. **Run Unit Tests:**
+   ```bash
+   pnpm run test
+   ```
+
+### Next Steps (Post-MVP Roadmap)
+- [ ] **Publish to npm:** Publish `@clipcloak/cli` and core packages to npm registry.
+- [ ] **Desktop App / Clipboard Monitor:** Build a Rust (Tauri) or Electron background app to monitor the OS clipboard and warn the user before pasting into a browser.
+- [ ] **IDE Extensions:** Create VSCode and JetBrains extensions to provide real-time alerts.
+- [ ] **Claude Code Integration Release:** Finalize and test the `claude-code` integration hook.
+- [ ] **Expanded Detectors:** Add more regional packs (e.g., UK, US-specific PII) and more generic token formats.
 
 ### Contributing
 We welcome contributions! Please see our [CONTRIBUTING.md](./CONTRIBUTING.md) for details.
@@ -99,18 +116,35 @@ O projeto é construído como um monorepo modular usando TypeScript e `pnpm work
 - `apps/cli`: CLI para escaneamento sob demanda.
 - `integrations/claude-code`: Hook nativo para o Claude Code bloquear a leitura de arquivos sensíveis.
 
-### Como Instalar e Usar
-*(MVP da CLI em desenvolvimento)*
-```bash
-# Escanear um arquivo específico
-clipcloak scan .env
+### Como Instalar, Usar e Testar Localmente
+Atualmente, o ClipCloak está em fase MVP e ainda não foi publicado no npm. Para testá-lo localmente:
 
-# Escanear um diretório
-clipcloak scan src/
+1. **Clonar e Instalar:**
+   ```bash
+   git clone https://github.com/your-username/clipcloak.git
+   cd clipcloak
+   pnpm install
+   pnpm run build
+   ```
 
-# Escanear arquivos staged antes do commit
-clipcloak scan --staged
-```
+2. **Testar a CLI (Execução Local):**
+   Você pode rodar a CLI diretamente da pasta compilada usando o `node`:
+   ```bash
+   node apps/cli/dist/index.js scan .env
+   node apps/cli/dist/index.js scan src/
+   ```
+
+3. **Rodar os Testes Unitários:**
+   ```bash
+   pnpm run test
+   ```
+
+### Próximas Etapas (Roadmap Pós-MVP)
+- [ ] **Publicar no npm:** Publicar `@clipcloak/cli` e os pacotes core no registro do npm.
+- [ ] **App Desktop / Monitor de Área de Transferência:** Criar um app em Rust (Tauri) ou Electron para monitorar o clipboard do sistema e avisar o usuário antes de colar em um navegador.
+- [ ] **Extensões de IDE:** Criar extensões para VSCode e JetBrains para alertas em tempo real.
+- [ ] **Release da Integração com Claude Code:** Finalizar e testar o hook de integração com o `claude-code`.
+- [ ] **Expandir Detectores:** Adicionar mais pacotes regionais (ex: PII do Reino Unido, EUA) e mais formatos de tokens genéricos.
 
 ### Contribuindo
 Aceitamos contribuições! Veja nosso [CONTRIBUTING.md](./CONTRIBUTING.md) para detalhes.

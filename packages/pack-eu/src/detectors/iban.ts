@@ -1,5 +1,4 @@
 import type { Detector, DetectionContext } from '@clipcloak/core';
-import { createRedactedPreview } from '@clipcloak/core';
 
 // MOD-97 algorithm for IBAN validation (ISO 13616)
 function isValidIban(iban: string): boolean {

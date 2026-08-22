@@ -1,20 +1,11 @@
-import type { Detector, DetectionContext } from '@clipcloak/core';
+import type { Detector, DetectionContext, Finding } from '@clipcloak/core';
 import { createRedactedPreview } from '@clipcloak/core';
 
 export const tokensDetector: Detector = {
   id: 'api-tokens',
   category: 'credential',
   detect(text: string, _context?: DetectionContext) {
-    const findings: any[] = [];
-    
-    // OpenAI: sk-proj-... or sk-...
-    // Anthropic: sk-ant-...
-    // GitHub: ghp_...
-    const patterns = [
-      { id: 'openai-api-key', regex: /\b(sk-[a-zA-Z0-9]{20,T?)(?:\s|$|[^a-zA-Z0-9\-])|\b(sk-proj-[a-zA-Z0-9\-_]{20,})\b/g, severity: 'critical', confidence: 0.95 },
-      { id: 'anthropic-api-key', regex: /\b(sk-ant-api03-[a-zA-Z0-9\-_]{80,})\b/g, severity: 'critical', confidence: 0.99 },
-      { id: 'github-pat', regex: /\b(gh[pousr]_[a-zA-Z0-9]{36})\b/g, severity: 'critical', confidence: 0.99 },
-    ] as const;
+    const findings: Finding[] = [];
 
     // Better regex for OpenAI (sk-proj... and normal sk-...)
     const openaiRegex = /\bsk-(?!ant-)(?:proj-)?[A-Za-z0-9\-_]{20,}\b/g;
