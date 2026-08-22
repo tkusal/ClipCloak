@@ -6,6 +6,8 @@ import { privateKeyDetector } from './detectors/private-key.js';
 import { connectionStringDetector } from './detectors/connection-string.js';
 import { emailDetector, ipv4Detector } from './detectors/network.js';
 import { creditCardDetector } from './detectors/credit-card.js';
+import { githubDetector } from './detectors/github.js';
+import { stripeDetector } from './detectors/stripe.js';
 
 export const genericPack: DetectorPack = {
   id: 'generic',
@@ -19,6 +21,8 @@ export const genericPack: DetectorPack = {
     emailDetector,
     ipv4Detector,
     creditCardDetector,
+    githubDetector,
+    stripeDetector,
   ],
 };
 

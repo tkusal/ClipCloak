@@ -93,7 +93,7 @@ function checkClipboard() {
 
 app.whenReady().then(() => {
   if (process.platform === 'darwin') {
-    app.dock.hide(); // Hide from macOS dock
+    app.dock?.hide(); // Hide from macOS dock
   }
 
   // Safe Paste Global Shortcut

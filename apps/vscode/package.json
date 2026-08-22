@@ -1,0 +1,38 @@
+{
+  "name": "clipcloak-vscode",
+  "displayName": "ClipCloak",
+  "version": "0.2.0",
+  "description": "ClipCloak VS Code Extension - Find and hide secrets locally.",
+  "publisher": "tkusal",
+  "engines": {
+    "vscode": "^1.80.0"
+  },
+  "categories": ["Linters", "Security"],
+  "main": "./dist/extension.js",
+  "activationEvents": [
+    "onStartupFinished"
+  ],
+  "contributes": {
+    "commands": [
+      {
+        "command": "clipcloak.scanFile",
+        "title": "ClipCloak: Scan File for Secrets"
+      }
+    ]
+  },
+  "scripts": {
+    "build": "tsc -b",
+    "watch": "tsc -b -w",
+    "vscode:prepublish": "pnpm build"
+  },
+  "dependencies": {
+    "@clipcloak/core": "workspace:*",
+    "@clipcloak/pack-generic": "workspace:*",
+    "@clipcloak/pack-br": "workspace:*",
+    "@clipcloak/pack-eu": "workspace:*"
+  },
+  "devDependencies": {
+    "@types/vscode": "^1.80.0",
+    "typescript": "^5.4.5"
+  }
+}
