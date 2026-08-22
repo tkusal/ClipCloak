@@ -26,7 +26,7 @@ Examples of unacceptable behavior by participants include:
 - Other conduct which could reasonably be considered inappropriate in a professional setting.
 
 ### Enforcement
-Instances of abusive, harassing, or otherwise unacceptable behavior may be reported by contacting the project team at [clipcloak@example.com]. All complaints will be reviewed and investigated and will result in a response that is deemed necessary and appropriate to the circumstances. The project team is obligated to maintain confidentiality with regard to the reporter of an incident.
+Instances of abusive, harassing, or otherwise unacceptable behavior may be reported to the repository maintainers via GitHub. If the issue is sensitive, you may reach out directly to the maintainers through their public social profiles linked on GitHub. All complaints will be reviewed and investigated and will result in a response that is deemed necessary and appropriate to the circumstances. The project team is obligated to maintain confidentiality with regard to the reporter of an incident.
 
 ### Attribution
 This Code of Conduct is adapted from the [Contributor Covenant](https://www.contributor-covenant.org), version 1.4.
@@ -55,7 +55,7 @@ Exemplos de comportamento inaceitável pelos participantes incluem:
 - Outras condutas que poderiam razoavelmente ser consideradas inadequadas em um ambiente profissional.
 
 ### Aplicação
-Casos de comportamento abusivo, de assédio ou de outra forma inaceitável podem ser relatados entrando em contato com a equipe do projeto em [clipcloak@example.com]. Todas as reclamações serão revisadas e investigadas, e resultarão em uma resposta considerada necessária e apropriada às circunstâncias. A equipe do projeto é obrigada a manter a confidencialidade em relação ao relator de um incidente.
+Casos de comportamento abusivo, de assédio ou de outra forma inaceitável podem ser relatados aos mantenedores do repositório através do GitHub. Caso o assunto seja sensível, você pode entrar em contato diretamente com os mantenedores por meio de seus perfis sociais públicos vinculados no GitHub. Todas as reclamações serão revisadas e investigadas, e resultarão em uma resposta considerada necessária e apropriada às circunstâncias. A equipe do projeto é obrigada a manter a confidencialidade em relação ao relator de um incidente.
 
 ### Atribuição
 Este Código de Conduta é adaptado do [Contributor Covenant](https://www.contributor-covenant.org), versão 1.4.
