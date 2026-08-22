@@ -1,11 +1,15 @@
-import type { Pack } from '@clipcloak/core';
+import type { DetectorPack } from '@clipcloak/core';
+import { cpfCnpjDetector } from './detectors/cpf-cnpj.js';
+import { pixDetector } from './detectors/pix.js';
+import { phoneBrDetector } from './detectors/phone.js';
 
-export const brPack: Pack = {
+export const brPack: DetectorPack = {
   id: 'br',
   name: 'Brazilian PII',
-  version: '0.1.0',
   detectors: [
-    // TODO: implement CPF, CNPJ, PIX
+    cpfCnpjDetector,
+    pixDetector,
+    phoneBrDetector,
   ],
 };
 
