@@ -30,14 +30,15 @@ describe('Core Engine', () => {
   };
 
   it('should find secrets using provided packs', () => {
-    const findings = detect('this is a secret message', [dummyPack]);
+    const { findings, errors } = detect('this is a secret message', [dummyPack]);
     expect(findings).toHaveLength(1);
     expect(findings[0].detectorId).toBe('dummy');
     expect(findings[0].packId).toBe('dummy-pack');
+    expect(errors).toHaveLength(0);
   });
 
   it('should apply confidence threshold', () => {
-    const findings = detect('this is a secret message', [dummyPack], { minConfidence: 0.95 });
+    const { findings } = detect('this is a secret message', [dummyPack], { minConfidence: 0.95 });
     expect(findings).toHaveLength(0); // the detector has 0.9
   });
 
@@ -55,8 +56,14 @@ describe('Core Engine', () => {
     };
 
     // It should survive the crash and still return findings from dummyDetector
-    const findings = detect('secret', [crashPack]);
+    const { findings, errors } = detect('secret', [crashPack]);
     expect(findings).toHaveLength(1);
     expect(findings[0].detectorId).toBe('dummy');
+    
+    // It should accumulate errors
+    expect(errors).toHaveLength(1);
+    expect(errors[0].detectorId).toBe('crash');
+    expect(errors[0].packId).toBe('crash-pack');
+    expect(errors[0].errorMessage).toBe('Regex too complex');
   });
 });

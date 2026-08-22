@@ -37,8 +37,20 @@ export interface DetectorPack {
   detectors: Detector[];
 }
 
+export interface DetectorError {
+  packId: string;
+  detectorId: string;
+  errorMessage: string;
+}
+
+export interface DetectResult {
+  findings: Finding[];
+  errors: DetectorError[];
+}
+
 export interface ScanResult {
   file: string;
   findings: Finding[];
+  errors: DetectorError[];
   error?: string;
 }

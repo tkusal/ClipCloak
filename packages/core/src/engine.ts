@@ -1,12 +1,13 @@
-import type { Finding, DetectorPack, DetectOptions } from './types.js';
+import type { Finding, DetectorPack, DetectOptions, DetectResult, DetectorError } from './types.js';
 import { resolveOverlaps } from './overlap.js';
 
 export function detect(
   text: string,
   packs: DetectorPack[],
   options: DetectOptions = {}
-): Finding[] {
+): DetectResult {
   let allFindings: Finding[] = [];
+  const errors: DetectorError[] = [];
 
   // Filter packs if requested
   const activePacks = options.packs
@@ -24,9 +25,12 @@ export function detect(
             packId: pack.id,
           });
         }
-      } catch (err) {
-        // We catch errors to prevent a single faulty regex/detector from crashing the whole engine
-        // In a real scenario we could log this safely (metadata only)
+      } catch (err: any) {
+        errors.push({
+          packId: pack.id,
+          detectorId: detector.id,
+          errorMessage: err.message || String(err),
+        });
       }
     }
   }
@@ -45,5 +49,5 @@ export function detect(
     allFindings = allFindings.filter(f => severityWeight[f.severity] >= minW);
   }
 
-  return allFindings;
+  return { findings: allFindings, errors };
 }
