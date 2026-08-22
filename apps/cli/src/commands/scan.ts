@@ -1,5 +1,6 @@
 import fs from 'node:fs';
 import path from 'node:path';
+import { execSync } from 'node:child_process';
 import { getIgnoreFilter, walkDir } from '../utils/ignore.js';
 import { getPacks, scanFile, scanText } from '../utils/scanner.js';
 import type { Finding, Severity } from '@clipcloak/core';
@@ -9,6 +10,7 @@ import { loadConfigFile } from '../utils/config.js';
 export interface ScanOptions {
   packs?: string;
   stdin?: boolean;
+  staged?: boolean;
   format?: string;
   severity?: Severity;
   confidence?: number;
@@ -44,7 +46,39 @@ export async function runScan(target: string | undefined, options: ScanOptions) 
     if (findings.length > 0) {
       allFindings.push({ file: 'stdin', findings });
     }
-  } 
+  }
+  // Handle staged files
+  else if (options.staged) {
+    try {
+      const gitOutput = execSync('git diff --cached --name-only --diff-filter=ACMR').toString();
+      const files = gitOutput.split('\n').map(s => s.trim()).filter(Boolean);
+      for (const file of files) {
+        const fullPath = path.resolve(cwd, file);
+        if (fs.existsSync(fullPath)) {
+          const relPath = path.relative(cwd, fullPath);
+          if (!ig.ignores(relPath)) {
+            // Read exact staged content using git show :<file>
+            try {
+              const content = execSync(`git show :${file}`, { stdio: ['pipe', 'pipe', 'ignore'] }).toString();
+              const { findings } = scanText(content, fullPath, packs, detectOptions);
+              if (findings.length > 0) {
+                allFindings.push({ file: fullPath, findings });
+              }
+            } catch (err) {
+              // Fallback to normal file read if git show fails (e.g., deleted file or renamed)
+              const { findings } = scanFile(fullPath, packs, detectOptions);
+              if (findings.length > 0) {
+                allFindings.push({ file: fullPath, findings });
+              }
+            }
+          }
+        }
+      }
+    } catch (err) {
+      console.error('[ERROR] Failed to get staged files. Are you in a git repository?');
+      process.exit(2);
+    }
+  }
   // Handle file or directory
   else if (target) {
     const fullPath = path.resolve(cwd, target);
@@ -81,6 +115,31 @@ export async function runScan(target: string | undefined, options: ScanOptions) 
   // Print results
   if (options.format === 'json') {
     console.log(JSON.stringify(allFindings, null, 2));
+  } else if (options.format === 'sarif') {
+    const sarif = {
+      version: '2.1.0',
+      $schema: 'https://raw.githubusercontent.com/oasis-tcs/sarif-spec/master/Schemata/sarif-schema-2.1.0.json',
+      runs: [{
+        tool: {
+          driver: {
+            name: 'ClipCloak',
+            version: '0.2.0',
+            informationUri: 'https://github.com/tkusal/ClipCloak'
+          }
+        },
+        results: allFindings.flatMap(r => r.findings.map(f => ({
+          ruleId: f.detectorId,
+          message: { text: f.reason },
+          locations: [{
+            physicalLocation: {
+              artifactLocation: { uri: r.file },
+              region: { charOffset: f.start, charLength: f.end - f.start }
+            }
+          }]
+        })))
+      }]
+    };
+    console.log(JSON.stringify(sarif, null, 2));
   } else {
     // Text output
     let total = 0;
