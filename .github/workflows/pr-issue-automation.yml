@@ -1,0 +1,78 @@
+name: PR Issue Automation
+
+on:
+  pull_request:
+    types: [opened, edited, closed, reopened]
+  pull_request_review:
+    types: [submitted]
+
+jobs:
+  manage-issue:
+    runs-on: ubuntu-latest
+    permissions:
+      issues: write
+      pull-requests: write
+    steps:
+      - name: Parse Issue from PR and update status
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const prBody = context.payload.pull_request.body || '';
+            // Regex to find keywords like "Fixes #123", "Resolves #123", "Closes #123"
+            const regex = /(?:fix|fixes|fixed|close|closes|closed|resolve|resolves|resolved)\s+#(\d+)/ig;
+            let match;
+            const issues = [];
+            
+            while ((match = regex.exec(prBody)) !== null) {
+              issues.push(parseInt(match[1]));
+            }
+            
+            if (issues.length === 0) {
+              console.log('No linked issues found in PR description.');
+              return;
+            }
+            
+            for (const issueNum of issues) {
+              if (context.payload.action === 'opened' || context.payload.action === 'reopened') {
+                await github.rest.issues.createComment({
+                  owner: context.repo.owner,
+                  repo: context.repo.repo,
+                  issue_number: issueNum,
+                  body: `🚀 A pull request (#${context.payload.pull_request.number}) has been opened for this issue and is currently in review.`
+                });
+                try {
+                  await github.rest.issues.addLabels({
+                    owner: context.repo.owner,
+                    repo: context.repo.repo,
+                    issue_number: issueNum,
+                    labels: ['in-review']
+                  });
+                } catch(e) {
+                  console.log('Could not add label, it might not exist yet.');
+                }
+              } 
+              else if (context.payload.action === 'closed' && context.payload.pull_request.merged) {
+                await github.rest.issues.createComment({
+                  owner: context.repo.owner,
+                  repo: context.repo.repo,
+                  issue_number: issueNum,
+                  body: `✅ The pull request (#${context.payload.pull_request.number}) has been merged! This issue will now be closed.`
+                });
+                try {
+                  await github.rest.issues.addLabels({
+                    owner: context.repo.owner,
+                    repo: context.repo.repo,
+                    issue_number: issueNum,
+                    labels: ['resolved']
+                  });
+                } catch(e) {}
+              }
+              else if (context.eventName === 'pull_request_review' && context.payload.review.state === 'approved') {
+                 await github.rest.issues.createComment({
+                  owner: context.repo.owner,
+                  repo: context.repo.repo,
+                  issue_number: issueNum,
+                  body: `🎉 The pull request (#${context.payload.pull_request.number}) related to this issue has been approved and is ready to be merged!`
+                });
+              }
+            }
