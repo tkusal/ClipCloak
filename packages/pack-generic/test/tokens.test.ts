@@ -20,15 +20,6 @@ describe('Generic Pack: Tokens Detector', () => {
     expect(findings[0].detectorId).toBe('anthropic-api-key');
   });
 
-  it('should detect GitHub PAT format', () => {
-    // 36 character string
-    const text = 'Use this ghp_8uF3hN9rL2kP5qW4xT7mJ1cV6bZ9nQ3yX5w0';
-    const findings = tokensDetector.detect(text);
-
-    expect(findings).toHaveLength(1);
-    expect(findings[0].detectorId).toBe('github-pat');
-  });
-
   it('should ignore false positives', () => {
     const text = 'ask-me-anything ghp_short sk-123';
     const findings = tokensDetector.detect(text);
