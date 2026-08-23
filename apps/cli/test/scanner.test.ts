@@ -39,14 +39,14 @@ describe('CLI: scanner utils', () => {
 
   describe('scanFile', () => {
     it('should skip file if larger than MAX_FILE_SIZE', () => {
-      vi.mocked(fs.statSync).mockReturnValue({ size: MAX_FILE_SIZE + 100 } as unknown as fs.Stats);
+      vi.mocked(fs.statSync).mockReturnValue({ size: MAX_FILE_SIZE + 100, isFile: () => true } as unknown as fs.Stats);
       const result = scanFile('large.txt', []);
       expect(result.findings).toHaveLength(0);
       expect(warnSpy).toHaveBeenCalledWith(expect.stringContaining('too large'));
     });
 
     it('should scan normal file', () => {
-      vi.mocked(fs.statSync).mockReturnValue({ size: 1024 } as unknown as fs.Stats);
+      vi.mocked(fs.statSync).mockReturnValue({ size: 1024, isFile: () => true } as unknown as fs.Stats);
       vi.mocked(fs.readFileSync).mockReturnValue('normal text');
       const packs = getPacks();
       const result = scanFile('test.txt', packs);

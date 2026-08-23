@@ -109,6 +109,9 @@ export function scanFile(
 ): DetectResult {
   try {
     const stat = fs.statSync(filepath);
+    if (!stat.isFile()) {
+      return { findings: [], errors: [] };
+    }
     if (stat.size > MAX_FILE_SIZE) {
       console.warn(
         `[SKIP] File ${filepath} is too large (${(stat.size / 1024 / 1024).toFixed(2)} MB)`,

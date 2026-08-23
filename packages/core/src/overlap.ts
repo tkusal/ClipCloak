@@ -20,25 +20,28 @@ export function resolveOverlaps(findings: Finding[]): Finding[] {
   const resolved: Finding[] = [];
 
   for (const current of sorted) {
-    if (resolved.length === 0) {
-      resolved.push(current);
-      continue;
+    let keepCurrent = true;
+
+    while (resolved.length > 0) {
+      const previous = resolved[resolved.length - 1];
+
+      // Check for overlap
+      if (current.start < previous.end) {
+        if (shouldKeepCurrent(previous, current)) {
+          // Current is better, remove previous and check the one before it
+          resolved.pop();
+        } else {
+          // Previous is better, drop current
+          keepCurrent = false;
+          break;
+        }
+      } else {
+        // No overlap with the last resolved item, so no overlap with any prior items
+        break;
+      }
     }
 
-    const previous = resolved[resolved.length - 1];
-
-    // Check for overlap
-    if (current.start < previous.end) {
-      // Overlap detected. Decide which one to keep.
-      if (shouldKeepCurrent(previous, current)) {
-        // If current is better, we pop the previous and evaluate against the one before that
-        // (A robust overlap resolution would need a more complex sweep-line, but this works for basic nested cases)
-        resolved.pop();
-        resolved.push(current);
-      }
-      // If previous is better, we just ignore current
-    } else {
-      // No overlap
+    if (keepCurrent) {
       resolved.push(current);
     }
   }

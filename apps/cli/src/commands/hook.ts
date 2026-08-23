@@ -98,6 +98,10 @@ export async function runClaudeCodeHook() {
     }
 
     const stat = fs.statSync(fullPath);
+    if (!stat.isFile()) {
+      outputDecision('allow');
+      return;
+    }
     // Skip/Block very large files
     if (stat.size > 5 * 1024 * 1024) {
       if (mode === 'strict') {
