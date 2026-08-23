@@ -4,6 +4,9 @@ import { createRedactedPreview } from '@clipcloak/core';
 export const pixDetector: Detector = {
   id: 'pix-key',
   category: 'financial',
+  defaultSeverity: 'high',
+  defaultConfidence: 0.8,
+  description: 'Brazilian PIX payment keys',
   detect(text: string, context?: DetectionContext) {
     const findings = [];
 

@@ -81,6 +81,15 @@ Create a `.clipcloak.json` at the root of your project:
 }
 ```
 
+### Detection vs Blocking
+
+ClipCloak differentiates between finding a sensitive string and actively blocking a process (like a Git commit).
+
+- **`minSeverity`**: The threshold for ClipCloak to *report* a finding. A `low` severity item (like an email) will be found and shown to you.
+- **`blockMinSeverity` & `blockCategories`**: The threshold for ClipCloak to *block* the run (exit with code 1). By default, only `credential` and `secret` categories with `high` severity or above will cause a hard block.
+
+This design prevents false-positive fatigue. For example, a CPF (Brazilian ID) might be flagged as a `pii` finding, but it won't prevent your commit by default unless you configure `blockCategories` to include `"pii"`.
+
 ## 🤝 Contributing
 
 We welcome contributions from everyone! See our [Contributing Guide](CONTRIBUTING.md) to learn how to set up the monorepo, run tests, and add new detectors without leaking real secrets.

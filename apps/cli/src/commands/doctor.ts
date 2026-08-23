@@ -76,9 +76,20 @@ export async function runDoctor() {
       console.log(`📦 Pack: ${pack.id} (${pack.detectors.length} detectors)`);
     }
 
-    // Run synthetic test to confirm detectors work
-    const testSecret = 'AKIAJ2P33Y7WQ6U2G3A4';
-    const testText = `This is a test block containing a mock AWS key: ${testSecret}`;
+    const activePackIds = packs.map(p => p.id);
+    let testSecret = 'AKIAJ2P33Y7WQ6U2G3A4';
+    let testText = `This is a test block containing a mock AWS key: ${testSecret}`;
+    
+    if (!activePackIds.includes('generic')) {
+      if (activePackIds.includes('br')) {
+        testSecret = '41725350030';
+        testText = `This is a test block containing a mock CPF: ${testSecret}`;
+      } else if (activePackIds.includes('eu')) {
+        testSecret = 'GB82WEST12345698765432';
+        testText = `This is a test block containing a mock IBAN: ${testSecret}`;
+      }
+    }
+
     const { findings, errors } = scanText(testText, 'synthetic_test.txt', packs, {
       minSeverity: 'low',
       minConfidence: 0.1,

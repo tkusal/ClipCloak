@@ -1,14 +1,12 @@
 const fs = require('fs');
 const files = [
-  'packages/pack-generic/src/detectors/github.ts',
-  'packages/pack-generic/src/detectors/stripe.ts',
-  'packages/pack-generic/src/detectors/tokens.ts'
+  'packages/pack-br/src/detectors/cpf-cnpj.ts',
+  'packages/pack-br/src/detectors/pix.ts'
 ];
 
 const metadata = {
-  'github-token': { s: 'critical', c: 0.95, d: 'Matches GitHub Personal Access Tokens' },
-  'stripe-key': { s: 'critical', c: 0.95, d: 'Stripe secret and restricted keys' },
-  'api-tokens': { s: 'critical', c: 0.95, d: 'General high-entropy API tokens (Slack, NPM, Sendgrid, GCP)' }
+  'cpf-cnpj': { s: 'medium', c: 0.95, d: 'Brazilian CPF and CNPJ validated mathematically' },
+  'pix-key': { s: 'high', c: 0.8, d: 'Brazilian PIX payment keys' }
 };
 
 for (const file of files) {

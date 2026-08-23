@@ -21,6 +21,16 @@
   "publishConfig": {
     "access": "public"
   },
+  "author": "tkusal",
+  "license": "MIT",
+  "homepage": "https://github.com/tkusal/ClipCloak#readme",
+  "bugs": {
+    "url": "https://github.com/tkusal/ClipCloak/issues"
+  },
+  "keywords": ["security", "secrets", "scanner", "cli", "clipcloak"],
+  "engines": {
+    "node": ">=18.0.0"
+  },
   "files": [
     "dist"
   ],

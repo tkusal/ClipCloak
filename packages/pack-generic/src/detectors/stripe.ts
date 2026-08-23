@@ -5,6 +5,9 @@ import { isDummyString } from '../utils/entropy.js';
 export const stripeDetector: Detector = {
   id: 'stripe-key',
   category: 'credential',
+  defaultSeverity: 'critical',
+  defaultConfidence: 0.95,
+  description: 'Stripe secret and restricted keys',
   detect(text: string, _context?: DetectionContext) {
     // Matches Stripe live secret keys and restricted keys
     const regex = /\b([sr]k_live_[a-zA-Z0-9]{24,99})\b/g;

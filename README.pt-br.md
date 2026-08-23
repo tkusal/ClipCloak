@@ -81,6 +81,15 @@ Crie um arquivo `.clipcloak.json` na raiz do seu projeto:
 }
 ```
 
+### Detecção vs Bloqueio
+
+O ClipCloak diferencia entre encontrar uma string sensível e ativamente bloquear um processo (como um commit no Git).
+
+- **`minSeverity`**: O limite para o ClipCloak *reportar* um achado. Um item de severidade `low` (como um e-mail) será detectado e mostrado a você.
+- **`blockMinSeverity` & `blockCategories`**: O limite para o ClipCloak *bloquear* a execução (sair com código 1). Por padrão, apenas categorias `credential` e `secret` com severidade `high` ou superior causarão um bloqueio.
+
+Esse design evita a fadiga de falsos positivos. Por exemplo, um CPF pode ser sinalizado como `pii`, mas não impedirá seu commit por padrão, a menos que você configure `blockCategories` para incluir `"pii"`.
+
 ## 🤝 Contribuindo
 
 Acolhemos contribuições de todos! Veja nosso [Guia de Contribuição](CONTRIBUTING.md) para aprender como configurar o monorepo, rodar os testes e adicionar novos detectores sem vazar segredos reais acidentalmente.

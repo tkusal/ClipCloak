@@ -1,6 +1,6 @@
 # ClipCloak Privacy Principles
 
-ClipCloak was built from the ground up to guarantee developers that their source code, credentials, and clipboard values never leave their machine.
+ClipCloak is designed so that its scanning and redaction operations happen locally. ClipCloak itself does not transmit your source code, credentials, or clipboard contents to external services.
 
 ## Invariant Privacy Policies
 

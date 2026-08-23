@@ -8,14 +8,13 @@
     "build": "tsc -b",
     "test": "vitest run"
   },
+  "deprecated": "This package has been unified into @clipcloak/cli. Use 'clipcloak install claude-code' instead.",
+  "private": true,
   "dependencies": {
     "@clipcloak/core": "workspace:*",
     "@clipcloak/pack-generic": "workspace:*",
     "@clipcloak/pack-br": "workspace:*",
     "@clipcloak/pack-eu": "workspace:*"
-  },
-  "publishConfig": {
-    "access": "public"
   },
   "files": [
     "dist"

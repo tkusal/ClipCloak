@@ -5,6 +5,9 @@ import { isObviousDummyString, isSoftDummyString } from '../utils/entropy.js';
 export const tokensDetector: Detector = {
   id: 'api-tokens',
   category: 'credential',
+  defaultSeverity: 'critical',
+  defaultConfidence: 0.95,
+  description: 'General high-entropy API tokens (Slack, NPM, Sendgrid, GCP)',
   detect(text: string, _context?: DetectionContext) {
     const findings: Omit<Finding, 'packId'>[] = [];
 
