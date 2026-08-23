@@ -75,12 +75,12 @@ export async function runClaudeCodeHook() {
     }
 
     const cwd = process.cwd();
-    let pathsToScan: string[] = [];
+    const pathsToScan: string[] = [];
 
     if (toolName === 'Bash' || toolName === 'Grep') {
       const commandOrPattern = toolInput.command || toolInput.pattern || '';
       // Heuristic: extract anything that looks like a file path after standard read commands
-      const regex = /(?:cat|grep|head|tail|less|more|vi|vim|nano)\s+(?:-[a-zA-Z0-9]+\s+)*(['"]?)([a-zA-Z0-9_\-\.\/\\]+)\1/g;
+      const regex = /(?:cat|grep|head|tail|less|more|vi|vim|nano)\s+(?:-[a-zA-Z0-9]+\s+)*(['"]?)([a-zA-Z0-9_.\-/\\]+)\1/g;
       let match;
       while ((match = regex.exec(commandOrPattern)) !== null) {
         if (match[2] && !match[2].startsWith('-')) {
