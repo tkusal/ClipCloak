@@ -111,7 +111,7 @@ fi
         console.log('✅ Appended ClipCloak scan to existing git pre-commit hook.');
         console.log(`Hook location: ${preCommitPath}`);
         process.exit(0);
-      } catch (err: any) {
+      } catch (err: unknown) {
         console.error('❌ [ERROR] Failed to update git hook:', err.message);
         process.exit(1);
       }
@@ -122,7 +122,7 @@ fi
         console.log('✅ Installed git pre-commit hook successfully.');
         console.log(`Hook location: ${preCommitPath}`);
         process.exit(0);
-      } catch (err: any) {
+      } catch (err: unknown) {
         console.error('❌ [ERROR] Failed to write git hook:', err.message);
         process.exit(1);
       }
@@ -142,7 +142,7 @@ fi
       installClaudeHookInSettings(cwd);
       console.log('✅ Installed Claude Code integration successfully.');
       process.exit(0);
-    } catch (err: any) {
+    } catch (err: unknown) {
       console.error('❌ [ERROR] Failed to update .claude/settings.json:', err.message);
       process.exit(1);
     }

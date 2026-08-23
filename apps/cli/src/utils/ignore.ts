@@ -39,7 +39,7 @@ export function walkDir(dir: string, ig: ReturnType<typeof ignore>, cwd: string)
 
   try {
     list = fs.readdirSync(dir);
-  } catch (err: any) {
+  } catch (err: unknown) {
     if (err.code === 'EACCES' || err.code === 'EPERM') {
       console.warn(`[WARN] Permission denied: ${dir}`);
       return results;
@@ -67,7 +67,7 @@ export function walkDir(dir: string, ig: ReturnType<typeof ignore>, cwd: string)
       } else if (stat.isFile()) {
         results.push(fullPath);
       }
-    } catch (err: any) {
+    } catch (err: unknown) {
       if (err.code === 'EACCES' || err.code === 'EPERM' || err.code === 'ENOENT') {
         console.warn(`[WARN] Skipping unreadable file/directory: ${fullPath}`);
         continue;

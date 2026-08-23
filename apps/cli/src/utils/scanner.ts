@@ -88,7 +88,7 @@ export function scanBuffer(
 
     const content = buffer.toString('utf8');
     return scanText(content, filepath, packs, customOptions);
-  } catch (err: any) {
+  } catch (err: unknown) {
     const errMsg = err instanceof Error ? err.message : String(err);
     return {
       findings: [],
@@ -127,7 +127,7 @@ export function scanFile(
 
     const content = fs.readFileSync(filepath, 'utf8');
     return scanText(content, filepath, packs, customOptions);
-  } catch (err: any) {
+  } catch (err: unknown) {
     const errMsg = err instanceof Error ? err.message : String(err);
     const code = err.code || 'UNKNOWN';
     return {

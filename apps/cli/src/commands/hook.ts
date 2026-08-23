@@ -185,7 +185,7 @@ export async function runClaudeCodeHook() {
     }
 
     outputDecision('allow');
-  } catch (err: any) {
+  } catch (err: unknown) {
     if (mode === 'strict') {
       outputDecision('deny', `ClipCloak strict mode: Hook crash: ${err.message}`);
     } else {

@@ -40,7 +40,7 @@ export async function runScan(target: string | undefined, options: ScanOptions) 
   let config;
   try {
     config = resolveConfig(fileConfig, cliOptions);
-  } catch (err: any) {
+  } catch (err: unknown) {
     console.error(`❌ [ERROR] Config resolution failed: ${err.message}`);
     process.exit(2);
   }
@@ -50,7 +50,7 @@ export async function runScan(target: string | undefined, options: ScanOptions) 
   let packs;
   try {
     packs = getPacks(config.packs);
-  } catch (err: any) {
+  } catch (err: unknown) {
     console.error(`❌ [ERROR] Pack resolution failed: ${err.message}`);
     process.exit(2);
   }
@@ -74,7 +74,7 @@ export async function runScan(target: string | undefined, options: ScanOptions) 
       if (findings.length > 0) {
         allFindings.push({ file: 'stdin', findings });
       }
-    } catch (err: any) {
+    } catch (err: unknown) {
       allErrors.push({
         file: 'stdin',
         errors: [{ packId: 'core', detectorId: 'stdin-reader', errorMessage: err.message }],
@@ -119,7 +119,7 @@ export async function runScan(target: string | undefined, options: ScanOptions) 
           }
         }
       }
-    } catch (err: any) {
+    } catch (err: unknown) {
       console.error(`❌ [ERROR] Failed to scan staged files: ${err.message}`);
       process.exit(2);
     }
@@ -157,7 +157,7 @@ export async function runScan(target: string | undefined, options: ScanOptions) 
           }
         }
       }
-    } catch (err: any) {
+    } catch (err: unknown) {
       allErrors.push({
         file: fullPath,
         errors: [{ packId: 'core', detectorId: 'target-scanner', errorMessage: err.message }],

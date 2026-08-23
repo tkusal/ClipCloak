@@ -71,7 +71,7 @@ export async function runDoctor() {
       } else {
         console.log('ℹ️ No pre-commit hook installed.');
       }
-    } catch (err: any) {
+    } catch (err: unknown) {
       console.log(`⚠️ Failed to inspect Git hooks directory: ${err.message}`);
     }
   }
@@ -111,7 +111,7 @@ export async function runDoctor() {
         '❌ Synthetic scan failed to find the mock secret. Detectors might be disabled or misconfigured.',
       );
     }
-  } catch (err: any) {
+  } catch (err: unknown) {
     issuesFound = true;
     console.log(`❌ Failed to verify packs or execute synthetic run: ${err.message}`);
   }
