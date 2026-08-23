@@ -54,7 +54,7 @@ export async function runScan(target: string | undefined, options: ScanOptions) 
     process.exit(2);
   }
 
-  const allFindings: { file: string; findings: Finding[] }[] = [];
+  const allFindings: { file: string; findings: Finding[]; skippedReason?: string }[] = [];
   const allErrors: { file: string; errors: any[] }[] = [];
 
   const detectOptions = {
@@ -108,7 +108,7 @@ export async function runScan(target: string | undefined, options: ScanOptions) 
             }
           } catch (err) {
             // Fallback to normal file read if git show fails (e.g. untracked or deleted from staging index somehow)
-            const { findings, errors } = scanFile(fullPath, packs, detectOptions);
+            const { findings, errors, skippedReason } = scanFile(fullPath, packs, detectOptions);
             if (errors && errors.length > 0) {
               allErrors.push({ file: fullPath, errors });
             }
@@ -136,18 +136,18 @@ export async function runScan(target: string | undefined, options: ScanOptions) 
       if (stat.isDirectory()) {
         const files = walkDir(fullPath, ig, cwd);
         for (const file of files) {
-          const { findings, errors } = scanFile(file, packs, detectOptions);
+          const { findings, errors, skippedReason } = scanFile(file, packs, detectOptions);
           if (errors && errors.length > 0) {
             allErrors.push({ file, errors });
           }
-          if (findings.length > 0) {
-            allFindings.push({ file, findings });
+          if (findings.length > 0 || skippedReason) {
+            allFindings.push({ file: file, findings, skippedReason });
           }
         }
       } else {
         const relPath = path.relative(cwd, fullPath);
         if (!ig.ignores(relPath)) {
-          const { findings, errors } = scanFile(fullPath, packs, detectOptions);
+          const { findings, errors, skippedReason } = scanFile(fullPath, packs, detectOptions);
           if (errors && errors.length > 0) {
             allErrors.push({ file: fullPath, errors });
           }
@@ -203,7 +203,7 @@ export async function runScan(target: string | undefined, options: ScanOptions) 
           tool: {
             driver: {
               name: 'ClipCloak',
-              version: '0.2.0',
+              version: '1.0.0',
               informationUri: 'https://github.com/tkusal/ClipCloak',
             },
           },

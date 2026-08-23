@@ -71,17 +71,18 @@ export function scanBuffer(
 ): DetectResult {
   try {
     if (buffer.length > MAX_FILE_SIZE) {
-      console.warn(
-        `[SKIP] File ${filepath} is too large (${(buffer.length / 1024 / 1024).toFixed(2)} MB)`,
-      );
-      return { findings: [], errors: [] };
+      const reason = `File ${filepath} is too large (${(buffer.length / 1024 / 1024).toFixed(2)} MB)`;
+      console.warn(`[SKIP] ${reason}`);
+      return { findings: [], errors: [], skippedReason: reason };
     }
 
     // Binary check: search first 4KB for NUL byte
     const bytesToCheck = Math.min(buffer.length, 4096);
     for (let i = 0; i < bytesToCheck; i++) {
       if (buffer[i] === 0) {
-        return { findings: [], errors: [] };
+        const reason = 'Binary content detected';
+        console.warn(`[SKIP] Buffer ${filepath}: ${reason}`);
+        return { findings: [], errors: [], skippedReason: reason };
       }
     }
 
@@ -110,17 +111,18 @@ export function scanFile(
   try {
     const stat = fs.statSync(filepath);
     if (!stat.isFile()) {
-      return { findings: [], errors: [] };
+      return { findings: [], errors: [], skippedReason: 'Not a regular file' };
     }
     if (stat.size > MAX_FILE_SIZE) {
-      console.warn(
-        `[SKIP] File ${filepath} is too large (${(stat.size / 1024 / 1024).toFixed(2)} MB)`,
-      );
-      return { findings: [], errors: [] };
+      const reason = `File ${filepath} is too large (${(stat.size / 1024 / 1024).toFixed(2)} MB)`;
+      console.warn(`[SKIP] ${reason}`);
+      return { findings: [], errors: [], skippedReason: reason };
     }
 
     if (isBinaryFileSync(filepath)) {
-      return { findings: [], errors: [] };
+      const reason = 'Binary content detected';
+      console.warn(`[SKIP] File ${filepath}: ${reason}`);
+      return { findings: [], errors: [], skippedReason: reason };
     }
 
     const content = fs.readFileSync(filepath, 'utf8');

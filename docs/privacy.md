@@ -14,10 +14,10 @@ ClipCloak was built from the ground up to guarantee developers that their source
 - No central server exists to report statistics or errors.
 - What happens on your machine stays on your machine.
 
-### 3. No Plaintext Memory Retention
-- Secrets copied to the clipboard are hashed immediately using SHA-256 for state comparison.
-- Plaintext secrets are never stored to files, registry, databases, or local logs.
-- During CLI/agent scanning, values reside only in ephemeral V8 engine memory during the matching process and are discarded immediately.
+### 3. No Intentional Plaintext Persistence
+- Secrets copied to the clipboard are temporarily fingerprinted using SHA-256 to avoid redundant processing.
+- Plaintext secrets are never intentionally persisted to files, registry, databases, telemetry, or logs.
+- During scanning, sensitive values reside in the Node.js/V8 garbage-collected heap memory and are not explicitly zeroed out due to JavaScript's memory management model.
 
 ## Fully Auditable
 Because the codebase is open-source and modular, you can easily inspect that there are no third-party network requests:

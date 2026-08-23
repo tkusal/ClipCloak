@@ -1,6 +1,6 @@
 <div align="center">
   <h1>🛡️ ClipCloak</h1>
-  <p><strong>The absolute shield against secret leaks for developers and AI agents.</strong></p>
+  <p><strong>A robust shield to help prevent secret leaks for developers and AI agents.</strong></p>
 
   <p>
     <a href="https://github.com/tkusal/ClipCloak/actions"><img src="https://img.shields.io/github/actions/workflow/status/tkusal/ClipCloak/ci.yml?branch=main" alt="CI Status"></a>
@@ -14,19 +14,19 @@
 
 ---
 
-ClipCloak is an ultra-fast, offline, cross-platform ecosystem designed to detect and redact sensitive data (API keys, passwords, credentials, PII) *before* it leaves your machine. 
+ClipCloak is an ultra-fast, offline, cross-platform ecosystem designed to detect and block sensitive data (API keys, passwords, credentials, PII) *before* it leaves your machine. 
 
-Whether you're pushing code, pasting to untrusted apps, or letting an autonomous AI agent roam your filesystem, ClipCloak stands between your secrets and the outside world.
+Whether you're pushing code, pasting to untrusted apps, or letting an autonomous AI agent roam your filesystem, ClipCloak helps reduce the risk of exposing your secrets to the outside world.
 
 ## 🌟 Ecosystem
 
 ClipCloak is built on a highly modular engine and provides tools for every developer workflow:
 
 - **CLI (`@clipcloak/cli`)**: Scan repositories, use it in CI/CD, or hook it to Git.
-- **Git Hook**: Automatically prevent commits containing secrets (`clipcloak install git-hook`).
+- **Git Hook**: Prevent commits containing secrets (`clipcloak install git-hook`).
 - **Desktop Daemon**: A background Electron app that intercepts your operating system's clipboard, warning you and providing a "Safe Paste" shortcut (`Ctrl+Shift+V`) for instant redaction.
 - **VS Code Extension**: Highlights exposed secrets directly in your IDE as you type.
-- **AI Integration (`@clipcloak/claude-code`)**: Seamlessly hooks into Claude Code's MCP (Model Context Protocol) to redact secrets before the LLM reads them, ensuring you don't leak production keys to AI vendors.
+- **AI Integration**: Seamlessly hooks into Claude Code's PreToolUse commands to block file reading when secrets are detected, helping ensure you don't leak production keys to AI vendors.
 
 ## 🚀 Quick Start
 
@@ -55,7 +55,7 @@ Protect your filesystem when using Claude Code:
 ```bash
 npx @clipcloak/cli install claude-code
 ```
-*Your autonomous agents will now only see `[REDACTED_BY_CLIPCLOAK]` instead of your `.env` secrets.*
+*Your autonomous agents will now be blocked from reading files that contain real credentials.*
 
 ## 🧠 The Engine
 

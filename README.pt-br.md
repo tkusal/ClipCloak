@@ -1,6 +1,6 @@
 <div align="center">
   <h1>🛡️ ClipCloak</h1>
-  <p><strong>O escudo absoluto contra o vazamento de segredos para desenvolvedores e agentes de IA.</strong></p>
+  <p><strong>Um escudo robusto para ajudar a prevenir o vazamento de segredos para desenvolvedores e agentes de IA.</strong></p>
 
   <p>
     <a href="https://github.com/tkusal/ClipCloak/actions"><img src="https://img.shields.io/github/actions/workflow/status/tkusal/ClipCloak/ci.yml?branch=main" alt="CI Status"></a>
@@ -14,19 +14,19 @@
 
 ---
 
-ClipCloak é um ecossistema ultra-rápido, offline e multiplataforma projetado para detectar e censurar dados sensíveis (chaves de API, senhas, credenciais, PII) *antes* que eles saiam da sua máquina.
+ClipCloak é um ecossistema ultra-rápido, offline e multiplataforma projetado para detectar e bloquear dados sensíveis (chaves de API, senhas, credenciais, PII) *antes* que eles saiam da sua máquina.
 
-Seja fazendo um commit, colando texto em um aplicativo não confiável ou deixando um agente autônomo de IA explorar seu sistema de arquivos, o ClipCloak fica entre os seus segredos e o mundo exterior.
+Seja fazendo um commit, colando texto em um aplicativo não confiável ou deixando um agente autônomo de IA explorar seu sistema de arquivos, o ClipCloak ajuda a reduzir o risco de expor seus segredos ao mundo exterior.
 
 ## 🌟 Ecossistema
 
 O ClipCloak é construído sobre um motor altamente modular e fornece ferramentas para cada fluxo de trabalho de desenvolvimento:
 
 - **CLI (`@clipcloak/cli`)**: Escaneie repositórios, use em CI/CD ou conecte-o ao Git.
-- **Git Hook**: Impeça automaticamente commits contendo segredos (`clipcloak install git-hook`).
+- **Git Hook**: Impeça commits contendo segredos (`clipcloak install git-hook`).
 - **Desktop Daemon**: Um aplicativo Electron em segundo plano que intercepta a área de transferência (clipboard) do seu sistema operacional, avisando-o e fornecendo um atalho de "Safe Paste" (`Ctrl+Shift+V`) para censura instantânea.
 - **VS Code Extension**: Destaca segredos expostos diretamente na sua IDE enquanto você digita.
-- **Integração de IA (`@clipcloak/claude-code`)**: Conecta-se nativamente ao MCP (Model Context Protocol) do Claude Code para censurar segredos antes que o LLM os leia, garantindo que você não vaze chaves de produção para servidores de IA.
+- **Integração de IA**: Conecta-se aos hooks PreToolUse do Claude Code para bloquear a leitura de arquivos quando segredos são detectados, ajudando a garantir que você não vaze chaves de produção para servidores de IA.
 
 ## 🚀 Início Rápido
 
@@ -55,7 +55,7 @@ Proteja seu sistema de arquivos ao usar o Claude Code:
 ```bash
 npx @clipcloak/cli install claude-code
 ```
-*A partir de agora, seus agentes autônomos verão apenas `[REDACTED_BY_CLIPCLOAK]` em vez dos segredos do seu `.env`.*
+*A partir de agora, seus agentes autônomos serão bloqueados de ler arquivos que contenham credenciais reais.*
 
 ## 🧠 O Motor
 

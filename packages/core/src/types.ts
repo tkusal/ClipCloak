@@ -55,6 +55,7 @@ export interface DetectorError {
 export interface DetectResult {
   findings: Finding[];
   errors: DetectorError[];
+  skippedReason?: string;
 }
 
 export interface ScanResult {
@@ -62,4 +63,5 @@ export interface ScanResult {
   findings: Finding[];
   errors: DetectorError[];
   error?: string;
+  skippedReason?: string;
 }
