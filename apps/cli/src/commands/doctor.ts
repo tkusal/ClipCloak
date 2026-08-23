@@ -3,8 +3,7 @@ import fs from 'node:fs';
 import path from 'node:path';
 import { execSync } from 'node:child_process';
 import { getPacks, scanText } from '../utils/scanner.js';
-import { loadConfigFile } from '../utils/config.js';
-import { resolveConfig, validateConfig } from '@clipcloak/core';
+import { loadAndResolveConfig } from '@clipcloak/core';
 
 export async function runDoctor() {
   console.log('🩺 ClipCloak Doctor\n');
@@ -17,24 +16,16 @@ export async function runDoctor() {
   console.log(`CWD: ${cwd}\n`);
 
   console.log('--- Configuration ---');
-  const fileConfig = loadConfigFile(cwd);
-  if (fileConfig) {
-    console.log('✅ Found .clipcloak.json in project or parent directory.');
-    const errors = validateConfig(fileConfig);
-    if (errors.length > 0) {
-      issuesFound = true;
-      console.log('❌ Configuration has schema validation errors:');
-      for (const err of errors) {
-        console.log(`  - ${err}`);
-      }
-    } else {
-      console.log('✅ Configuration schema is valid.');
+  const { config, errors } = loadAndResolveConfig(cwd, {});
+  if (errors.length > 0) {
+    issuesFound = true;
+    console.log('❌ Configuration has schema validation errors:');
+    for (const err of errors) {
+      console.log(`  - ${err}`);
     }
   } else {
-    console.log('ℹ️ No .clipcloak.json found. Using defaults.');
+    console.log('✅ Configuration schema is valid.');
   }
-
-  const config = resolveConfig(fileConfig, {});
   console.log(`Resolved minSeverity: ${config.minSeverity}`);
   console.log(`Resolved minConfidence: ${config.minConfidence}`);
   console.log(`Resolved blockMinSeverity: ${config.blockMinSeverity}`);

@@ -67,6 +67,14 @@ export const awsSecretKeyDetector: Detector = {
         continue;
       }
 
+      // Contextual check to reduce false positives (like SHA-1 hashes)
+      const contextWindow = text.substring(Math.max(0, match.index - 200), match.index + 200).toLowerCase();
+      const hasContext = /aws_?secret|secret_?access_?key|aws_?session|akid|akia|asia|\.env|\byaml\b|\bjson\b/i.test(contextWindow);
+
+      if (!hasContext) {
+        continue; // Skip if no AWS or Secret context is found nearby
+      }
+
       let confidence = 0.8;
       if (isSoftDummyString(token)) {
         confidence = 0.6;
@@ -80,7 +88,7 @@ export const awsSecretKeyDetector: Detector = {
         start: match.index,
         end: match.index + token.length,
         redactedPreview: createRedactedPreview(token, this.id, { strategy: 'partial' }),
-        reason: 'Matches high-entropy 40-character base64 AWS Secret Key pattern',
+        reason: 'Matches high-entropy 40-character base64 AWS Secret Key pattern with context',
       });
     }
 

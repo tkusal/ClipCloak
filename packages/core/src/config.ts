@@ -1,3 +1,5 @@
+import fs from 'node:fs';
+import path from 'node:path';
 import type { ClipCloakConfig, Severity, FindingCategory } from './types.js';
 
 export const DEFAULT_CONFIG: ClipCloakConfig = {
@@ -47,11 +49,12 @@ export function validateConfig(config: any): string[] {
   if (config.minConfidence !== undefined) {
     if (
       typeof config.minConfidence !== 'number' ||
+      !Number.isFinite(config.minConfidence) ||
       config.minConfidence < 0 ||
       config.minConfidence > 1
     ) {
       errors.push(
-        `Invalid minConfidence: ${config.minConfidence}. Must be a number between 0 and 1.`,
+        `Invalid minConfidence: ${config.minConfidence}. Must be a finite number between 0 and 1.`,
       );
     }
   }
@@ -133,4 +136,63 @@ export function resolveConfig(
   }
 
   return mergedConfig;
+}
+
+/**
+ * Loads configuration from .clipcloak.json in the specified directory or its parents.
+ */
+export function loadConfigFile(cwd: string = process.cwd()): Partial<ClipCloakConfig> | null {
+  let currentDir = cwd;
+  let reachedRoot = false;
+  while (!reachedRoot) {
+    const configPath = path.join(currentDir, '.clipcloak.json');
+    if (fs.existsSync(configPath)) {
+      try {
+        const content = fs.readFileSync(configPath, 'utf-8');
+        return JSON.parse(content) as Partial<ClipCloakConfig>;
+      } catch (err: unknown) {
+        throw new Error(`Failed to parse ${configPath}: ${err instanceof Error ? err.message : String(err)}`);
+      }
+    }
+
+    const parentDir = path.dirname(currentDir);
+    if (parentDir === currentDir) {
+      reachedRoot = true;
+    } else {
+      currentDir = parentDir;
+    }
+  }
+
+  return null;
+}
+
+export interface ConfigResult {
+  config: ClipCloakConfig;
+  errors: string[];
+}
+
+/**
+ * Loads config from file, merges with CLI/runtime options, and validates the final result.
+ */
+export function loadAndResolveConfig(
+  cwd: string = process.cwd(),
+  cliOptions: Partial<ClipCloakConfig> = {}
+): ConfigResult {
+  const fileConfig = loadConfigFile(cwd);
+  
+  if (fileConfig) {
+    const fileErrors = validateConfig(fileConfig);
+    if (fileErrors.length > 0) {
+      return { config: DEFAULT_CONFIG, errors: fileErrors.map(e => `File config error: ${e}`) };
+    }
+  }
+
+  const resolved = resolveConfig(fileConfig, cliOptions);
+  
+  const resolvedErrors = validateConfig(resolved);
+  if (resolvedErrors.length > 0) {
+    return { config: resolved, errors: resolvedErrors.map(e => `Resolved config error: ${e}`) };
+  }
+
+  return { config: resolved, errors: [] };
 }

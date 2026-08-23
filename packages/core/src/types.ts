@@ -60,6 +60,7 @@ export interface DetectResult {
 
 export interface ScanResult {
   file: string;
+  status: 'scanned' | 'skipped' | 'error';
   findings: Finding[];
   errors: DetectorError[];
   error?: string;

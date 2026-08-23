@@ -14,7 +14,7 @@
 
 ---
 
-ClipCloak é um ecossistema ultra-rápido, offline e multiplataforma projetado para detectar e bloquear dados sensíveis (chaves de API, senhas, credenciais, PII) *antes* que eles saiam da sua máquina.
+ClipCloak é um ecossistema ultra-rápido, offline e multiplataforma projetado para ajudar a detectar e bloquear dados sensíveis (chaves de API, senhas, credenciais, PII) *antes* que eles saiam da sua máquina.
 
 Seja fazendo um commit, colando texto em um aplicativo não confiável ou deixando um agente autônomo de IA explorar seu sistema de arquivos, o ClipCloak ajuda a reduzir o risco de expor seus segredos ao mundo exterior.
 
@@ -24,7 +24,7 @@ O ClipCloak é construído sobre um motor altamente modular e fornece ferramenta
 
 - **CLI (`@clipcloak/cli`)**: Escaneie repositórios, use em CI/CD ou conecte-o ao Git.
 - **Git Hook**: Impeça commits contendo segredos (`clipcloak install git-hook`).
-- **Desktop Daemon**: Um aplicativo Electron em segundo plano que intercepta a área de transferência (clipboard) do seu sistema operacional, avisando-o e fornecendo um atalho de "Safe Paste" (`Ctrl+Shift+V`) para censura instantânea.
+- **Desktop Daemon**: Um aplicativo Electron em segundo plano que monitora a área de transferência (clipboard) localmente, avisando-o e fornecendo um atalho de "Safe Paste" (`Ctrl+Shift+V`) para censura instantânea.
 - **VS Code Extension**: Destaca segredos expostos diretamente na sua IDE enquanto você digita.
 - **Integração de IA**: Conecta-se aos hooks PreToolUse do Claude Code para bloquear a leitura de arquivos quando segredos são detectados, ajudando a garantir que você não vaze chaves de produção para servidores de IA.
 

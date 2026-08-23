@@ -17,15 +17,15 @@ jobs:
       id-token: write
     steps:
       - name: Checkout Repo
-        uses: actions/checkout@v4
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
 
       - name: Setup pnpm
-        uses: pnpm/action-setup@v4
+        uses: pnpm/action-setup@a3252b78c470c02df07e9d59298aecedc3ccdd6d
         with:
           version: 9
 
       - name: Setup Node.js
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@39370e3970a6d050c480ffad4ff0ed4d3fdee5af
         with:
           node-version: 22
           cache: 'pnpm'
@@ -35,7 +35,7 @@ jobs:
 
       - name: Create Release Pull Request or Publish to npm
         id: changesets
-        uses: changesets/action@v1
+        uses: changesets/action@3143cad93086b3e34b12c7553f169f4ed703c613
         with:
           publish: pnpm run publish-packages
         env:

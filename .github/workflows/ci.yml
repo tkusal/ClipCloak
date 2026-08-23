@@ -15,15 +15,15 @@ jobs:
         node-version: [22.x, 24.x]
     
     steps:
-    - uses: actions/checkout@v4
+    - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
     
     - name: Install pnpm
-      uses: pnpm/action-setup@v4
+      uses: pnpm/action-setup@a3252b78c470c02df07e9d59298aecedc3ccdd6d
       with:
         version: 9
         
     - name: Install Node.js ${{ matrix.node-version }}
-      uses: actions/setup-node@v4
+      uses: actions/setup-node@39370e3970a6d050c480ffad4ff0ed4d3fdee5af
       with:
         node-version: ${{ matrix.node-version }}
         cache: 'pnpm'

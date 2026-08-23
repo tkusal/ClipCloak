@@ -3,9 +3,8 @@ import path from 'node:path';
 import { execFileSync } from 'node:child_process';
 import { getIgnoreFilter, walkDir } from '../utils/ignore.js';
 import { getPacks, scanFile, scanBuffer, scanText } from '../utils/scanner.js';
-import type { Finding, Severity } from '@clipcloak/core';
-import { resolveConfig, validateConfig } from '@clipcloak/core';
-import { loadConfigFile } from '../utils/config.js';
+import type { Severity, ScanResult } from '@clipcloak/core';
+import { loadAndResolveConfig } from '@clipcloak/core';
 
 export interface ScanOptions {
   packs?: string;
@@ -20,28 +19,17 @@ export interface ScanOptions {
 export async function runScan(target: string | undefined, options: ScanOptions) {
   const cwd = process.cwd();
 
-  const fileConfig = loadConfigFile(cwd);
-  if (fileConfig) {
-    const configErrors = validateConfig(fileConfig);
-    if (configErrors.length > 0) {
-      console.error('❌ [ERROR] Invalid configuration in .clipcloak.json:');
-      for (const err of configErrors) {
-        console.error(`  - ${err}`);
-      }
-      process.exit(2);
-    }
-  }
-
   const cliOptions: any = {};
   if (options.packs) cliOptions.packs = options.packs.split(',');
   if (options.severity) cliOptions.minSeverity = options.severity;
   if (options.confidence !== undefined) cliOptions.minConfidence = options.confidence;
 
-  let config;
-  try {
-    config = resolveConfig(fileConfig, cliOptions);
-  } catch (err: unknown) {
-    console.error(`❌ [ERROR] Config resolution failed: ${(err instanceof Error ? err.message : String(err))}`);
+  const { config, errors: configErrors } = loadAndResolveConfig(cwd, cliOptions);
+  if (configErrors.length > 0) {
+    console.error('❌ [ERROR] Invalid configuration:');
+    for (const err of configErrors) {
+      console.error(`  - ${err}`);
+    }
     process.exit(2);
   }
 
@@ -51,11 +39,11 @@ export async function runScan(target: string | undefined, options: ScanOptions) 
   try {
     packs = getPacks(config.packs);
   } catch (err: unknown) {
-    console.error(`❌ [ERROR] Pack resolution failed: ${(err instanceof Error ? err.message : String(err))}`);
+    console.error(`❌ [ERROR] Failed to load packs: ${(err instanceof Error ? err.message : String(err))}`);
     process.exit(2);
   }
 
-  const allFindings: { file: string; findings: Finding[]; skippedReason?: string }[] = [];
+  const allFindings: ScanResult[] = [];
   const allErrors: { file: string; errors: any[] }[] = [];
 
   const detectOptions = {
@@ -66,13 +54,14 @@ export async function runScan(target: string | undefined, options: ScanOptions) 
   // Handle stdin
   if (options.stdin) {
     try {
-      const text = fs.readFileSync(0, 'utf-8'); // Read from stdin
-      const { findings, errors } = scanText(text, 'stdin', packs, detectOptions);
+      const input = fs.readFileSync(0, 'utf-8');
+      const { findings, errors } = scanText(input, 'stdin', packs, detectOptions);
+      const status = (errors && errors.length > 0) ? 'error' : 'scanned';
       if (errors && errors.length > 0) {
         allErrors.push({ file: 'stdin', errors });
       }
       if (findings.length > 0) {
-        allFindings.push({ file: 'stdin', findings });
+        allFindings.push({ file: 'stdin', status, findings, errors: errors || [] });
       }
     } catch (err: unknown) {
       allErrors.push({
@@ -100,22 +89,18 @@ export async function runScan(target: string | undefined, options: ScanOptions) 
               cwd,
               stdio: ['pipe', 'pipe', 'pipe'],
             });
-            const { findings, errors } = scanBuffer(buffer, fullPath, packs, detectOptions);
-            if (errors && errors.length > 0) {
-              allErrors.push({ file: fullPath, errors });
-            }
-            if (findings.length > 0) {
-              allFindings.push({ file: fullPath, findings });
-            }
-          } catch (err) {
-            // Fallback to normal file read if git show fails (e.g. untracked or deleted from staging index somehow)
-            const { findings, errors, skippedReason } = scanFile(fullPath, packs, detectOptions);
+            const { findings, errors, skippedReason } = scanBuffer(buffer, fullPath, packs, detectOptions);
+            const status = (errors && errors.length > 0) ? 'error' : skippedReason ? 'skipped' : 'scanned';
             if (errors && errors.length > 0) {
               allErrors.push({ file: fullPath, errors });
             }
             if (findings.length > 0 || skippedReason) {
-              allFindings.push({ file: fullPath, findings, skippedReason });
+              allFindings.push({ file: fullPath, status, findings, errors: errors || [], skippedReason });
             }
+          } catch (err: unknown) {
+            const errMsg = err instanceof Error ? err.message : String(err);
+            allErrors.push({ file: fullPath, errors: [{ packId: 'core', detectorId: 'git-show', errorMessage: errMsg }] });
+            allFindings.push({ file: fullPath, status: 'error', findings: [], errors: [{ packId: 'core', detectorId: 'git-show', errorMessage: errMsg }] });
           }
         }
       }
@@ -138,49 +123,39 @@ export async function runScan(target: string | undefined, options: ScanOptions) 
         const files = walkDir(fullPath, ig, cwd);
         for (const file of files) {
           const { findings, errors, skippedReason } = scanFile(file, packs, detectOptions);
+          const status = (errors && errors.length > 0) ? 'error' : skippedReason ? 'skipped' : 'scanned';
           if (errors && errors.length > 0) {
             allErrors.push({ file, errors });
           }
           if (findings.length > 0 || skippedReason) {
-            allFindings.push({ file: file, findings, skippedReason });
+            allFindings.push({ file, status, findings, errors: errors || [], skippedReason });
           }
         }
       } else {
         const relPath = path.relative(cwd, fullPath);
         if (!ig.ignores(relPath)) {
           const { findings, errors, skippedReason } = scanFile(fullPath, packs, detectOptions);
+          const status = (errors && errors.length > 0) ? 'error' : skippedReason ? 'skipped' : 'scanned';
           if (errors && errors.length > 0) {
             allErrors.push({ file: fullPath, errors });
           }
           if (findings.length > 0 || skippedReason) {
-            allFindings.push({ file: fullPath, findings, skippedReason });
+            allFindings.push({ file: fullPath, status, findings, errors: errors || [], skippedReason });
           }
         }
       }
     } catch (err: unknown) {
       allErrors.push({
         file: fullPath,
-        errors: [{ packId: 'core', detectorId: 'target-scanner', errorMessage: (err instanceof Error ? err.message : String(err)) }],
+        errors: [{ packId: 'core', detectorId: 'file-reader', errorMessage: (err instanceof Error ? err.message : String(err)) }],
       });
     }
   } else {
-    console.error('❌ [ERROR] Please specify a file/directory or use --stdin/--staged');
+    console.error('❌ [ERROR] No target specified. Use --stdin, --staged, or provide a path.');
     process.exit(2);
   }
 
-  // Handle failure-closed logic on scanner errors
-  if (allErrors.length > 0) {
-    console.error(`\n❌ [ERROR] ClipCloak encountered errors during scan:`);
-    for (const errObj of allErrors) {
-      console.error(`  - In ${errObj.file}:`);
-      for (const err of errObj.errors) {
-        console.error(`    * ${err.errorMessage}`);
-      }
-    }
-    process.exit(2);
-  }
-
-  const blockSeverityWeight = { low: 1, medium: 2, high: 3, critical: 4 };
+  const blockSeverityWeight: Record<string, number> = { low: 1, medium: 2, high: 3, critical: 4 };
   const minBlockW = blockSeverityWeight[config.blockMinSeverity || 'high'];
   const blockCategories = config.blockCategories || ['credential', 'secret'];
 
@@ -190,6 +165,11 @@ export async function runScan(target: string | undefined, options: ScanOptions) 
     .filter((f) => {
       return blockSeverityWeight[f.severity] >= minBlockW && blockCategories.includes(f.category);
     });
+
+  // Strict mode: Treat skips and errors as blocking
+  const skippedFiles = allFindings.filter((r) => r.status === 'skipped');
+  const errorFiles = allFindings.filter((r) => r.status === 'error');
+  const strictViolations = options.strict && (skippedFiles.length > 0 || errorFiles.length > 0);
 
   // Print results
   if (options.format === 'json') {
@@ -256,25 +236,31 @@ export async function runScan(target: string | undefined, options: ScanOptions) 
       }
     }
 
-    const skippedFiles = allFindings.filter((r) => r.skippedReason);
     if (skippedFiles.length > 0) {
       console.log(`\n⚠️  ${skippedFiles.length} file(s) skipped (e.g., ${skippedFiles[0].skippedReason}).`);
     }
 
+    if (errorFiles.length > 0) {
+      console.log(`\n⚠️  ${errorFiles.length} file(s) encountered errors.`);
+    }
+
     if (blockableFindings.length > 0) {
-      const totalFindings = allFindings.reduce((acc, curr) => acc + curr.findings.length, 0);
       console.log(
-        `\n${i18n.get('found', t, blockableFindings.length.toString(), totalFindings.toString())}`,
+        '\n' +
+          i18n
+            .get('found', t)
+            .replace('{0}', String(blockableFindings.length))
+            .replace('{1}', String(allFindings.flatMap((r) => r.findings).length)),
       );
       process.exit(1);
+    } else if (strictViolations) {
+      console.log(
+        `\n❌ [STRICT MODE] Run blocked due to ${skippedFiles.length} skipped files and ${errorFiles.length} errors.`
+      );
+      process.exit(2);
     } else {
-      console.log(i18n.get('clean', t));
-      if (options.strict && skippedFiles.length > 0) {
-        process.exit(2);
-      }
+      console.log('\n' + i18n.get('clean', t));
       process.exit(0);
     }
   }
-
-  process.exit(blockableFindings.length > 0 ? 1 : 0);
 }

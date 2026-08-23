@@ -2,13 +2,11 @@ import fs from 'node:fs';
 import path from 'node:path';
 import { getPacks, scanText } from '../utils/scanner.js';
 import { applyRedaction } from '@clipcloak/core';
-import { loadConfigFile } from '../utils/config.js';
-import { resolveConfig } from '@clipcloak/core';
+import { loadAndResolveConfig } from '@clipcloak/core';
 
 export async function runRedact(target: string) {
   const cwd = process.cwd();
-  const fileConfig = loadConfigFile(cwd);
-  const config = resolveConfig(fileConfig, {});
+  const { config } = loadAndResolveConfig(cwd, {});
   const packs = getPacks(config.packs);
 
   const fullPath = path.resolve(cwd, target);

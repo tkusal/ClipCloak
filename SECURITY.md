@@ -33,5 +33,5 @@ We will not initiate legal action or law enforcement investigation against anyon
 ### Out of Scope (Not Vulnerabilities)
 The following are considered out of scope and do not constitute security vulnerabilities in ClipCloak:
 - **False Positives**: The scanner flagging a non-sensitive string (e.g., a dummy value) is an annoyance, not a vulnerability. Please report these as regular bug issues.
-- **Bypasses in unsupported contexts**: e.g., an AI agent reading secrets using tools other than file reading tools (`Bash`, `Grep`, `Read`), or using `@file` references in Claude Code which deliberately bypass PreToolUse hooks.
+- **Bypasses in unsupported contexts**: e.g., an AI agent reading secrets using complex shell commands not parsable by our heuristics in Standard mode, or using `@file` references in Claude Code which deliberately bypass PreToolUse hooks.
 - **Memory scraping**: ClipCloak runs in the user space; any attacker with sufficient privileges to dump the memory of the Node.js or Electron process can extract secrets. Defending against active OS-level malware is out of scope.

@@ -1,5 +1,5 @@
 import { app, clipboard, Notification, globalShortcut } from 'electron';
-import { detect, i18n } from '@clipcloak/core';
+import { detect, i18n, loadAndResolveConfig } from '@clipcloak/core';
 import genericPack from '@clipcloak/pack-generic';
 import brPack from '@clipcloak/pack-br';
 import euPack from '@clipcloak/pack-eu';
@@ -7,6 +7,10 @@ import euPack from '@clipcloak/pack-eu';
 import crypto from 'node:crypto';
 
 const ALL_PACKS = [genericPack, brPack, euPack];
+
+let currentConfig = { minSeverity: 'medium', minConfidence: 0.5, packs: ['generic', 'br', 'eu'] };
+
+
 
 const t = {
   alertTitle: { en: 'ClipCloak Alert', pt: 'Alerta ClipCloak' },
@@ -49,14 +53,18 @@ function getFingerprint(text: string): string {
 }
 
 function checkClipboard() {
-  const text = clipboard.readText();
-  if (text) {
+  let text = clipboard.readText();
+    if (text) {
+      if (text.length > 5 * 1024 * 1024) {
+        text = text.substring(0, 5 * 1024 * 1024);
+      }
     const hash = getFingerprint(text);
     if (hash !== lastClipboardHash) {
       lastClipboardHash = hash;
 
       const { findings } = detect(text, ALL_PACKS, {
-        minSeverity: 'medium',
+        minSeverity: currentConfig.minSeverity as any,
+        minConfidence: currentConfig.minConfidence,
         context: { filename: 'clipboard' },
       });
 
@@ -120,15 +128,22 @@ function checkClipboard() {
 }
 
 app.whenReady().then(() => {
+  const result = loadAndResolveConfig(app.getPath('home'), {});
+  if (result.errors.length === 0) {
+    currentConfig = result.config as any;
+  }
   if (process.platform === 'darwin') {
     app.dock?.hide(); // Hide from macOS dock
   }
 
   // Safe Paste Global Shortcut
-  globalShortcut.register('CommandOrControl+Shift+V', () => {
-    const text = clipboard.readText();
+  const registered = globalShortcut.register('CommandOrControl+Shift+V', () => {
+    let text = clipboard.readText();
     if (text) {
-      const { findings } = detect(text, ALL_PACKS, { minSeverity: 'medium' });
+      if (text.length > 5 * 1024 * 1024) {
+        text = text.substring(0, 5 * 1024 * 1024);
+      }
+      const { findings } = detect(text, ALL_PACKS, { minSeverity: currentConfig.minSeverity as any, minConfidence: currentConfig.minConfidence });
       if (findings.length > 0) {
         import('@clipcloak/core').then(({ applyRedaction }) => {
           const safeText = applyRedaction(text, findings);
@@ -143,6 +158,10 @@ app.whenReady().then(() => {
       }
     }
   });
+
+  if (!registered) {
+    console.warn('[ClipCloak] Failed to register Safe Paste shortcut (CommandOrControl+Shift+V). It might be in use.');
+  }
 
   // Start polling clipboard every 1 second
   setInterval(checkClipboard, 1000);

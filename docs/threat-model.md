@@ -38,7 +38,7 @@ The security boundary of ClipCloak is the **local development machine**.
 
 ### 2. AI Agents Reading Local Credentials
 - **Threat:** Autonomous coding agents (like Claude Code) invoke file-reading tools (e.g. `Read`, `fs_read_file`) on files containing credentials (like `.env`, config files).
-- **Mitigation:** ClipCloak integrates as a `PreToolUse` hook script, intercepting read requests, parsing filenames, scanning file buffers locally, and returning blocking OIDC `deny` instructions.
+- **Mitigation:** ClipCloak integrates as a `PreToolUse` hook script, intercepting read requests, parsing filenames, scanning file buffers locally, and returning blocking `deny` instructions.
 
 ### 3. Untrusted Git Commits containing Secrets
 - **Threat:** Developer commits a secret to their local repository history, which is then pushed to a public remote.
@@ -48,6 +48,6 @@ The security boundary of ClipCloak is the **local development machine**.
 - **Operating System Compromise:** Malware with keylogger/clipboard-reader privileges can read clipboard values before ClipCloak.
 - **Intentional Bypasses:** Developers explicitly bypassing pre-commit checks (`--no-verify`) or configuring AI agents to ignore hooks.
 - **Claude Code @file References:** Using `@file` references directly in Claude Code prompts bypasses the `PreToolUse` hook completely, allowing the agent to read secrets.
-- **Skipped Files:** Files larger than 5MB or binary files are skipped by the scanner and assumed clean to avoid hanging the agent or CI. Symlinks are ignored to prevent loops.
+- **Skipped Files:** Files larger than 5MB or binary files are skipped by the scanner and assumed clean in standard mode to avoid hanging the agent or CI, but will trigger an explicit error in strict mode. Symlinks are ignored to prevent loops.
 - **False Negatives:** Formats not covered by active packs, unknown credentials, or highly encoded data (e.g. base64 inside JSON) may bypass detectors.
 - **Clipboard Polling Race:** The daemon polls the clipboard every second; an extremely fast process could theoretically read the clipboard before ClipCloak reacts.

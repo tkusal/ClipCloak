@@ -1,7 +1,5 @@
 import * as vscode from 'vscode';
-import * as fs from 'node:fs';
-import * as path from 'node:path';
-import { detect, resolveConfig } from '@clipcloak/core';
+import { detect, loadAndResolveConfig } from '@clipcloak/core';
 import genericPack from '@clipcloak/pack-generic';
 import brPack from '@clipcloak/pack-br';
 import euPack from '@clipcloak/pack-eu';
@@ -21,14 +19,9 @@ export function activate(context: vscode.ExtensionContext) {
     const workspaceFolder = vscode.workspace.getWorkspaceFolder(document.uri);
     
     if (workspaceFolder) {
-      const configPath = path.join(workspaceFolder.uri.fsPath, '.clipcloak.json');
-      if (fs.existsSync(configPath)) {
-        try {
-          const fileConfig = JSON.parse(fs.readFileSync(configPath, 'utf8'));
-          config = resolveConfig(fileConfig, {});
-        } catch {
-          // ignore parsing errors
-        }
+      const result = loadAndResolveConfig(workspaceFolder.uri.fsPath, {});
+      if (result.errors.length === 0) {
+        config = result.config;
       }
     }
 
@@ -39,6 +32,7 @@ export function activate(context: vscode.ExtensionContext) {
     const text = document.getText();
     const { findings } = detect(text, activePacks, {
       minSeverity: config.minSeverity || 'medium',
+        minConfidence: config.minConfidence || 0.5,
       context: { filename: document.fileName },
     });
 

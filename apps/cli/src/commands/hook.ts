@@ -1,7 +1,7 @@
 import fs from 'node:fs';
 import path from 'node:path';
-import { detect, resolveConfig } from '@clipcloak/core';
-import { loadConfigFile } from '../utils/config.js';
+import { detect, loadAndResolveConfig } from '@clipcloak/core';
+
 import { getPacks, isBinaryFileSync } from '../utils/scanner.js';
 
 function getClaudeHookMode(): 'standard' | 'strict' {
@@ -114,8 +114,7 @@ export async function runClaudeCodeHook() {
     }
 
     // Resolve project config once
-    const fileConfig = loadConfigFile(cwd);
-    const config = resolveConfig(fileConfig, {});
+    const { config } = loadAndResolveConfig(cwd, {});
     const packs = getPacks(config.packs);
 
     for (const filePath of pathsToScan) {
