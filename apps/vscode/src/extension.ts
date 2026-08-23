@@ -32,7 +32,7 @@ export function activate(context: vscode.ExtensionContext) {
     const text = document.getText();
     const { findings } = detect(text, activePacks, {
       minSeverity: config.minSeverity || 'medium',
-        minConfidence: config.minConfidence || 0.5,
+      minConfidence: config.minConfidence ?? 0.5,
       context: { filename: document.fileName },
     });
 

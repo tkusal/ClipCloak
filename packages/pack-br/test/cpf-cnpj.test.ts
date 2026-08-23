@@ -26,4 +26,14 @@ describe('BR Pack: CPF & CNPJ Detector', () => {
     expect(findings).toHaveLength(1);
     expect(findings[0].detectorId).toBe('cnpj');
   });
+
+  it('should detect valid alphanumeric CNPJ', () => {
+    // Alphanumeric CNPJ
+    const text = 'Empresa alfa: 00.000.000/E08G-12';
+    const findings = cpfCnpjDetector.detect(text);
+
+    expect(findings).toHaveLength(1);
+    expect(findings[0].detectorId).toBe('cnpj');
+    expect(findings[0].redactedPreview).toBe('00.***.***/****-12');
+  });
 });

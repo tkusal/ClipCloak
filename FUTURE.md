@@ -3,9 +3,8 @@
 This document outlines potential features, improvements, and stretch goals for the next major and minor versions of the ClipCloak ecosystem (v1.1.0 and beyond).
 
 ## 1. Engine & Detectors (Core)
-- **More Cloud Providers**: Native detectors for GCP (Google Cloud) and Azure credentials.
-- **SaaS Tokens**: Dedicated detectors for Slack, Discord, NPM, and Sendgrid tokens.
-- **Database URIs**: Robust detection for Postgres, MongoDB, and Redis connection strings containing raw passwords.
+- **More Regional Packs**: Packs for APAC and North America (SSN, Driver Licenses).
+- **Custom Regex Rules**: Allow users to define custom regular expressions for proprietary internal token formats directly in `.clipcloak.json`.
 - **Context-Aware Scanning**: Use AST (Abstract Syntax Tree) parsing to know if a string is inside a comment, a variable named `mock_secret`, or actual code, further reducing false positives.
 
 ## 2. Artificial Intelligence Integrations

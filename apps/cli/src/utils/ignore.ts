@@ -33,16 +33,22 @@ export function getIgnoreFilter(cwd: string, extraIgnores: string[] = []) {
   return ig;
 }
 
-export function walkDir(dir: string, ig: ReturnType<typeof ignore>, cwd: string): string[] {
-  const results: string[] = [];
+export interface WalkResult {
+  files: string[];
+  skipped: { path: string; reason: string }[];
+  errors: { path: string; error: Error }[];
+}
+
+export function walkDir(dir: string, ig: ReturnType<typeof ignore>, cwd: string): WalkResult {
+  const result: WalkResult = { files: [], skipped: [], errors: [] };
   let list: string[] = [];
 
   try {
     list = fs.readdirSync(dir);
   } catch (err: unknown) {
-    if ((err as any).code === 'EACCES' || (err as any).code === 'EPERM') {
-      console.warn(`[WARN] Permission denied: ${dir}`);
-      return results;
+    if ((err as any).code === 'EACCES' || (err as any).code === 'EPERM' || (err as any).code === 'ENOENT') {
+      result.errors.push({ path: dir, error: err as Error });
+      return result;
     }
     throw err;
   }
@@ -58,23 +64,27 @@ export function walkDir(dir: string, ig: ReturnType<typeof ignore>, cwd: string)
 
       // Skip symlinks to avoid infinite loops and scanning external files
       if (stat.isSymbolicLink()) {
+        result.skipped.push({ path: fullPath, reason: 'symlink' });
         continue;
       }
 
       if (stat.isDirectory()) {
         // Recurse
-        results.push(...walkDir(fullPath, ig, cwd));
+        const subResult = walkDir(fullPath, ig, cwd);
+        result.files.push(...subResult.files);
+        result.skipped.push(...subResult.skipped);
+        result.errors.push(...subResult.errors);
       } else if (stat.isFile()) {
-        results.push(fullPath);
+        result.files.push(fullPath);
       }
     } catch (err: unknown) {
       if ((err as any).code === 'EACCES' || (err as any).code === 'EPERM' || (err as any).code === 'ENOENT') {
-        console.warn(`[WARN] Skipping unreadable file/directory: ${fullPath}`);
+        result.errors.push({ path: fullPath, error: err as Error });
         continue;
       }
       throw err;
     }
   }
 
-  return results;
+  return result;
 }

@@ -23,31 +23,36 @@ function validateCPF(cpf: string): boolean {
 }
 
 function validateCNPJ(cnpj: string): boolean {
+  if (cnpj.length !== 14) return false;
   if (/^(\d)\1{13}$/.test(cnpj)) return false;
 
-  let size = cnpj.length - 2;
-  let numbers = cnpj.substring(0, size);
-  const digits = cnpj.substring(size);
-  let sum = 0;
-  let pos = size - 7;
+  const baseAndOrder = cnpj.substring(0, 12);
+  const digits = cnpj.substring(12);
 
-  for (let i = size; i >= 1; i--) {
-    sum += parseInt(numbers.charAt(size - i)) * pos--;
+  if (!/^\d{2}$/.test(digits)) return false;
+
+  const charToInt = (char: string) => {
+    const code = char.charCodeAt(0);
+    return code - 48;
+  };
+
+  let sum = 0;
+  let pos = 5;
+  for (let i = 0; i < 12; i++) {
+    sum += charToInt(baseAndOrder.charAt(i)) * pos--;
     if (pos < 2) pos = 9;
   }
 
   let result = sum % 11 < 2 ? 0 : 11 - (sum % 11);
   if (result !== parseInt(digits.charAt(0))) return false;
 
-  size += 1;
-  numbers = cnpj.substring(0, size);
   sum = 0;
-  pos = size - 7;
-
-  for (let i = size; i >= 1; i--) {
-    sum += parseInt(numbers.charAt(size - i)) * pos--;
+  pos = 6;
+  for (let i = 0; i < 12; i++) {
+    sum += charToInt(baseAndOrder.charAt(i)) * pos--;
     if (pos < 2) pos = 9;
   }
+  sum += parseInt(digits.charAt(0)) * 2;
 
   result = sum % 11 < 2 ? 0 : 11 - (sum % 11);
   if (result !== parseInt(digits.charAt(1))) return false;
@@ -61,15 +66,15 @@ export const cpfCnpjDetector: Detector = {
   detect(text: string, _context?: DetectionContext) {
     const findings = [];
 
-    // Captures CPF (with or without formatting) and CNPJ (with or without formatting)
+    // Captures CPF (with or without formatting) and CNPJ (with or without formatting) including alphanumeric
     // Limits matches to boundaries to prevent capturing a subset of a long id.
     const regex =
-      /\b(?:\d{3}[.\s]?\d{3}[.\s]?\d{3}[-.\s]?\d{2}|\d{2}[.\s]?\d{3}[.\s]?\d{3}[/.\s]?\d{4}[-.\s]?\d{2})\b/g;
+      /\b(?:\d{3}[.\s]?\d{3}[.\s]?\d{3}[-.\s]?\d{2}|[A-Za-z0-9]{2}[.\s]?[A-Za-z0-9]{3}[.\s]?[A-Za-z0-9]{3}[/.\s]?[A-Za-z0-9]{4}[-.\s]?\d{2})\b/g;
 
     let match;
     while ((match = regex.exec(text)) !== null) {
       const candidate = match[0];
-      const cleanCandidate = candidate.replace(/[^\d]/g, '');
+      const cleanCandidate = candidate.replace(/[^\dA-Za-z]/g, '').toUpperCase();
 
       let isCPF = false;
       let isCNPJ = false;

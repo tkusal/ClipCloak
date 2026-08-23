@@ -6,11 +6,15 @@ import euPack from '@clipcloak/pack-eu';
 
 import crypto from 'node:crypto';
 
-const ALL_PACKS = [genericPack, brPack, euPack];
+const ALL_PACKS_MAP: Record<string, any> = { generic: genericPack, br: brPack, eu: euPack };
 
 let currentConfig = { minSeverity: 'medium', minConfidence: 0.5, packs: ['generic', 'br', 'eu'] };
 
-
+function getActivePacks() {
+  return (currentConfig.packs || ['generic', 'br', 'eu'])
+    .map((p: string) => ALL_PACKS_MAP[p])
+    .filter(Boolean);
+}
 
 const t = {
   alertTitle: { en: 'ClipCloak Alert', pt: 'Alerta ClipCloak' },
@@ -62,7 +66,7 @@ function checkClipboard() {
     if (hash !== lastClipboardHash) {
       lastClipboardHash = hash;
 
-      const { findings } = detect(text, ALL_PACKS, {
+      const { findings } = detect(text, getActivePacks(), {
         minSeverity: currentConfig.minSeverity as any,
         minConfidence: currentConfig.minConfidence,
         context: { filename: 'clipboard' },
@@ -143,7 +147,7 @@ app.whenReady().then(() => {
       if (text.length > 5 * 1024 * 1024) {
         text = text.substring(0, 5 * 1024 * 1024);
       }
-      const { findings } = detect(text, ALL_PACKS, { minSeverity: currentConfig.minSeverity as any, minConfidence: currentConfig.minConfidence });
+      const { findings } = detect(text, getActivePacks(), { minSeverity: currentConfig.minSeverity as any, minConfidence: currentConfig.minConfidence ?? 0.5 });
       if (findings.length > 0) {
         import('@clipcloak/core').then(({ applyRedaction }) => {
           const safeText = applyRedaction(text, findings);

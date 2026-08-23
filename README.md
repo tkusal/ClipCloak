@@ -22,11 +22,11 @@ Whether you're pushing code, pasting to untrusted apps, or letting an autonomous
 
 ClipCloak is built on a highly modular engine and provides tools for every developer workflow:
 
-- **CLI (`@clipcloak/cli`)**: Scan repositories, use it in CI/CD, or hook it to Git.
-- **Git Hook**: Prevent commits containing secrets (`clipcloak install git-hook`).
-- **Desktop Daemon**: A background Electron app that monitors your operating system's clipboard locally, warning you and providing a "Safe Paste" shortcut (`Ctrl+Shift+V`) for instant redaction.
-- **VS Code Extension**: Highlights exposed secrets directly in your IDE as you type.
-- **AI Integration**: Seamlessly hooks into Claude Code's PreToolUse commands to block file reading when secrets are detected, helping ensure you don't leak production keys to AI vendors.
+- **CLI (`@clipcloak/cli`)** *(Stable)*: Scan repositories, use it in CI/CD, or hook it to Git.
+- **Git Hook** *(Stable)*: Prevent commits containing secrets (`clipcloak install git-hook`).
+- **AI Integration** *(Preview)*: Seamlessly hooks into Claude Code's PreToolUse commands to block file reading when secrets are detected, helping ensure you don't leak production keys to AI vendors.
+- **VS Code Extension** *(Preview)*: Highlights exposed secrets directly in your IDE as you type.
+- **Desktop Daemon** *(Alpha)*: A background Electron app that monitors your operating system's clipboard locally, warning you and providing a "Safe Paste" shortcut (`Ctrl+Shift+V`) for instant redaction.
 
 ## 🚀 Quick Start
 
@@ -55,7 +55,9 @@ Protect your filesystem when using Claude Code:
 ```bash
 npx @clipcloak/cli install claude-code
 ```
-*Your autonomous agents will now be blocked from reading files that contain real credentials.*
+*Adds a local protection layer that can block supported file-read operations when sensitive data is detected.*
+
+**Note:** ClipCloak reduces exposure risk; it is not a sandbox or a guarantee against secret leakage.
 
 ## 🧠 The Engine
 

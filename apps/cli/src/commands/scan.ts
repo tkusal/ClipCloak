@@ -120,8 +120,22 @@ export async function runScan(target: string | undefined, options: ScanOptions) 
     try {
       const stat = fs.statSync(fullPath);
       if (stat.isDirectory()) {
-        const files = walkDir(fullPath, ig, cwd);
-        for (const file of files) {
+        const walkResult = walkDir(fullPath, ig, cwd);
+        
+        // Add walk errors
+        for (const e of walkResult.errors) {
+          const errMsg = e.error.message || String(e.error);
+          const packError = { packId: 'core', detectorId: 'walk-dir', errorMessage: errMsg };
+          allErrors.push({ file: e.path, errors: [packError] });
+          allFindings.push({ file: e.path, status: 'error', findings: [], errors: [packError] });
+        }
+        
+        // Add walk skipped
+        for (const s of walkResult.skipped) {
+          allFindings.push({ file: s.path, status: 'skipped', findings: [], errors: [], skippedReason: s.reason });
+        }
+
+        for (const file of walkResult.files) {
           const { findings, errors, skippedReason } = scanFile(file, packs, detectOptions);
           const status = (errors && errors.length > 0) ? 'error' : skippedReason ? 'skipped' : 'scanned';
           if (errors && errors.length > 0) {

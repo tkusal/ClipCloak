@@ -81,7 +81,7 @@ export async function runClaudeCodeHook() {
     if (toolName === 'Bash' || toolName === 'Grep') {
       const commandOrPattern = toolInput.command || toolInput.pattern || '';
       // Heuristic: extract anything that looks like a file path after standard read commands
-      const regex = /(?:cat|grep|head|tail|less|more|vi|vim|nano)\s+(?:-[a-zA-Z0-9]+\s+)*(['"]?)([a-zA-Z0-9_.\-/\\]+)\1/g;
+      const regex = /(?:cat|grep|head|tail|less|more|vi|vim|nano)\s+(?:-[a-zA-Z0-9]+\s+)*(['"]?)([a-zA-Z0-9_.\-/\\][\w\s.\-/\\]*)\1/g;
       let match;
       while ((match = regex.exec(commandOrPattern)) !== null) {
         if (match[2] && !match[2].startsWith('-')) {
@@ -91,7 +91,11 @@ export async function runClaudeCodeHook() {
       
       // If we couldn't extract paths but it's Bash/Grep, we allow it with a risk (or we could block in strict mode)
       if (pathsToScan.length === 0) {
-        outputDecision('allow');
+        if (mode === 'strict') {
+          outputDecision('deny', 'ClipCloak strict mode: Could not reliably extract file paths from Bash/Grep command.');
+        } else {
+          outputDecision('allow');
+        }
         return;
       }
     } else {
@@ -142,6 +146,9 @@ export async function runClaudeCodeHook() {
 
       // Skip binary files
       if (isBinaryFileSync(fullPath)) {
+        if (mode === 'strict') {
+          outputDecision('deny', `ClipCloak strict mode: File ${filePath} is a binary file and cannot be scanned.`);
+        }
         continue;
       }
 

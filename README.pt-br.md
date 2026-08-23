@@ -22,11 +22,11 @@ Seja fazendo um commit, colando texto em um aplicativo não confiável ou deixan
 
 O ClipCloak é construído sobre um motor altamente modular e fornece ferramentas para cada fluxo de trabalho de desenvolvimento:
 
-- **CLI (`@clipcloak/cli`)**: Escaneie repositórios, use em CI/CD ou conecte-o ao Git.
-- **Git Hook**: Impeça commits contendo segredos (`clipcloak install git-hook`).
-- **Desktop Daemon**: Um aplicativo Electron em segundo plano que monitora a área de transferência (clipboard) localmente, avisando-o e fornecendo um atalho de "Safe Paste" (`Ctrl+Shift+V`) para censura instantânea.
-- **VS Code Extension**: Destaca segredos expostos diretamente na sua IDE enquanto você digita.
-- **Integração de IA**: Conecta-se aos hooks PreToolUse do Claude Code para bloquear a leitura de arquivos quando segredos são detectados, ajudando a garantir que você não vaze chaves de produção para servidores de IA.
+- **CLI (`@clipcloak/cli`)** *(Estável)*: Escaneie repositórios, use em CI/CD ou conecte-o ao Git.
+- **Git Hook** *(Estável)*: Impeça commits contendo segredos (`clipcloak install git-hook`).
+- **Integração de IA** *(Preview)*: Conecta-se aos hooks PreToolUse do Claude Code para bloquear a leitura de arquivos quando segredos são detectados, ajudando a garantir que você não vaze chaves de produção para servidores de IA.
+- **VS Code Extension** *(Preview)*: Destaca segredos expostos diretamente na sua IDE enquanto você digita.
+- **Desktop Daemon** *(Alpha)*: Um aplicativo Electron em segundo plano que monitora a área de transferência (clipboard) localmente, avisando-o e fornecendo um atalho de "Safe Paste" (`Ctrl+Shift+V`) para censura instantânea.
 
 ## 🚀 Início Rápido
 
@@ -55,7 +55,9 @@ Proteja seu sistema de arquivos ao usar o Claude Code:
 ```bash
 npx @clipcloak/cli install claude-code
 ```
-*A partir de agora, seus agentes autônomos serão bloqueados de ler arquivos que contenham credenciais reais.*
+*Adiciona uma camada local de proteção que pode bloquear operações suportadas de leitura de arquivo quando dados sensíveis são detectados.*
+
+**Nota:** O ClipCloak reduz o risco de exposição; não é um sandbox ou garantia contra o vazamento de segredos.
 
 ## 🧠 O Motor
 
