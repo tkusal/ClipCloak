@@ -20,7 +20,13 @@ function getClaudeHookMode(): 'standard' | 'strict' {
 }
 
 function outputDecision(decision: 'allow' | 'deny', reason?: string) {
-  const result: Record<string, unknown> = {
+  const result: {
+    hookSpecificOutput: {
+      hookEventName: string;
+      permissionDecision: 'allow' | 'deny';
+      permissionDecisionReason?: string;
+    };
+  } = {
     hookSpecificOutput: {
       hookEventName: 'PreToolUse',
       permissionDecision: decision,
