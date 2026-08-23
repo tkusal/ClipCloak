@@ -86,8 +86,8 @@ export async function runDoctor() {
     }
 
     // Run synthetic test to confirm detectors work
-    const testSecret = 'sk-proj-dummyKeyForTestingOpenAI12345';
-    const testText = `This is a test block containing a mock OpenAI key: ${testSecret}`;
+    const testSecret = 'AKIAJ2P33Y7WQ6U2G3A4';
+    const testText = `This is a test block containing a mock AWS key: ${testSecret}`;
     const { findings, errors } = scanText(testText, 'synthetic_test.txt', packs, {
       minSeverity: 'low',
       minConfidence: 0.1,
