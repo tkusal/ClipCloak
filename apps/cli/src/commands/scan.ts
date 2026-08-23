@@ -112,8 +112,8 @@ export async function runScan(target: string | undefined, options: ScanOptions) 
             if (errors && errors.length > 0) {
               allErrors.push({ file: fullPath, errors });
             }
-            if (findings.length > 0) {
-              allFindings.push({ file: fullPath, findings });
+            if (findings.length > 0 || skippedReason) {
+              allFindings.push({ file: fullPath, findings, skippedReason });
             }
           }
         }
@@ -151,8 +151,8 @@ export async function runScan(target: string | undefined, options: ScanOptions) 
           if (errors && errors.length > 0) {
             allErrors.push({ file: fullPath, errors });
           }
-          if (findings.length > 0) {
-            allFindings.push({ file: fullPath, findings });
+          if (findings.length > 0 || skippedReason) {
+            allFindings.push({ file: fullPath, findings, skippedReason });
           }
         }
       }
