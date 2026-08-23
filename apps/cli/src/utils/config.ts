@@ -15,7 +15,7 @@ export function loadConfigFile(cwd: string = process.cwd()): Partial<ClipCloakCo
         const content = fs.readFileSync(configPath, 'utf-8');
         return JSON.parse(content) as Partial<ClipCloakConfig>;
       } catch (err: unknown) {
-        throw new Error(`Failed to parse ${configPath}: ${err instanceof Error ? err.message : String(err)}`);
+        throw new Error(`Failed to parse ${configPath}: ${err instanceof Error ? (err instanceof Error ? err.message : String(err)) : String(err)}`);
       }
     }
 

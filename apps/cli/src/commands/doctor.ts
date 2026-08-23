@@ -72,7 +72,7 @@ export async function runDoctor() {
         console.log('ℹ️ No pre-commit hook installed.');
       }
     } catch (err: unknown) {
-      console.log(`⚠️ Failed to inspect Git hooks directory: ${err.message}`);
+      console.log(`⚠️ Failed to inspect Git hooks directory: ${(err instanceof Error ? err.message : String(err))}`);
     }
   }
   console.log('');
@@ -113,7 +113,7 @@ export async function runDoctor() {
     }
   } catch (err: unknown) {
     issuesFound = true;
-    console.log(`❌ Failed to verify packs or execute synthetic run: ${err.message}`);
+    console.log(`❌ Failed to verify packs or execute synthetic run: ${(err instanceof Error ? err.message : String(err))}`);
   }
 
   if (issuesFound) {

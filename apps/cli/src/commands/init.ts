@@ -18,7 +18,7 @@ export async function runInit() {
     console.log('You can now customize the engine behavior, ignored patterns, and enabled packs.');
     process.exit(0);
   } catch (err: unknown) {
-    const message = err instanceof Error ? err.message : String(err);
+    const message = err instanceof Error ? (err instanceof Error ? err.message : String(err)) : String(err);
     console.error(`[ERROR] Failed to create .clipcloak.json: ${message}`);
     process.exit(2);
   }

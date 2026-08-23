@@ -41,7 +41,7 @@ export async function runScan(target: string | undefined, options: ScanOptions) 
   try {
     config = resolveConfig(fileConfig, cliOptions);
   } catch (err: unknown) {
-    console.error(`❌ [ERROR] Config resolution failed: ${err.message}`);
+    console.error(`❌ [ERROR] Config resolution failed: ${(err instanceof Error ? err.message : String(err))}`);
     process.exit(2);
   }
 
@@ -51,7 +51,7 @@ export async function runScan(target: string | undefined, options: ScanOptions) 
   try {
     packs = getPacks(config.packs);
   } catch (err: unknown) {
-    console.error(`❌ [ERROR] Pack resolution failed: ${err.message}`);
+    console.error(`❌ [ERROR] Pack resolution failed: ${(err instanceof Error ? err.message : String(err))}`);
     process.exit(2);
   }
 
@@ -77,7 +77,7 @@ export async function runScan(target: string | undefined, options: ScanOptions) 
     } catch (err: unknown) {
       allErrors.push({
         file: 'stdin',
-        errors: [{ packId: 'core', detectorId: 'stdin-reader', errorMessage: err.message }],
+        errors: [{ packId: 'core', detectorId: 'stdin-reader', errorMessage: (err instanceof Error ? err.message : String(err)) }],
       });
     }
   }
@@ -120,7 +120,7 @@ export async function runScan(target: string | undefined, options: ScanOptions) 
         }
       }
     } catch (err: unknown) {
-      console.error(`❌ [ERROR] Failed to scan staged files: ${err.message}`);
+      console.error(`❌ [ERROR] Failed to scan staged files: ${(err instanceof Error ? err.message : String(err))}`);
       process.exit(2);
     }
   }
@@ -160,7 +160,7 @@ export async function runScan(target: string | undefined, options: ScanOptions) 
     } catch (err: unknown) {
       allErrors.push({
         file: fullPath,
-        errors: [{ packId: 'core', detectorId: 'target-scanner', errorMessage: err.message }],
+        errors: [{ packId: 'core', detectorId: 'target-scanner', errorMessage: (err instanceof Error ? err.message : String(err)) }],
       });
     }
   } else {

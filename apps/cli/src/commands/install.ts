@@ -30,7 +30,7 @@ function installClaudeHookInSettings(cwd: string) {
       const content = fs.readFileSync(settingsPath, 'utf8');
       settings = JSON.parse(content);
     } catch (err: unknown) {
-      throw new Error(`Failed to parse existing .claude/settings.json: ${err instanceof Error ? err.message : String(err)}. Please fix the JSON file before installing the hook.`);
+      throw new Error(`Failed to parse existing .claude/settings.json: ${err instanceof Error ? (err instanceof Error ? err.message : String(err)) : String(err)}. Please fix the JSON file before installing the hook.`);
     }
   }
 
@@ -112,7 +112,7 @@ fi
         console.log(`Hook location: ${preCommitPath}`);
         process.exit(0);
       } catch (err: unknown) {
-        console.error('❌ [ERROR] Failed to update git hook:', err.message);
+        console.error('❌ [ERROR] Failed to update git hook:', (err instanceof Error ? err.message : String(err)));
         process.exit(1);
       }
     } else {
@@ -123,7 +123,7 @@ fi
         console.log(`Hook location: ${preCommitPath}`);
         process.exit(0);
       } catch (err: unknown) {
-        console.error('❌ [ERROR] Failed to write git hook:', err.message);
+        console.error('❌ [ERROR] Failed to write git hook:', (err instanceof Error ? err.message : String(err)));
         process.exit(1);
       }
     }
@@ -143,7 +143,7 @@ fi
       console.log('✅ Installed Claude Code integration successfully.');
       process.exit(0);
     } catch (err: unknown) {
-      console.error('❌ [ERROR] Failed to update .claude/settings.json:', err.message);
+      console.error('❌ [ERROR] Failed to update .claude/settings.json:', (err instanceof Error ? err.message : String(err)));
       process.exit(1);
     }
   } else {
