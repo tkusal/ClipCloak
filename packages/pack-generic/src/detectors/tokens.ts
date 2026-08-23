@@ -9,8 +9,12 @@ export const tokensDetector: Detector = {
     const findings: Omit<Finding, 'packId'>[] = [];
 
     // Better regex for OpenAI (sk-proj... and normal sk-...)
-    const openaiRegex = /\bsk-(?!ant-)(?:proj-)?[A-Za-z0-9\-_]{20,}\b/g;
-    const anthropicRegex = /\bsk-ant-[A-Za-z0-9\-_]{20,}\b/g;
+    const openaiRegex = /\bsk-(?!ant-)(?:proj-)?[A-Za-z0-9_-]{20,}\b/g;
+    const anthropicRegex = /\bsk-ant-[A-Za-z0-9_-]{20,}\b/g;
+    const slackRegex = /\bxox[baprs]-[A-Za-z0-9-]+\b/g;
+    const npmRegex = /\bnpm_[A-Za-z0-9]{36}\b/g;
+    const sendgridRegex = /\bSG\.[A-Za-z0-9_-]{22}\.[A-Za-z0-9_-]{43}\b/g;
+    const gcpRegex = /\bAIza[0-9A-Za-z_-]{35}\b/g;
 
     const runPattern = (regex: RegExp, id: string, name: string) => {
       let match;
@@ -41,6 +45,10 @@ export const tokensDetector: Detector = {
 
     runPattern(openaiRegex, 'openai-api-key', 'OpenAI API Key');
     runPattern(anthropicRegex, 'anthropic-api-key', 'Anthropic API Key');
+    runPattern(slackRegex, 'slack-token', 'Slack Token');
+    runPattern(npmRegex, 'npm-token', 'NPM Token');
+    runPattern(sendgridRegex, 'sendgrid-api-key', 'SendGrid API Key');
+    runPattern(gcpRegex, 'gcp-api-key', 'GCP API Key');
 
     return findings;
   },

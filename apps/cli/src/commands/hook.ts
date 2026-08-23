@@ -164,11 +164,18 @@ export async function runClaudeCodeHook() {
         continue;
       }
 
-      if (findings.length > 0) {
+      const blockSeverityWeight = { low: 1, medium: 2, high: 3, critical: 4 };
+      const minBlockW = blockSeverityWeight[config.blockMinSeverity || 'high'];
+      const blockCategories = config.blockCategories || ['credential', 'secret'];
+
+      const blockableFindings = findings.filter(
+        (f) => blockSeverityWeight[f.severity] >= minBlockW && blockCategories.includes(f.category)
+      );
+
+      if (blockableFindings.length > 0) {
         // Find the highest severity finding
-        const worstFinding = [...findings].sort((a, b) => {
-          const severityWeight = { low: 1, medium: 2, high: 3, critical: 4 };
-          return severityWeight[b.severity] - severityWeight[a.severity];
+        const worstFinding = [...blockableFindings].sort((a, b) => {
+          return blockSeverityWeight[b.severity] - blockSeverityWeight[a.severity];
         })[0];
 
         const reason = `ClipCloak blocked reading ${filePath} because it contains potential sensitive data (${worstFinding.detectorId}, severity: ${worstFinding.severity.toUpperCase()}). Note: Claude Code @file references bypass PreToolUse hooks.`;

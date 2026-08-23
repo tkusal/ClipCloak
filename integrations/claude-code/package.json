@@ -1,6 +1,6 @@
 {
   "name": "@clipcloak/claude-code",
-  "version": "0.2.1",
+  "version": "1.0.0",
   "description": "Claude Code hook adapter for ClipCloak",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",

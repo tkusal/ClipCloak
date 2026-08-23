@@ -37,7 +37,7 @@ describe('Core Redaction', () => {
       };
 
       const result = applyRedaction(text, [finding]);
-      expect(result).toBe('Here is my key: sk-proj-********1234. Do not share!');
+      expect(result).toBe('Here is my key: [REDACTED:OPENAI]. Do not share!');
     });
 
     it('should handle multiple findings safely', () => {

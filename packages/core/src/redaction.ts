@@ -66,7 +66,7 @@ export function applyRedaction(text: string, findings: Finding[]): string {
     if (finding.start < lastIndex) continue;
 
     result += text.slice(lastIndex, finding.start);
-    result += finding.redactedPreview;
+    result += `[REDACTED:${finding.detectorId.toUpperCase()}]`;
     lastIndex = finding.end;
   }
 

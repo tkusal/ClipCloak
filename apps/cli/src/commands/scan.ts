@@ -14,6 +14,7 @@ export interface ScanOptions {
   format?: string;
   severity?: Severity;
   confidence?: number;
+  strict?: boolean;
 }
 
 export async function runScan(target: string | undefined, options: ScanOptions) {
@@ -255,6 +256,11 @@ export async function runScan(target: string | undefined, options: ScanOptions) 
       }
     }
 
+    const skippedFiles = allFindings.filter((r) => r.skippedReason);
+    if (skippedFiles.length > 0) {
+      console.log(`\n⚠️  ${skippedFiles.length} file(s) skipped (e.g., ${skippedFiles[0].skippedReason}).`);
+    }
+
     if (blockableFindings.length > 0) {
       const totalFindings = allFindings.reduce((acc, curr) => acc + curr.findings.length, 0);
       console.log(
@@ -263,6 +269,9 @@ export async function runScan(target: string | undefined, options: ScanOptions) 
       process.exit(1);
     } else {
       console.log(i18n.get('clean', t));
+      if (options.strict && skippedFiles.length > 0) {
+        process.exit(2);
+      }
       process.exit(0);
     }
   }

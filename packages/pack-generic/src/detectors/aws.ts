@@ -44,3 +44,46 @@ export const awsDetector: Detector = {
     return findings;
   },
 };
+
+export const awsSecretKeyDetector: Detector = {
+  id: 'aws-secret-key',
+  category: 'credential',
+  detect(text: string, _context?: DetectionContext) {
+    // AWS Secret Access Keys are 40 base64 characters
+    const regex = /(?<![A-Za-z0-9/+=])[A-Za-z0-9/+=]{40}(?![A-Za-z0-9/+=])/g;
+    const findings = [];
+    let match;
+
+    while ((match = regex.exec(text)) !== null) {
+      const token = match[0];
+
+      if (isObviousDummyString(token)) {
+        continue;
+      }
+
+      const entropy = shannonEntropy(token);
+      // Requires high entropy (random base64 usually > 4.5)
+      if (entropy < 4.0) {
+        continue;
+      }
+
+      let confidence = 0.8;
+      if (isSoftDummyString(token)) {
+        confidence = 0.6;
+      }
+
+      findings.push({
+        detectorId: this.id,
+        category: this.category,
+        severity: 'critical' as const,
+        confidence,
+        start: match.index,
+        end: match.index + token.length,
+        redactedPreview: createRedactedPreview(token, this.id, { strategy: 'partial' }),
+        reason: 'Matches high-entropy 40-character base64 AWS Secret Key pattern',
+      });
+    }
+
+    return findings;
+  },
+};

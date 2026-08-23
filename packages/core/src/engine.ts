@@ -44,10 +44,7 @@ export function detect(
     }
   }
 
-  // Deduplicate and resolve overlapping findings
-  allFindings = resolveOverlaps(allFindings);
-
-  // Apply filters from options
+  // Apply filters from options first to avoid low-confidence findings eliminating valid findings during overlap
   if (options.minConfidence !== undefined) {
     allFindings = allFindings.filter((f) => f.confidence >= options.minConfidence!);
   }
@@ -57,6 +54,9 @@ export function detect(
     const minW = severityWeight[options.minSeverity];
     allFindings = allFindings.filter((f) => severityWeight[f.severity] >= minW);
   }
+
+  // Deduplicate and resolve overlapping findings AFTER filtering
+  allFindings = resolveOverlaps(allFindings);
 
   return { findings: allFindings, errors };
 }

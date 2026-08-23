@@ -1,6 +1,6 @@
 {
   "name": "@clipcloak/desktop",
-  "version": "0.2.0",
+  "version": "1.0.0",
   "description": "ClipCloak Desktop App (Clipboard Protection)",
   "private": true,
   "main": "dist/main.js",

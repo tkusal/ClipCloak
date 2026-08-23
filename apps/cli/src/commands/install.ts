@@ -29,8 +29,8 @@ function installClaudeHookInSettings(cwd: string) {
     try {
       const content = fs.readFileSync(settingsPath, 'utf8');
       settings = JSON.parse(content);
-    } catch (err) {
-      console.warn(`[WARN] Failed to parse existing .claude/settings.json. Overwriting.`, err);
+    } catch (err: unknown) {
+      throw new Error(`Failed to parse existing .claude/settings.json: ${err instanceof Error ? err.message : String(err)}. Please fix the JSON file before installing the hook.`);
     }
   }
 
@@ -42,7 +42,7 @@ function installClaudeHookInSettings(cwd: string) {
   }
 
   const newHookEntry = {
-    matcher: 'Read|ViewFile|View|fs_read_file|readFile|cat',
+    matcher: 'Read|ViewFile|View|fs_read_file|readFile|cat|Bash|Grep',
     hooks: [
       {
         type: 'command',

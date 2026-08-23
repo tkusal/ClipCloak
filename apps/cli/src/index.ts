@@ -10,7 +10,7 @@ const program = new Command();
 program
   .name('clipcloak')
   .description('Detects and redacts sensitive data before it reaches AI')
-  .version('0.2.0');
+  .version('1.0.0');
 
 program
   .command('scan')
@@ -19,9 +19,10 @@ program
   .option('--stdin', 'Scan from standard input')
   .option('--staged', 'Scan git staged files')
   .option('--packs <packs>', 'Comma-separated list of packs to use (e.g., generic,br,eu)')
-  .option('--format <format>', 'Output format (text, json)', 'text')
+  .option('--format <format>', 'Output format (text, json, sarif)', 'text')
   .option('--severity <severity>', 'Minimum severity level (low, medium, high, critical)')
   .option('--confidence <confidence>', 'Minimum confidence level (0.0 to 1.0)', parseFloat)
+  .option('--strict', 'Fail the CI (exit 2) if files were skipped or unknown')
   .action(async (target, options) => {
     await runScan(target, options);
   });

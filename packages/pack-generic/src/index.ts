@@ -1,5 +1,5 @@
 import type { DetectorPack } from '@clipcloak/core';
-import { awsDetector } from './detectors/aws.js';
+import { awsDetector, awsSecretKeyDetector } from './detectors/aws.js';
 import { tokensDetector } from './detectors/tokens.js';
 import { jwtDetector } from './detectors/jwt.js';
 import { privateKeyDetector } from './detectors/private-key.js';
@@ -14,6 +14,7 @@ export const genericPack: DetectorPack = {
   name: 'Generic Secrets & PII',
   detectors: [
     awsDetector,
+    awsSecretKeyDetector,
     tokensDetector,
     jwtDetector,
     privateKeyDetector,

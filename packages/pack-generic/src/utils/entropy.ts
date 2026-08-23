@@ -26,7 +26,8 @@ export function isObviousDummyString(str: string): boolean {
     lower === 'pass' ||
     lower === 'password' ||
     lower === 'secret' ||
-    /^([a-z0-9])\1+$/.test(lower) // Repeated characters like 'aaaaa' or '00000000000'
+    lower.includes('00000000') ||
+    /^([a-z0-9])\1+$/.test(lower.replace(/[^a-z0-9]/g, '')) // Repeated characters ignoring punctuation
   ) {
     return true;
   }

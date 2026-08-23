@@ -1,10 +1,12 @@
 import * as vscode from 'vscode';
-import { detect } from '@clipcloak/core';
+import * as fs from 'node:fs';
+import * as path from 'node:path';
+import { detect, resolveConfig } from '@clipcloak/core';
 import genericPack from '@clipcloak/pack-generic';
 import brPack from '@clipcloak/pack-br';
 import euPack from '@clipcloak/pack-eu';
 
-const ALL_PACKS = [genericPack, brPack, euPack];
+const ALL_PACKS_MAP: Record<string, any> = { generic: genericPack, br: brPack, eu: euPack };
 
 export function activate(context: vscode.ExtensionContext) {
   const diagnosticCollection = vscode.languages.createDiagnosticCollection('clipcloak');
@@ -15,9 +17,28 @@ export function activate(context: vscode.ExtensionContext) {
     if (document.uri.scheme !== 'file') return;
     if (document.getText().length > 5 * 1024 * 1024) return;
 
+    let config: any = { minSeverity: 'medium', packs: ['generic', 'br', 'eu'] };
+    const workspaceFolder = vscode.workspace.getWorkspaceFolder(document.uri);
+    
+    if (workspaceFolder) {
+      const configPath = path.join(workspaceFolder.uri.fsPath, '.clipcloak.json');
+      if (fs.existsSync(configPath)) {
+        try {
+          const fileConfig = JSON.parse(fs.readFileSync(configPath, 'utf8'));
+          config = resolveConfig(fileConfig, {});
+        } catch {
+          // ignore parsing errors
+        }
+      }
+    }
+
+    const activePacks = (config.packs || ['generic', 'br', 'eu'])
+      .map((p: string) => ALL_PACKS_MAP[p])
+      .filter(Boolean);
+
     const text = document.getText();
-    const { findings } = detect(text, ALL_PACKS, {
-      minSeverity: 'medium',
+    const { findings } = detect(text, activePacks, {
+      minSeverity: config.minSeverity || 'medium',
       context: { filename: document.fileName },
     });
 
