@@ -3,6 +3,9 @@ import type { Detector, DetectionContext } from '@clipcloak/core';
 export const privateKeyDetector: Detector = {
   id: 'private-key',
   category: 'credential',
+  defaultSeverity: 'critical',
+  defaultConfidence: 0.99,
+  description: 'PEM private key blocks',
   detect(text: string, _context?: DetectionContext) {
     const findings = [];
     const regex =

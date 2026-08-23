@@ -4,6 +4,9 @@ import { createRedactedPreview } from '@clipcloak/core';
 export const phoneBrDetector: Detector = {
   id: 'phone-br',
   category: 'pii',
+  defaultSeverity: 'low',
+  defaultConfidence: 0.7,
+  description: 'Brazilian mobile and landline formats',
   detect(text: string, _context?: DetectionContext) {
     const findings = [];
 

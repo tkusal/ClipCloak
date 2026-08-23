@@ -15,12 +15,14 @@ for (const pack of packs) {
   if (pack.id === 'br') md += 'Designed to detect Brazilian regional identifier formats with deterministic verifications.\n\n';
   if (pack.id === 'eu') md += 'Designed to detect European regional identifier formats.\n\n';
 
-  md += '| Detector ID | Category | Description |\n';
-  md += '| ----------- | -------- | ----------- |\n';
+  md += '| Detector ID | Category | Severity | Confidence | Description |\n';
+  md += '| ----------- | -------- | -------- | ---------- | ----------- |\n';
 
   for (const detector of pack.detectors) {
-    let desc = detector.id;
-    md += `| \`${detector.id}\` | \`${detector.category}\` | ${desc} |\n`;
+    const sev = detector.defaultSeverity || 'medium';
+    const conf = detector.defaultConfidence || 0.9;
+    const desc = detector.description || detector.id;
+    md += `| \`${detector.id}\` | \`${detector.category}\` | \`${sev}\` | \`${conf}\` | ${desc} |\n`;
   }
   md += '\n---\n\n';
 }

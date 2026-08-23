@@ -6,6 +6,9 @@ import { isObviousDummyString, isSoftDummyString, shannonEntropy } from '../util
 export const awsDetector: Detector = {
   id: 'aws-access-key',
   category: 'credential',
+  defaultSeverity: 'critical',
+  defaultConfidence: 0.9,
+  description: 'Matches standard AWS Access Key IDs',
   detect(text: string, _context?: DetectionContext) {
     const regex = /\b(AKIA|ASIA)[A-Z0-9]{16}\b/g;
     const findings = [];
@@ -48,6 +51,9 @@ export const awsDetector: Detector = {
 export const awsSecretKeyDetector: Detector = {
   id: 'aws-secret-key',
   category: 'credential',
+  defaultSeverity: 'critical',
+  defaultConfidence: 0.8,
+  description: 'Matches high-entropy 40-character base64 AWS Secret Key',
   detect(text: string, _context?: DetectionContext) {
     // AWS Secret Access Keys are 40 base64 characters
     const regex = /(?<![A-Za-z0-9/+=])[A-Za-z0-9/+=]{40}(?![A-Za-z0-9/+=])/g;

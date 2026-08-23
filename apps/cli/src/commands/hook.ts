@@ -41,6 +41,7 @@ function outputDecision(decision: 'allow' | 'deny', reason?: string) {
 
 export async function runClaudeCodeHook() {
   const mode = getClaudeHookMode();
+  const cwd = process.cwd();
 
   try {
     let input = '';
@@ -78,20 +79,24 @@ export async function runClaudeCodeHook() {
     const fileReadTools = ['Read', 'ViewFile', 'View', 'fs_read_file', 'readFile', 'cat', 'Bash', 'Grep'];
 
     if (!toolName || !fileReadTools.includes(toolName)) {
-      outputDecision('allow');
+      if (mode === 'strict') {
+        return outputDecision('deny', 'Unknown tool not allowed in strict mode. Only standard read tools are supported.');
+      }
+      return outputDecision('allow');
     }
 
-    const cwd = process.cwd();
     const pathsToScan: string[] = [];
 
+    // 1. Extract paths from shell commands
     if (toolName === 'Bash' || toolName === 'Grep') {
       const commandOrPattern = toolInput.command || toolInput.pattern || '';
-      // Heuristic: extract anything that looks like a file path after standard read commands
-      const regex = /(?:cat|grep|head|tail|less|more|vi|vim|nano)\s+(?:-[a-zA-Z0-9]+\s+)*(['"]?)([a-zA-Z0-9_.\-/\\][\w\s.\-/\\]*)\1/g;
+      // Heuristic: extract anything that looks like a file path after standard read commands.
+      // Now stops at the first unescaped space to avoid taking && or pipes.
+      const regex = /(?:cat|grep|head|tail|less|more|vi|vim|nano)\s+(?:-[a-zA-Z0-9]+\s+)*(['"]?)([a-zA-Z0-9_.\-/\\][\w\s.\-/\\]*?)\1(?=\s|$|&&|\|\||;|>|<|\|)/g;
       let match;
       while ((match = regex.exec(commandOrPattern)) !== null) {
         if (match[2] && !match[2].startsWith('-')) {
-          pathsToScan.push(match[2]);
+          pathsToScan.push(match[2].trim());
         }
       }
       

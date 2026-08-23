@@ -25,6 +25,9 @@ function luhnCheck(num: string): boolean {
 export const creditCardDetector: Detector = {
   id: 'credit-card',
   category: 'financial',
+  defaultSeverity: 'high',
+  defaultConfidence: 0.9,
+  description: 'Credit Card numbers validated with the Luhn algorithm',
   detect(text: string, _context?: DetectionContext) {
     const findings = [];
     // Match 13 to 19 digit sequences, allowing for spaces or dashes between blocks

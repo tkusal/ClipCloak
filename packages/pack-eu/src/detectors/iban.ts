@@ -29,6 +29,9 @@ function isValidIban(iban: string): boolean {
 export const ibanDetector: Detector = {
   id: 'iban',
   category: 'financial',
+  defaultSeverity: 'high',
+  defaultConfidence: 0.9,
+  description: 'International Bank Account Numbers validated via check digits',
   detect(text: string, _context?: DetectionContext) {
     const findings = [];
 

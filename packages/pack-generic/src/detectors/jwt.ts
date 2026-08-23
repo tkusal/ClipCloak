@@ -5,6 +5,9 @@ import { shannonEntropy } from '../utils/entropy.js';
 export const jwtDetector: Detector = {
   id: 'jwt',
   category: 'credential',
+  defaultSeverity: 'high',
+  defaultConfidence: 0.8,
+  description: 'Standard JSON Web Tokens checking Shannon Entropy',
   detect(text: string, _context?: DetectionContext) {
     const findings = [];
     // Basic JWT regex: eyJ... (header) . eyJ... (payload) . ... (signature)

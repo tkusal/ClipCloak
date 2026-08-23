@@ -5,6 +5,9 @@ import { isDummyString } from '../utils/entropy.js';
 export const connectionStringDetector: Detector = {
   id: 'connection-string',
   category: 'credential',
+  defaultSeverity: 'high',
+  defaultConfidence: 0.8,
+  description: 'Connection URIs containing plaintext passwords',
   detect(text: string, _context?: DetectionContext) {
     const findings = [];
     // Matches e.g. postgres://user:password@host:port/db

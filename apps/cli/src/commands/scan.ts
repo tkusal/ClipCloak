@@ -183,7 +183,15 @@ export async function runScan(target: string | undefined, options: ScanOptions) 
   // Strict mode: Treat skips and errors as blocking
   const skippedFiles = allFindings.filter((r) => r.status === 'skipped');
   const errorFiles = allFindings.filter((r) => r.status === 'error');
-  const strictViolations = options.strict && (skippedFiles.length > 0 || errorFiles.length > 0);
+  // Include allErrors.length to catch errors that didn't generate an explicit error ScanResult
+  const strictViolations = options.strict && (skippedFiles.length > 0 || errorFiles.length > 0 || allErrors.length > 0);
+
+  let exitCode = 0;
+  if (blockableFindings.length > 0) {
+    exitCode = 1;
+  } else if (strictViolations) {
+    exitCode = 2;
+  }
 
   // Print results
   if (options.format === 'json') {
@@ -227,8 +235,8 @@ export async function runScan(target: string | undefined, options: ScanOptions) 
       file: { en: 'File:', pt: 'Arquivo:' },
       confidence: { en: 'confidence:', pt: 'confiança:' },
       found: {
-        en: '❌ Found {0} blocking secret(s) ({1} total findings).',
-        pt: '❌ Encontrado {0} segredo(s) impeditivo(s) ({1} total).',
+        en: '🚨 Found {0} blocking secret(s) ({1} total findings).',
+        pt: '🚨 Encontrado {0} segredo(s) impeditivo(s) ({1} total).',
       },
       clean: {
         en: '✅ No blocking secrets found.',
@@ -238,11 +246,11 @@ export async function runScan(target: string | undefined, options: ScanOptions) 
 
     for (const result of allFindings) {
       if (result.findings.length > 0) {
-        console.log(`\n🛡️  ${i18n.get('file', t)} ${result.file}`);
+        console.log(`\n📄  ${i18n.get('file', t)} ${result.file}`);
         for (const f of result.findings) {
           const isBlockable =
             blockSeverityWeight[f.severity] >= minBlockW && blockCategories.includes(f.category);
-          const prefix = isBlockable ? '❌ [BLOCK]' : '⚠️ [WARN]';
+          const prefix = isBlockable ? '⛔ [BLOCK]' : '⚠️ [WARN]';
           console.log(
             `  - ${prefix} ${f.detectorId}: ${f.redactedPreview} (${i18n.get('confidence', t)} ${f.confidence})`,
           );
@@ -251,14 +259,15 @@ export async function runScan(target: string | undefined, options: ScanOptions) 
     }
 
     if (skippedFiles.length > 0) {
-      console.log(`\n⚠️  ${skippedFiles.length} file(s) skipped (e.g., ${skippedFiles[0].skippedReason}).`);
+      console.log(`\n⏭️  ${skippedFiles.length} file(s) skipped (e.g., ${skippedFiles[0].skippedReason}).`);
     }
 
-    if (errorFiles.length > 0) {
-      console.log(`\n⚠️  ${errorFiles.length} file(s) encountered errors.`);
+    const totalErrors = errorFiles.length + allErrors.filter(e => !errorFiles.some(ef => ef.file === e.file)).length;
+    if (totalErrors > 0) {
+      console.log(`\n❌  ${totalErrors} file(s) encountered errors.`);
     }
 
-    if (blockableFindings.length > 0) {
+    if (exitCode === 1) {
       console.log(
         '\n' +
           i18n
@@ -266,15 +275,14 @@ export async function runScan(target: string | undefined, options: ScanOptions) 
             .replace('{0}', String(blockableFindings.length))
             .replace('{1}', String(allFindings.flatMap((r) => r.findings).length)),
       );
-      process.exit(1);
-    } else if (strictViolations) {
+    } else if (exitCode === 2) {
       console.log(
-        `\n❌ [STRICT MODE] Run blocked due to ${skippedFiles.length} skipped files and ${errorFiles.length} errors.`
+        `\n⛔ [STRICT MODE] Run blocked due to ${skippedFiles.length} skipped files and ${totalErrors} errors.`
       );
-      process.exit(2);
     } else {
       console.log('\n' + i18n.get('clean', t));
-      process.exit(0);
     }
   }
+
+  process.exit(exitCode);
 }

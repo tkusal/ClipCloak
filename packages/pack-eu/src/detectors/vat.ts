@@ -3,7 +3,10 @@ import { createRedactedPreview } from '@clipcloak/core';
 
 export const vatDetector: Detector = {
   id: 'eu-vat',
-  category: 'pii', // Or financial depending on interpretation
+  category: 'pii',
+  defaultSeverity: 'low',
+  defaultConfidence: 0.6,
+  description: 'European Value Added Tax numbers', // Or financial depending on interpretation
   detect(text: string, _context?: DetectionContext) {
     const findings = [];
 

@@ -4,6 +4,9 @@ import { createRedactedPreview } from '@clipcloak/core';
 export const emailDetector: Detector = {
   id: 'email',
   category: 'pii',
+  defaultSeverity: 'low',
+  defaultConfidence: 0.9,
+  description: 'Standard email address format',
   detect(text: string, _context?: DetectionContext) {
     const findings = [];
     const regex = /\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}\b/g;
@@ -27,7 +30,10 @@ export const emailDetector: Detector = {
 
 export const ipv4Detector: Detector = {
   id: 'ipv4',
-  category: 'pii', // Network identifiable info
+  category: 'pii',
+  defaultSeverity: 'low',
+  defaultConfidence: 0.8,
+  description: 'Standard IPv4 address formats', // Network identifiable info
   detect(text: string, _context?: DetectionContext) {
     const findings = [];
     // Standard IPv4 regex (0-255 octets)
