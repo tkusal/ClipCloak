@@ -1,15 +1,16 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
+import type { MockInstance } from 'vitest';
 import fs from 'node:fs';
 import { runClaudeCodeHook } from '../src/commands/hook.js';
 
 vi.mock('node:fs');
 
 describe('CLI: Claude Code Hook', () => {
-  let exitSpy: any;
-  let logSpy: any;
-  let mockFsExistsSync: any;
-  let mockFsReadFileSync: any;
-  let mockFsStatSync: any;
+  let exitSpy: MockInstance;
+  let logSpy: MockInstance;
+  let mockFsExistsSync: MockInstance;
+  let mockFsReadFileSync: MockInstance;
+  let mockFsStatSync: MockInstance;
 
   beforeEach(() => {
     vi.resetAllMocks();
@@ -58,11 +59,11 @@ describe('CLI: Claude Code Hook', () => {
       return {
         isFile: () => true,
         size: options.fileSize || 1024,
-      } as any;
+      } as unknown as fs.Stats;
     });
 
     vi.spyOn(fs, 'openSync').mockImplementation(() => 999);
-    vi.spyOn(fs, 'readSync').mockImplementation((fd, buffer: any, offset, length, position) => {
+    vi.spyOn(fs, 'readSync').mockImplementation((_fd, buffer: Buffer | Uint8Array, _offset, _length, _position) => {
       if (options.isBinary) {
         buffer[0] = 0;
       } else {
