@@ -1,155 +1,90 @@
-# ClipCloak 🛡️
+<div align="center">
+  <h1>🛡️ ClipCloak</h1>
+  <p><strong>The absolute shield against secret leaks for developers and AI agents.</strong></p>
 
-*[Read in English](#english)* | *[Leia em Português](#portugues)*
-
----
-
-<a name="english"></a>
-## English
-
-**"Never accidentally paste secrets into AI again — especially while vibe coding."**
-
-ClipCloak is a 100% open-source, local-first security layer designed to detect and redact sensitive data (API keys, credentials, PII, etc.) BEFORE they are pasted into AI chats or read by AI coding agents like Claude Code, Cursor, or Windsurf.
-
-### The Problem It Solves
-Developers often accidentally expose sensitive information when using AI tools. This happens either by manually copy-pasting secrets into a prompt, or when an AI agent automatically reads files like `.env`, logs, or configuration files containing credentials and sends them as context to a language model.
-
-### Threat Model & Limitations
-**ClipCloak mitigates:**
-- API keys, JWTs, and tokens accidentally copied to prompts.
-- Private keys and connection strings present in files read by AI agents.
-- PII (Personally Identifiable Information) and financial data.
-- Secrets accidentally added to Git commits (via CLI/pre-commit).
-
-**ClipCloak DOES NOT protect against:**
-- Malware on your machine or malicious browser extensions.
-- OS compromise.
-- AI Agents that deliberately bypass ClipCloak's hooks.
-- Users who intentionally ignore warnings.
-- *ClipCloak is an additional layer of prevention against accidental exposure, not a silver bullet DLP solution.*
-
-### Privacy Principles (Non-negotiable)
-- **100% Local:** No network calls whatsoever. No `fetch`, no WebSockets.
-- **Zero Telemetry:** No tracking, no external logging.
-- **No Secret Storage:** Detected secrets are never saved to disk or logged. They exist only in memory during redaction.
-
-### Project Structure (Architecture)
-The project is built as a modular monorepo using TypeScript and `pnpm workspaces`:
-- `packages/core`: The main detection engine. It contains no hardcoded regional rules.
-- `packages/pack-generic`: Detects generic secrets (AWS keys, OpenAI keys, CC, emails, IPs).
-- `packages/pack-br`: Detects Brazilian PII (CPF, CNPJ, PIX).
-- `packages/pack-eu`: Detects European PII (IBAN, VAT).
-- `apps/cli`: Command Line Interface for on-demand scanning.
-- `integrations/claude-code`: Native hook for Claude Code to block sensitive file reads.
-
-### How to Install, Use & Test Locally
-Currently, ClipCloak is in its MVP phase and not yet published to npm. To test it locally:
-
-1. **Clone and Install:**
-   ```bash
-   git clone https://github.com/tkusal/ClipCloak.git
-   cd ClipCloak
-   pnpm install
-   pnpm run build
-   ```
-
-2. **Test the CLI (Local execution):**
-   You can run the CLI directly from the source using `node`:
-   ```bash
-   node apps/cli/dist/index.js scan .env
-   node apps/cli/dist/index.js scan src/
-   ```
-
-3. **Run Unit Tests:**
-   ```bash
-   pnpm run test
-   ```
-
-### Next Steps & Roadmap
-Currently in **v0.2.0 (Core & CLI Preview)**. The detection engine is stable, supporting local scanning, staged files, configurations, and environment checks.
-
-- [x] **v0.2.0**: Core & CLI Preview (Robust scanner, `.clipcloak.json` config, Shannon entropy checks, CLI staged scans, `init`, `doctor`).
-- [ ] **v0.3.0**: Stable CLI (Config validation, fail-closed CLI exits, dynamic Git hook installer, Claude Code integration command).
-- [ ] **v0.4.0**: Publish to npm registry.
-- [ ] **v0.5.0**: AI Agents hooks and Desktop Beta (Electron 43, clipboard fingerprinting, tray controls).
-- [ ] **v0.6.0+**: VS Code Extensions, more regional detector packs.
-
-### Contributing
-We welcome contributions! Please see our [CONTRIBUTING.md](./CONTRIBUTING.md) for details.
-**To create a new pack:** Create a new folder under `packages/` (e.g., `pack-uk`), implement the `DetectorPack` interface, and add your deterministic validators. We prioritize deterministic validation over simple Regex to avoid false positives.
+  <p>
+    <a href="https://github.com/tkusal/ClipCloak/actions"><img src="https://img.shields.io/github/actions/workflow/status/tkusal/ClipCloak/ci.yml?branch=main" alt="CI Status"></a>
+    <a href="https://www.npmjs.com/package/@clipcloak/cli"><img src="https://img.shields.io/npm/v/@clipcloak/cli.svg" alt="NPM Version"></a>
+    <a href="./LICENSE"><img src="https://img.shields.io/badge/license-MIT-blue.svg" alt="License"></a>
+  </p>
+  <p>
+    <em>Leia isso em <a href="README.pt-br.md">Português (Brasil)</a></em>
+  </p>
+</div>
 
 ---
 
-<a name="portugues"></a>
-## Português
+ClipCloak is an ultra-fast, offline, cross-platform ecosystem designed to detect and redact sensitive data (API keys, passwords, credentials, PII) *before* it leaves your machine. 
 
-**"Nunca mais vaze segredos acidentalmente para a IA — especialmente durante o vibe coding."**
+Whether you're pushing code, pasting to untrusted apps, or letting an autonomous AI agent roam your filesystem, ClipCloak stands between your secrets and the outside world.
 
-O ClipCloak é uma camada de segurança 100% open-source e executada localmente, desenvolvida para detectar e ofuscar dados sensíveis (chaves de API, credenciais, PII, etc.) ANTES que eles sejam colados em chats de IA ou lidos por agentes de código como Claude Code, Cursor ou Windsurf.
+## 🌟 Ecosystem
 
-### O Problema que Resolve
-Desenvolvedores frequentemente expõem acidentalmente informações sensíveis ao usar ferramentas de IA. Isso ocorre seja copiando e colando segredos manualmente em um prompt, ou quando um agente de IA lê automaticamente arquivos como `.env`, logs ou arquivos de configuração e os envia como contexto para um modelo de linguagem.
+ClipCloak is built on a highly modular engine and provides tools for every developer workflow:
 
-### Modelo de Ameaça e Limitações
-**O ClipCloak mitiga:**
-- Chaves de API, JWTs e tokens copiados acidentalmente.
-- Chaves privadas e connection strings lidas por agentes de IA.
-- PII (Informações Pessoais Identificáveis) e dados financeiros.
-- Segredos adicionados acidentalmente em commits do Git.
+- **CLI (`@clipcloak/cli`)**: Scan repositories, use it in CI/CD, or hook it to Git.
+- **Git Hook**: Automatically prevent commits containing secrets (`clipcloak install git-hook`).
+- **Desktop Daemon**: A background Electron app that intercepts your operating system's clipboard, warning you and providing a "Safe Paste" shortcut (`Ctrl+Shift+V`) for instant redaction.
+- **VS Code Extension**: Highlights exposed secrets directly in your IDE as you type.
+- **AI Integration (`@clipcloak/claude-code`)**: Seamlessly hooks into Claude Code's MCP (Model Context Protocol) to redact secrets before the LLM reads them, ensuring you don't leak production keys to AI vendors.
 
-**O ClipCloak NÃO protege contra:**
-- Malware na sua máquina ou extensões de navegador maliciosas.
-- Comprometimento do Sistema Operacional.
-- Agentes de IA que ignorem deliberadamente os hooks do ClipCloak.
-- Usuários que intencionalmente ignorem um alerta.
-- *O ClipCloak é uma camada adicional de prevenção contra exposição acidental, e não uma solução completa de DLP infalível.*
+## 🚀 Quick Start
 
-### Princípios de Privacidade (Inegociáveis)
-- **100% Local:** Nenhuma chamada de rede. Sem `fetch`, sem WebSockets.
-- **Zero Telemetria:** Sem rastreamento, sem logs externos.
-- **Nenhum Armazenamento de Segredos:** Segredos detectados nunca são salvos em disco ou logados. Eles existem apenas em memória durante a ofuscação.
+### 1. Command Line Interface (CLI)
+Install globally or run via `npx`:
 
-### Estrutura do Projeto (Arquitetura)
-O projeto é construído como um monorepo modular usando TypeScript e `pnpm workspaces`:
-- `packages/core`: O motor principal de detecção. Não contém regras regionais hardcoded.
-- `packages/pack-generic`: Segredos genéricos (chaves AWS, chaves OpenAI, CC, e-mails, IPs).
-- `packages/pack-br`: PII brasileiro (CPF, CNPJ, PIX).
-- `packages/pack-eu`: PII europeu (IBAN, VAT).
-- `apps/cli`: CLI para escaneamento sob demanda.
-- `integrations/claude-code`: Hook nativo para o Claude Code bloquear a leitura de arquivos sensíveis.
+```bash
+# Scan a specific file or folder
+npx @clipcloak/cli scan ./src
 
-### Como Instalar, Usar e Testar Localmente
-Atualmente, o ClipCloak está em fase MVP e ainda não foi publicado no npm. Para testá-lo localmente:
+# Scan only staged files in git
+npx @clipcloak/cli scan --staged
 
-1. **Clonar e Instalar:**
-   ```bash
-   git clone https://github.com/tkusal/ClipCloak.git
-   cd ClipCloak
-   pnpm install
-   pnpm run build
-   ```
+# Install the pre-commit hook in your repo
+npx @clipcloak/cli install git-hook
+```
 
-2. **Testar a CLI (Execução Local):**
-   Você pode rodar a CLI diretamente da pasta compilada usando o `node`:
-   ```bash
-   node apps/cli/dist/index.js scan .env
-   node apps/cli/dist/index.js scan src/
-   ```
+### 2. Desktop Clipboard Protection
+1. Clone the repository and build the monorepo (`pnpm install && pnpm build`).
+2. Run the desktop daemon: `cd apps/desktop && pnpm start`.
+3. Copy a secret (e.g., a dummy GitHub PAT).
+4. See the native OS notification! Press `Ctrl+Shift+V` to paste the redacted version anywhere.
 
-3. **Rodar os Testes Unitários:**
-   ```bash
-   pnpm run test
-   ```
+### 3. Claude Code AI Protection
+Protect your filesystem when using Claude Code:
+```bash
+npx @clipcloak/cli install claude-code
+```
+*Your autonomous agents will now only see `[REDACTED_BY_CLIPCLOAK]` instead of your `.env` secrets.*
 
-### Próximas Etapas e Roadmap
-Atualmente na **v0.2.0 (Core & CLI Preview)**. O motor de detecção é estável, suportando escaneamento local, arquivos staged, configurações e diagnósticos de ambiente.
+## 🧠 The Engine
 
-- [x] **v0.2.0**: Core & CLI Preview (Scanner robusto, config `.clipcloak.json`, entropia de Shannon, escaneamento de staged, `init`, `doctor`).
-- [ ] **v0.3.0**: CLI Estável (Validação de config, saída fail-closed, instalador de Git hook dinâmico, comando de integração Claude Code).
-- [ ] **v0.4.0**: Publicação no npm registry.
-- [ ] **v0.5.0**: Integração estável de IA e Desktop Beta (Electron 43, clipboard fingerprinting, bandeja).
-- [ ] **v0.6.0+**: Extensões VS Code, mais pacotes de detectores regionais.
+ClipCloak uses a highly optimized Node.js core (`@clipcloak/core`). It avoids the dreaded "false positive fatigue" associated with simple RegEx scanners by using:
+- **Shannon Entropy Analysis**: Distinguishes true randomly-generated API keys from dummy strings like `EXAMPLE_KEY` or `AKIAIOSFODNN7EXAMPLE`.
+- **Modular Packs**: Enable only the detectors you need:
+  - `@clipcloak/pack-generic`: AWS, GitHub, Stripe, JWTs, IPs, Emails, Credit Cards.
+  - `@clipcloak/pack-br`: Brazilian PII (CPF, CNPJ, Pix).
+  - `@clipcloak/pack-eu`: European PII (IBAN, VAT).
 
-### Contribuindo
-Aceitamos contribuições! Veja nosso [CONTRIBUTING.md](./CONTRIBUTING.md) para detalhes.
-**Como criar um novo pacote:** Crie uma nova pasta em `packages/` (ex: `pack-uk`), implemente a interface `DetectorPack` e adicione seus validadores determinísticos. Priorizamos validação matemática/determinística sobre Regex simples para evitar falsos positivos.
+## ⚙️ Configuration
+
+Create a `.clipcloak.json` at the root of your project:
+
+```json
+{
+  "minSeverity": "medium",
+  "minConfidence": 0.8,
+  "packs": ["generic", "br"],
+  "ignore": ["tests/fixtures/**", "*.md"]
+}
+```
+
+## 🤝 Contributing
+
+We welcome contributions from everyone! See our [Contributing Guide](CONTRIBUTING.md) to learn how to set up the monorepo, run tests, and add new detectors without leaking real secrets.
+
+Please note that we have a [Code of Conduct](CODE_OF_CONDUCT.md). By participating in this project, you agree to abide by its terms.
+
+## 📝 License
+
+Distributed under the MIT License. See `LICENSE` for more information.

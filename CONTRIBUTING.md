@@ -31,10 +31,11 @@ This project uses `pnpm` workspaces.
 
 ### Adding a New Regional Pack
 
-We encourage adding new regional packs (e.g., `pack-uk`, `pack-de`).
+We encourage adding new regional packs (e.g., `pack-uk`, `pack-de`) and generic detectors.
 1. Create a new folder under `packages/pack-[region]`.
 2. Implement the `Pack` interface defined in `packages/core`.
-3. Add unit tests for your detectors, including both positive and negative fixtures.
+3. Add unit tests for your detectors, including both positive and negative fixtures. 
+   - **CRITICAL:** Do NOT put real secrets in tests. Use randomly generated dummy values or `isDummyString` strategies.
 4. Ensure no ReDoS vulnerabilities exist in any regular expressions you add.
 
 ---
@@ -66,8 +67,9 @@ Este projeto utiliza workspaces do `pnpm`.
 
 ### Adicionando um Novo Pacote Regional
 
-Incentivamos a adição de novos pacotes regionais (ex: `pack-uk`, `pack-de`).
+Incentivamos a adição de novos pacotes regionais (ex: `pack-uk`, `pack-de`) e detectores genéricos.
 1. Crie uma nova pasta em `packages/pack-[regiao]`.
 2. Implemente a interface `Pack` definida em `packages/core`.
 3. Adicione testes unitários para seus detectores, incluindo fixtures positivas e negativas.
+   - **CRÍTICO:** NÃO coloque segredos reais nos testes. Use valores falsos gerados aleatoriamente ou estratégias baseadas em `isDummyString`.
 4. Certifique-se de que não existam vulnerabilidades ReDoS em nenhuma expressão regular que você adicionar.
