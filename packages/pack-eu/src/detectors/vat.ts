@@ -22,6 +22,9 @@ export const vatDetector: Detector = {
 
       // Exclude simple sequences
       if (/^[A-Z]{2}0{5,}$/.test(candidate)) continue;
+      
+      // Must contain at least one digit to avoid matching normal uppercase English words
+      if (!/\d/.test(candidate)) continue;
 
       findings.push({
         detectorId: this.id,

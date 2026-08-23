@@ -1,1 +1,1 @@
-export * from './hook.js';
+export { handlePreToolUse } from './hook.js';

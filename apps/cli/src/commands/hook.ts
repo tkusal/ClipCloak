@@ -68,92 +68,112 @@ export async function runClaudeCodeHook() {
     const toolInput = payload.tool_input || payload.toolArgs || {};
 
     // Standard Claude Code tool names or typical CLI commands
-    const fileReadTools = ['Read', 'ViewFile', 'View', 'fs_read_file', 'readFile', 'cat'];
+    const fileReadTools = ['Read', 'ViewFile', 'View', 'fs_read_file', 'readFile', 'cat', 'Bash', 'Grep'];
 
     if (!toolName || !fileReadTools.includes(toolName)) {
       outputDecision('allow');
     }
 
-    const filePath =
-      toolInput.file_path ||
-      toolInput.filePath ||
-      toolInput.path ||
-      toolInput.file ||
-      toolInput.filename;
-
-    if (!filePath || typeof filePath !== 'string') {
-      if (mode === 'strict') {
-        outputDecision('deny', 'ClipCloak strict mode: Unknown or missing file path in read tool.');
-      } else {
-        outputDecision('allow');
-      }
-      return;
-    }
-
     const cwd = process.cwd();
-    const fullPath = path.resolve(cwd, filePath);
+    let pathsToScan: string[] = [];
 
-    if (!fs.existsSync(fullPath)) {
-      outputDecision('allow'); // Let the tool fail naturally on non-existing files
-    }
-
-    const stat = fs.statSync(fullPath);
-    if (!stat.isFile()) {
-      outputDecision('allow');
-      return;
-    }
-    // Skip/Block very large files
-    if (stat.size > 5 * 1024 * 1024) {
-      if (mode === 'strict') {
-        outputDecision(
-          'deny',
-          `ClipCloak strict mode: File ${filePath} is too large to scan safely (> 5 MB).`,
-        );
-      } else {
-        outputDecision('allow');
+    if (toolName === 'Bash' || toolName === 'Grep') {
+      const commandOrPattern = toolInput.command || toolInput.pattern || '';
+      // Heuristic: extract anything that looks like a file path after standard read commands
+      const regex = /(?:cat|grep|head|tail|less|more|vi|vim|nano)\s+(?:-[a-zA-Z0-9]+\s+)*(['"]?)([a-zA-Z0-9_\-\.\/\\]+)\1/g;
+      let match;
+      while ((match = regex.exec(commandOrPattern)) !== null) {
+        if (match[2] && !match[2].startsWith('-')) {
+          pathsToScan.push(match[2]);
+        }
       }
-      return;
+      
+      // If we couldn't extract paths but it's Bash/Grep, we allow it with a risk (or we could block in strict mode)
+      if (pathsToScan.length === 0) {
+        outputDecision('allow');
+        return;
+      }
+    } else {
+      const filePath =
+        toolInput.file_path ||
+        toolInput.filePath ||
+        toolInput.path ||
+        toolInput.file ||
+        toolInput.filename;
+
+      if (!filePath || typeof filePath !== 'string') {
+        if (mode === 'strict') {
+          outputDecision('deny', 'ClipCloak strict mode: Unknown or missing file path in read tool.');
+        } else {
+          outputDecision('allow');
+        }
+        return;
+      }
+      pathsToScan.push(filePath);
     }
 
-    // Skip binary files
-    if (isBinaryFileSync(fullPath)) {
-      outputDecision('allow');
-    }
-
-    const content = fs.readFileSync(fullPath, 'utf8');
-
-    // Resolve project config
+    // Resolve project config once
     const fileConfig = loadConfigFile(cwd);
     const config = resolveConfig(fileConfig, {});
     const packs = getPacks(config.packs);
 
-    const { findings, errors } = detect(content, packs, {
-      context: { filename: filePath },
-      minSeverity: config.minSeverity || 'high',
-      minConfidence: config.minConfidence || 0.5,
-    });
+    for (const filePath of pathsToScan) {
+      const fullPath = path.resolve(cwd, filePath);
 
-    if (errors && errors.length > 0) {
-      if (mode === 'strict') {
-        outputDecision(
-          'deny',
-          `ClipCloak strict mode: Internal scanner error: ${errors[0].errorMessage}`,
-        );
-      } else {
-        outputDecision('allow');
+      if (!fs.existsSync(fullPath)) {
+        continue;
       }
-      return;
-    }
 
-    if (findings.length > 0) {
-      // Find the highest severity finding
-      const worstFinding = [...findings].sort((a, b) => {
-        const severityWeight = { low: 1, medium: 2, high: 3, critical: 4 };
-        return severityWeight[b.severity] - severityWeight[a.severity];
-      })[0];
+      const stat = fs.statSync(fullPath);
+      if (!stat.isFile()) {
+        continue;
+      }
+      
+      // Skip/Block very large files
+      if (stat.size > 5 * 1024 * 1024) {
+        if (mode === 'strict') {
+          outputDecision(
+            'deny',
+            `ClipCloak strict mode: File ${filePath} is too large to scan safely (> 5 MB).`,
+          );
+        }
+        continue;
+      }
 
-      const reason = `ClipCloak blocked reading ${filePath} because it contains potential sensitive data (${worstFinding.detectorId}, severity: ${worstFinding.severity.toUpperCase()}).`;
-      outputDecision('deny', reason);
+      // Skip binary files
+      if (isBinaryFileSync(fullPath)) {
+        continue;
+      }
+
+      const content = fs.readFileSync(fullPath, 'utf8');
+
+      const { findings, errors } = detect(content, packs, {
+        context: { filename: filePath },
+        minSeverity: config.minSeverity || 'high',
+        minConfidence: config.minConfidence || 0.5,
+      });
+
+      if (errors && errors.length > 0) {
+        if (mode === 'strict') {
+          outputDecision(
+            'deny',
+            `ClipCloak strict mode: Internal scanner error: ${errors[0].errorMessage}`,
+          );
+        }
+        continue;
+      }
+
+      if (findings.length > 0) {
+        // Find the highest severity finding
+        const worstFinding = [...findings].sort((a, b) => {
+          const severityWeight = { low: 1, medium: 2, high: 3, critical: 4 };
+          return severityWeight[b.severity] - severityWeight[a.severity];
+        })[0];
+
+        const reason = `ClipCloak blocked reading ${filePath} because it contains potential sensitive data (${worstFinding.detectorId}, severity: ${worstFinding.severity.toUpperCase()}). Note: Claude Code @file references bypass PreToolUse hooks.`;
+        outputDecision('deny', reason);
+        return; // Exits process
+      }
     }
 
     outputDecision('allow');

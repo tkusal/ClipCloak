@@ -11,7 +11,6 @@ export const tokensDetector: Detector = {
     // Better regex for OpenAI (sk-proj... and normal sk-...)
     const openaiRegex = /\bsk-(?!ant-)(?:proj-)?[A-Za-z0-9\-_]{20,}\b/g;
     const anthropicRegex = /\bsk-ant-[A-Za-z0-9\-_]{20,}\b/g;
-    const githubRegex = /\bgh[pousr]_[A-Za-z0-9]{36}\b/g;
 
     const runPattern = (regex: RegExp, id: string, name: string) => {
       let match;
@@ -42,7 +41,6 @@ export const tokensDetector: Detector = {
 
     runPattern(openaiRegex, 'openai-api-key', 'OpenAI API Key');
     runPattern(anthropicRegex, 'anthropic-api-key', 'Anthropic API Key');
-    runPattern(githubRegex, 'github-pat', 'GitHub Personal Access Token');
 
     return findings;
   },

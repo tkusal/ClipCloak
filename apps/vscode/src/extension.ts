@@ -44,10 +44,27 @@ export function activate(context: vscode.ExtensionContext) {
     diagnosticCollection.set(document.uri, diagnostics);
   };
 
+  // Debounce state for document changes
+  const timeoutMap = new Map<string, NodeJS.Timeout>();
+
+  const debouncedScan = (document: vscode.TextDocument) => {
+    const key = document.uri.toString();
+    if (timeoutMap.has(key)) {
+      clearTimeout(timeoutMap.get(key)!);
+    }
+    timeoutMap.set(
+      key,
+      setTimeout(() => {
+        scanDocument(document);
+        timeoutMap.delete(key);
+      }, 300),
+    );
+  };
+
   // Scan on open and on change
   context.subscriptions.push(
     vscode.workspace.onDidOpenTextDocument(scanDocument),
-    vscode.workspace.onDidChangeTextDocument((e) => scanDocument(e.document)),
+    vscode.workspace.onDidChangeTextDocument((e) => debouncedScan(e.document)),
     vscode.workspace.onDidSaveTextDocument(scanDocument),
   );
 
