@@ -64,8 +64,9 @@ export const cpfCnpjDetector: Detector = {
   id: 'cpf-cnpj',
   category: 'pii',
   defaultSeverity: 'medium',
-  defaultConfidence: 0.95,
+  defaultConfidence: 0.9,
   description: 'Brazilian CPF and CNPJ validated mathematically',
+  emittedIds: ['cpf', 'cnpj'],
   detect(text: string, _context?: DetectionContext) {
     const findings = [];
 

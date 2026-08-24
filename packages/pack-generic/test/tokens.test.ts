@@ -25,4 +25,32 @@ describe('Generic Pack: Tokens Detector', () => {
     const findings = tokensDetector.detect(text);
     expect(findings).toHaveLength(0);
   });
+
+  it('should detect Slack tokens', () => {
+    const text = 'xoxb-' + '987654321098-9876543210987-aBcDeFgHiJkLmNoPqRsTuVwX';
+    const findings = tokensDetector.detect(text);
+    expect(findings).toHaveLength(1);
+    expect(findings[0].detectorId).toBe('slack-token');
+  });
+
+  it('should detect npm tokens', () => {
+    const text = 'npm_' + 'aBcDeFgHiJkLmNoPqRsTuVwXyZ0123456789';
+    const findings = tokensDetector.detect(text);
+    expect(findings).toHaveLength(1);
+    expect(findings[0].detectorId).toBe('npm-token');
+  });
+
+  it('should detect SendGrid tokens', () => {
+    const text = 'SG.' + 'ECtsmUtDYErdq7Up6zu8So.UVGn4yFeZd7ITPRCTT6aFNQjdqtuAWeFq39CBa3VDnY';
+    const findings = tokensDetector.detect(text);
+    expect(findings).toHaveLength(1);
+    expect(findings[0].detectorId).toBe('sendgrid-api-key');
+  });
+
+  it('should detect GCP tokens', () => {
+    const text = 'AIza' + 'SyA1B2C3D4E5F6G7H8I9J0K1L2M3N4O5P6Q';
+    const findings = tokensDetector.detect(text);
+    expect(findings).toHaveLength(1);
+    expect(findings[0].detectorId).toBe('gcp-api-key');
+  });
 });

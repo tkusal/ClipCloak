@@ -4,19 +4,19 @@ import { detect, loadAndResolveConfig } from '@clipcloak/core';
 
 import { getPacks, isBinaryFileSync } from '../utils/scanner.js';
 
-function getClaudeHookMode(): 'standard' | 'strict' {
-  try {
-    const configPath = path.join(process.cwd(), 'claude-clipcloak.config.json');
-    if (fs.existsSync(configPath)) {
+function getClaudeHookMode(): { mode: 'standard' | 'strict'; error?: string } {
+  const configPath = path.join(process.cwd(), 'claude-clipcloak.config.json');
+  if (fs.existsSync(configPath)) {
+    try {
       const config = JSON.parse(fs.readFileSync(configPath, 'utf8'));
       if (config.mode === 'strict') {
-        return 'strict';
+        return { mode: 'strict' };
       }
+    } catch (err) {
+      return { mode: 'strict', error: 'Malformed claude-clipcloak.config.json' };
     }
-  } catch {
-    // Ignore and fallback to standard mode
   }
-  return 'standard';
+  return { mode: 'standard' };
 }
 
 function outputDecision(decision: 'allow' | 'deny', reason?: string) {
@@ -40,7 +40,13 @@ function outputDecision(decision: 'allow' | 'deny', reason?: string) {
 }
 
 export async function runClaudeCodeHook() {
-  const mode = getClaudeHookMode();
+  const modeResult = getClaudeHookMode();
+  const mode = modeResult.mode;
+
+  if (modeResult.error && mode === 'strict') {
+    return outputDecision('deny', `ClipCloak strict mode: ${modeResult.error}`);
+  }
+
   const cwd = process.cwd();
 
   try {
@@ -48,16 +54,18 @@ export async function runClaudeCodeHook() {
     try {
       input = fs.readFileSync(0, 'utf-8');
     } catch (err) {
-      // If reading stdin fails, fallback to standard behavior
       if (mode === 'strict') {
-        outputDecision('deny', 'ClipCloak strict mode: Failed to read stdin event.');
+        return outputDecision('deny', 'ClipCloak strict mode: Failed to read stdin event.');
       } else {
-        outputDecision('allow');
+        return outputDecision('allow');
       }
     }
 
     if (!input.trim()) {
-      outputDecision('allow');
+      if (mode === 'strict') {
+        return outputDecision('deny', 'ClipCloak strict mode: Empty stdin payload.');
+      }
+      return outputDecision('allow');
     }
 
     let payload;
@@ -65,34 +73,29 @@ export async function runClaudeCodeHook() {
       payload = JSON.parse(input);
     } catch (err) {
       if (mode === 'strict') {
-        outputDecision('deny', 'ClipCloak strict mode: Failed to parse stdin JSON payload.');
-      } else {
-        outputDecision('allow');
+        return outputDecision('deny', 'ClipCloak strict mode: Failed to parse stdin JSON payload.');
       }
-      return;
+      return outputDecision('allow');
     }
 
     const toolName = payload.tool_name || payload.toolName;
     const toolInput = payload.tool_input || payload.toolArgs || {};
 
-    // Standard Claude Code tool names or typical CLI commands
-    const fileReadTools = ['Read', 'ViewFile', 'View', 'fs_read_file', 'readFile', 'cat', 'Bash', 'Grep'];
+    const fileReadTools = ['Read', 'ViewFile', 'View', 'fs_read_file', 'readFile', 'cat', 'Bash', 'Grep', 'PowerShell'];
 
     if (!toolName || !fileReadTools.includes(toolName)) {
       if (mode === 'strict') {
-        return outputDecision('deny', 'Unknown tool not allowed in strict mode. Only standard read tools are supported.');
+        return outputDecision('deny', 'Unknown tool not allowed in strict mode. Only standard read operations are intercepted.');
       }
       return outputDecision('allow');
     }
 
     const pathsToScan: string[] = [];
 
-    // 1. Extract paths from shell commands
-    if (toolName === 'Bash' || toolName === 'Grep') {
-      const commandOrPattern = toolInput.command || toolInput.pattern || '';
-      // Heuristic: extract anything that looks like a file path after standard read commands.
-      // Now stops at the first unescaped space to avoid taking && or pipes.
-      const regex = /(?:cat|grep|head|tail|less|more|vi|vim|nano)\s+(?:-[a-zA-Z0-9]+\s+)*(['"]?)([a-zA-Z0-9_.\-/\\][\w\s.\-/\\]*?)\1(?=\s|$|&&|\|\||;|>|<|\|)/g;
+    if (toolName === 'Bash' || toolName === 'PowerShell') {
+      const commandOrPattern = toolInput.command || '';
+      // Heuristic: extract paths for Bash and PowerShell
+      const regex = /(?:cat|grep|head|tail|less|more|vi|vim|nano|Get-Content|gc|type)\s+(?:-[a-zA-Z0-9]+\s+)*(['"]?)([a-zA-Z0-9_.\-/\\][\w\s.\-/\\]*?)\1(?=\s|$|&&|\|\||;|>|<|\|)/gi;
       let match;
       while ((match = regex.exec(commandOrPattern)) !== null) {
         if (match[2] && !match[2].startsWith('-')) {
@@ -100,14 +103,21 @@ export async function runClaudeCodeHook() {
         }
       }
       
-      // If we couldn't extract paths but it's Bash/Grep, we allow it with a risk (or we could block in strict mode)
       if (pathsToScan.length === 0) {
         if (mode === 'strict') {
-          outputDecision('deny', 'ClipCloak strict mode: Could not reliably extract file paths from Bash/Grep command.');
-        } else {
-          outputDecision('allow');
+          return outputDecision('deny', `ClipCloak strict mode: Could not reliably extract file paths from ${toolName} command.`);
         }
-        return;
+        return outputDecision('allow');
+      }
+    } else if (toolName === 'Grep') {
+      const filePath = toolInput.path || toolInput.filePath || toolInput.file_path;
+      if (filePath) {
+        pathsToScan.push(filePath);
+      } else {
+        if (mode === 'strict') {
+          return outputDecision('deny', 'ClipCloak strict mode: Grep tool requires a path field.');
+        }
+        return outputDecision('allow');
       }
     } else {
       const filePath =
@@ -119,28 +129,35 @@ export async function runClaudeCodeHook() {
 
       if (!filePath || typeof filePath !== 'string') {
         if (mode === 'strict') {
-          outputDecision('deny', 'ClipCloak strict mode: Unknown or missing file path in read tool.');
-        } else {
-          outputDecision('allow');
+          return outputDecision('deny', 'ClipCloak strict mode: Unknown or missing file path in read tool.');
         }
-        return;
+        return outputDecision('allow');
       }
       pathsToScan.push(filePath);
     }
 
-    // Resolve project config once
-    const { config } = loadAndResolveConfig(cwd, {});
+    const { config, errors: configErrors } = loadAndResolveConfig(cwd, {});
+    if (configErrors && configErrors.length > 0 && mode === 'strict') {
+      return outputDecision('deny', `ClipCloak strict mode: Configuration error: ${configErrors[0]}`);
+    }
+    
     const packs = getPacks(config.packs);
 
     for (const filePath of pathsToScan) {
       const fullPath = path.resolve(cwd, filePath);
 
       if (!fs.existsSync(fullPath)) {
+        if (mode === 'strict') {
+          return outputDecision('deny', `ClipCloak strict mode: Target file ${filePath} does not exist.`);
+        }
         continue;
       }
 
       const stat = fs.statSync(fullPath);
       if (!stat.isFile()) {
+        if (mode === 'strict') {
+          return outputDecision('deny', `ClipCloak strict mode: Target ${filePath} is not a regular file.`);
+        }
         continue;
       }
       

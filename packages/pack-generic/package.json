@@ -21,5 +21,20 @@
     "type": "git",
     "url": "https://github.com/tkusal/ClipCloak.git",
     "directory": "packages/pack-generic"
+  },
+  "license": "MIT",
+  "author": "tkusal",
+  "homepage": "https://github.com/tkusal/ClipCloak#readme",
+  "bugs": {
+    "url": "https://github.com/tkusal/ClipCloak/issues"
+  },
+  "keywords": [
+    "security",
+    "clipcloak",
+    "secrets",
+    "dlp"
+  ],
+  "engines": {
+    "node": ">=22"
   }
 }

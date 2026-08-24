@@ -82,7 +82,7 @@ export async function runDoctor() {
     
     if (!activePackIds.includes('generic')) {
       if (activePackIds.includes('br')) {
-        testSecret = '41725350030';
+        testSecret = '12345678909';
         testText = `This is a test block containing a mock CPF: ${testSecret}`;
       } else if (activePackIds.includes('eu')) {
         testSecret = 'GB82WEST12345698765432';

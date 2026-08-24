@@ -5,6 +5,12 @@ import { getIgnoreFilter, walkDir } from '../utils/ignore.js';
 import { getPacks, scanFile, scanBuffer, scanText } from '../utils/scanner.js';
 import type { Severity, ScanResult } from '@clipcloak/core';
 import { loadAndResolveConfig } from '@clipcloak/core';
+import fs2 from 'node:fs';
+import path2 from 'node:path';
+
+const pkgPath = path2.join(__dirname, '../../package.json');
+const pkg = JSON.parse(fs2.readFileSync(pkgPath, 'utf8'));
+const VERSION = pkg.version;
 
 export interface ScanOptions {
   packs?: string;
@@ -206,7 +212,7 @@ export async function runScan(target: string | undefined, options: ScanOptions) 
           tool: {
             driver: {
               name: 'ClipCloak',
-              version: '1.0.0',
+              version: VERSION,
               informationUri: 'https://github.com/tkusal/ClipCloak',
             },
           },

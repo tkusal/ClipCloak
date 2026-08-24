@@ -42,7 +42,7 @@ function installClaudeHookInSettings(cwd: string) {
   }
 
   const newHookEntry = {
-    matcher: 'Read|ViewFile|View|fs_read_file|readFile|cat|Bash|Grep',
+    matcher: 'Read|ViewFile|View|fs_read_file|readFile|cat|Bash|Grep|PowerShell',
     hooks: [
       {
         type: 'command',
@@ -135,8 +135,8 @@ fi
     };
     fs.writeFileSync(configPath, JSON.stringify(config, null, 2));
     console.log(`✅ Config file created at: ${configPath}`);
-    console.log('   In `strict` mode, any scanner crash or unrecognized tool blocks access.');
-    console.log('   In `standard` mode, we fail-open to preserve agent flow.');
+    console.log('   In `strict` mode, scanner errors and missing/invalid read operations fail closed.');
+    console.log('   In `standard` mode, we fail-open to preserve agent flow where appropriate.');
 
     try {
       installClaudeHookInSettings(cwd);

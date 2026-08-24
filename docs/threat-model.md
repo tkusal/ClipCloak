@@ -51,3 +51,7 @@ The security boundary of ClipCloak is the **local development machine**.
 - **Skipped Files:** Files larger than 5MB or binary files are skipped by the scanner and assumed clean in standard mode to avoid hanging the agent or CI, but will trigger an explicit error in strict mode. Symlinks are ignored to prevent loops.
 - **False Negatives:** Formats not covered by active packs, unknown credentials, or highly encoded data (e.g. base64 inside JSON) may bypass detectors.
 - **Clipboard Polling Race:** The daemon polls the clipboard every second; an extremely fast process could theoretically read the clipboard before ClipCloak reacts.
+
+### Claude Code Integration Semantics
+- **Strict Mode:** In strict mode, ClipCloak fails closed for supported/intercepted read operations (including missing paths, invalid configurations, and unparseable inputs). It does not block all unknown tools because the integration explicitly matches specific tools (e.g. `Read`, `Bash`, `Grep`, `PowerShell`).
+- **Shell Support:** For `Bash` and `PowerShell` tools, paths are extracted conservatively from standard read commands (e.g., `cat`, `Get-Content`). Complex scripting constructs that obfuscate the path may bypass extraction and fail closed in strict mode or fail open in standard mode.

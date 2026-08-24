@@ -172,11 +172,68 @@ describe('CLI: Claude Code Hook', () => {
     await runClaudeCodeHook();
     expect(getOutputDecision().hookSpecificOutput.permissionDecision).toBe('allow');
   });
-
   it('should deny unrecognized Bash command in strict mode', async () => {
     setupMock({
       stdin: JSON.stringify({ toolName: 'Bash', toolArgs: { command: 'sed -i "s/a/b/" file.txt' } }),
       configContent: JSON.stringify({ mode: 'strict' }),
+    });
+    await runClaudeCodeHook();
+    expect(getOutputDecision().hookSpecificOutput.permissionDecision).toBe('deny');
+  });
+
+  it('should deny missing file in strict mode', async () => {
+    setupMock({
+      stdin: JSON.stringify({ toolName: 'Read', toolArgs: { filePath: 'missing.txt' } }),
+      fileExists: false,
+      configContent: JSON.stringify({ mode: 'strict' }),
+    });
+    await runClaudeCodeHook();
+    expect(getOutputDecision().hookSpecificOutput.permissionDecision).toBe('deny');
+  });
+
+  it('should extract path from PowerShell Get-Content', async () => {
+    setupMock({
+      stdin: JSON.stringify({ toolName: 'PowerShell', toolArgs: { command: 'Get-Content src/secret.txt' } }),
+      fileContent: 'AKIA1234567890ABCDEF',
+      configContent: JSON.stringify({ blockMinSeverity: 'medium', minSeverity: 'medium' }),
+    });
+    await runClaudeCodeHook();
+    expect(getOutputDecision().hookSpecificOutput.permissionDecision).toBe('deny');
+  });
+
+  it('should handle Grep structured input correctly', async () => {
+    setupMock({
+      stdin: JSON.stringify({ toolName: 'Grep', toolArgs: { pattern: 'password', path: 'src/secret.txt' } }),
+      fileContent: 'AKIA1234567890ABCDEF',
+      configContent: JSON.stringify({ blockMinSeverity: 'medium', minSeverity: 'medium' }),
+    });
+    await runClaudeCodeHook();
+    expect(getOutputDecision().hookSpecificOutput.permissionDecision).toBe('deny');
+  });
+
+  it('should deny Grep if path is missing in strict mode', async () => {
+    setupMock({
+      stdin: JSON.stringify({ toolName: 'Grep', toolArgs: { pattern: 'password' } }),
+      configContent: JSON.stringify({ mode: 'strict' }),
+    });
+    await runClaudeCodeHook();
+    expect(getOutputDecision().hookSpecificOutput.permissionDecision).toBe('deny');
+  });
+
+  it('should deny malformed config in strict mode', async () => {
+    setupMock({
+      stdin: JSON.stringify({ toolName: 'Read', toolArgs: { filePath: 'test.txt' } }),
+      configContent: '{ invalid json ',
+    });
+    await runClaudeCodeHook();
+    expect(getOutputDecision().hookSpecificOutput.permissionDecision).toBe('deny');
+  });
+
+  it('should handle pipes in Bash correctly', async () => {
+    setupMock({
+      stdin: JSON.stringify({ toolName: 'Bash', toolArgs: { command: 'cat src/secret.txt | grep something' } }),
+      fileContent: 'AKIA1234567890ABCDEF',
+      configContent: JSON.stringify({ blockMinSeverity: 'medium', minSeverity: 'medium' }),
     });
     await runClaudeCodeHook();
     expect(getOutputDecision().hookSpecificOutput.permissionDecision).toBe('deny');

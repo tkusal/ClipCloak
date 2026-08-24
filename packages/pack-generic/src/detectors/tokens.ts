@@ -8,6 +8,7 @@ export const tokensDetector: Detector = {
   defaultSeverity: 'critical',
   defaultConfidence: 0.95,
   description: 'General high-entropy API tokens (Slack, NPM, Sendgrid, GCP)',
+  emittedIds: ['openai-api-key', 'anthropic-api-key', 'slack-token', 'npm-token', 'sendgrid-api-key', 'gcp-api-key'],
   detect(text: string, _context?: DetectionContext) {
     const findings: Omit<Finding, 'packId'>[] = [];
 

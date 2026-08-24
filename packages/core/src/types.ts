@@ -40,6 +40,7 @@ export interface Detector {
   description?: string;
   defaultSeverity?: Severity;
   defaultConfidence?: number;
+  emittedIds?: string[];
   detect: (text: string, context?: DetectionContext) => Omit<Finding, 'packId'>[];
 }
 

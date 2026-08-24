@@ -5,12 +5,19 @@ import { runScan } from './commands/scan.js';
 import { runInit } from './commands/init.js';
 import { runDoctor } from './commands/doctor.js';
 
+import fs from 'node:fs';
+import path from 'node:path';
+
+const pkgPath = path.join(__dirname, '../package.json');
+const pkg = JSON.parse(fs.readFileSync(pkgPath, 'utf8'));
+const VERSION = pkg.version;
+
 const program = new Command();
 
 program
   .name('clipcloak')
   .description('Detects and redacts sensitive data before it reaches AI')
-  .version('1.0.0');
+  .version(VERSION);
 
 program
   .command('scan')

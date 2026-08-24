@@ -7,6 +7,7 @@ export const pixDetector: Detector = {
   defaultSeverity: 'high',
   defaultConfidence: 0.8,
   description: 'Brazilian PIX payment keys',
+  emittedIds: ['pix-evp', 'pix-contextual'],
   detect(text: string, context?: DetectionContext) {
     const findings = [];
 
