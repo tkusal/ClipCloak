@@ -15,7 +15,7 @@
     "@clipcloak/pack-br": "workspace:*",
     "@clipcloak/pack-eu": "workspace:*",
     "@clipcloak/pack-generic": "workspace:*",
-    "commander": "^12.0.0",
+    "commander": "^15.0.0",
     "ignore": "^7.0.6"
   },
   "publishConfig": {

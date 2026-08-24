@@ -15,10 +15,10 @@ jobs:
         node-version: [22.x, 24.x]
     
     steps:
-    - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+    - uses: actions/checkout@v7
     
     - name: Install pnpm
-      uses: pnpm/action-setup@a3252b78c470c02df07e9d59298aecedc3ccdd6d
+      uses: pnpm/action-setup@v6
       with:
         version: 9
         

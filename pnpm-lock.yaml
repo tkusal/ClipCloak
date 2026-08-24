@@ -48,8 +48,8 @@ importers:
         specifier: workspace:*
         version: link:../../packages/pack-generic
       commander:
-        specifier: ^12.0.0
-        version: 12.1.0
+        specifier: ^15.0.0
+        version: 15.0.0
       ignore:
         specifier: ^7.0.6
         version: 7.0.6
@@ -68,6 +68,9 @@ importers:
       '@clipcloak/pack-generic':
         specifier: workspace:*
         version: link:../../packages/pack-generic
+      commander:
+        specifier: ^15.0.0
+        version: 15.0.0
     devDependencies:
       '@types/node':
         specifier: ^20.12.7
@@ -93,6 +96,9 @@ importers:
       '@clipcloak/pack-generic':
         specifier: workspace:*
         version: link:../../packages/pack-generic
+      commander:
+        specifier: ^15.0.0
+        version: 15.0.0
     devDependencies:
       '@types/vscode':
         specifier: ^1.80.0
@@ -115,26 +121,42 @@ importers:
       '@clipcloak/pack-generic':
         specifier: workspace:*
         version: link:../../packages/pack-generic
+      commander:
+        specifier: ^15.0.0
+        version: 15.0.0
 
-  packages/core: {}
+  packages/core:
+    dependencies:
+      commander:
+        specifier: ^15.0.0
+        version: 15.0.0
 
   packages/pack-br:
     dependencies:
       '@clipcloak/core':
         specifier: workspace:*
         version: link:../core
+      commander:
+        specifier: ^15.0.0
+        version: 15.0.0
 
   packages/pack-eu:
     dependencies:
       '@clipcloak/core':
         specifier: workspace:*
         version: link:../core
+      commander:
+        specifier: ^15.0.0
+        version: 15.0.0
 
   packages/pack-generic:
     dependencies:
       '@clipcloak/core':
         specifier: workspace:*
         version: link:../core
+      commander:
+        specifier: ^15.0.0
+        version: 15.0.0
 
 packages:
 
@@ -723,9 +745,9 @@ packages:
   color-name@1.1.4:
     resolution: {integrity: sha512-dOy+3AuW3a2wNbZHIuMZpTcgjGuLU/uBL/ubcZF9OXbDo8ff4O8yVp5Bf0efS8uEoYo5q4Fx7dY9OgQGXgAsQA==}
 
-  commander@12.1.0:
-    resolution: {integrity: sha512-Vw8qHK3bZM9y/P10u3Vib8o/DdkvA2OtPtZvD871QKjy74Wj1WSKFILMPRPSdUSx5RFK1arlJzEtA4PkFgnbuA==}
-    engines: {node: '>=18'}
+  commander@15.0.0:
+    resolution: {integrity: sha512-z67u4ZhzCL/Tydu1lJARtEZYWbWaN7oYLHbsuzocr6y4N6WZAagG3RQ4FW61V1/0+jImpj293XfrcYnd1qxtPg==}
+    engines: {node: '>=22.12.0'}
 
   concat-map@0.0.1:
     resolution: {integrity: sha512-/Srv4dswyQNBfohGpz9o6Yb3Gz3SrUDqBH5rTuhGR7ahtlbYKnVxw2bCFMRljaA7EXHaXZ8wsHdodFvbkhKmqg==}
@@ -1966,7 +1988,7 @@ snapshots:
 
   color-name@1.1.4: {}
 
-  commander@12.1.0: {}
+  commander@15.0.0: {}
 
   concat-map@0.0.1: {}
 

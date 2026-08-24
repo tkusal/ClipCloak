@@ -8,7 +8,10 @@
   "engines": {
     "vscode": "^1.80.0"
   },
-  "categories": ["Linters", "Security"],
+  "categories": [
+    "Linters",
+    "Security"
+  ],
   "main": "./dist/extension.js",
   "activationEvents": [
     "onStartupFinished"
@@ -28,9 +31,10 @@
   },
   "dependencies": {
     "@clipcloak/core": "workspace:*",
-    "@clipcloak/pack-generic": "workspace:*",
     "@clipcloak/pack-br": "workspace:*",
-    "@clipcloak/pack-eu": "workspace:*"
+    "@clipcloak/pack-eu": "workspace:*",
+    "@clipcloak/pack-generic": "workspace:*",
+    "commander": "^15.0.0"
   },
   "devDependencies": {
     "@types/vscode": "^1.80.0",

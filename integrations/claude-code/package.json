@@ -12,9 +12,10 @@
   "private": true,
   "dependencies": {
     "@clipcloak/core": "workspace:*",
-    "@clipcloak/pack-generic": "workspace:*",
     "@clipcloak/pack-br": "workspace:*",
-    "@clipcloak/pack-eu": "workspace:*"
+    "@clipcloak/pack-eu": "workspace:*",
+    "@clipcloak/pack-generic": "workspace:*",
+    "commander": "^15.0.0"
   },
   "files": [
     "dist"
