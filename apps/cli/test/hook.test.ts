@@ -238,4 +238,63 @@ describe('CLI: Claude Code Hook', () => {
     await runClaudeCodeHook();
     expect(getOutputDecision().hookSpecificOutput.permissionDecision).toBe('deny');
   });
+  it('should deny if a sensitive second file is read', async () => {
+    setupMock({
+      stdin: JSON.stringify({ toolName: 'Bash', toolArgs: { command: 'cat clean.txt secret.txt' } }),
+      fileContent: 'AKIA1234567890ABCDEF',
+      configContent: JSON.stringify({ blockMinSeverity: 'medium', minSeverity: 'medium' }),
+    });
+    await runClaudeCodeHook();
+    expect(getOutputDecision().hookSpecificOutput.permissionDecision).toBe('deny');
+  });
+
+  it('should extract paths from PowerShell Get-Content with multiple files', async () => {
+    setupMock({
+      stdin: JSON.stringify({ toolName: 'PowerShell', toolArgs: { command: 'Get-Content clean.txt secret.txt' } }),
+      fileContent: 'AKIA1234567890ABCDEF',
+      configContent: JSON.stringify({ blockMinSeverity: 'medium', minSeverity: 'medium' }),
+    });
+    await runClaudeCodeHook();
+    expect(getOutputDecision().hookSpecificOutput.permissionDecision).toBe('deny');
+  });
+
+  it('should handle grep pattern plus file correctly in Bash', async () => {
+    setupMock({
+      stdin: JSON.stringify({ toolName: 'Bash', toolArgs: { command: 'grep -n password secret.txt' } }),
+      fileContent: 'AKIA1234567890ABCDEF',
+      configContent: JSON.stringify({ blockMinSeverity: 'medium', minSeverity: 'medium' }),
+    });
+    await runClaudeCodeHook();
+    expect(getOutputDecision().hookSpecificOutput.permissionDecision).toBe('deny');
+  });
+
+  it('should handle shell chaining &&', async () => {
+    setupMock({
+      stdin: JSON.stringify({ toolName: 'Bash', toolArgs: { command: 'cat clean.txt && cat secret.txt' } }),
+      fileContent: 'AKIA1234567890ABCDEF',
+      configContent: JSON.stringify({ blockMinSeverity: 'medium', minSeverity: 'medium' }),
+    });
+    await runClaudeCodeHook();
+    expect(getOutputDecision().hookSpecificOutput.permissionDecision).toBe('deny');
+  });
+
+  it('should deny ambiguous multi-file commands in strict mode', async () => {
+    setupMock({
+      stdin: JSON.stringify({ toolName: 'Bash', toolArgs: { command: 'cat $FILE1 $FILE2' } }),
+      configContent: JSON.stringify({ mode: 'strict' }),
+    });
+    await runClaudeCodeHook();
+    expect(getOutputDecision().hookSpecificOutput.permissionDecision).toBe('deny');
+    expect(getOutputDecision().hookSpecificOutput.permissionDecisionReason).toContain('Could not reliably extract all file paths');
+  });
+
+  it('should deny command with unsupported syntax in strict mode', async () => {
+    setupMock({
+      stdin: JSON.stringify({ toolName: 'Bash', toolArgs: { command: 'cat {a,b}.txt' } }),
+      configContent: JSON.stringify({ mode: 'strict' }),
+    });
+    await runClaudeCodeHook();
+    expect(getOutputDecision().hookSpecificOutput.permissionDecision).toBe('deny');
+    expect(getOutputDecision().hookSpecificOutput.permissionDecisionReason).toContain('Could not reliably extract all file paths');
+  });
 });

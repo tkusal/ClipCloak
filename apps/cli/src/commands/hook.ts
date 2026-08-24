@@ -94,20 +94,64 @@ export async function runClaudeCodeHook() {
 
     if (toolName === 'Bash' || toolName === 'PowerShell') {
       const commandOrPattern = toolInput.command || '';
-      // Heuristic: extract paths for Bash and PowerShell
-      const regex = /(?:cat|grep|head|tail|less|more|vi|vim|nano|Get-Content|gc|type)\s+(?:-[a-zA-Z0-9]+\s+)*(['"]?)([a-zA-Z0-9_.\-/\\][\w\s.\-/\\]*?)\1(?=\s|$|&&|\|\||;|>|<|\|)/gi;
-      let match;
-      while ((match = regex.exec(commandOrPattern)) !== null) {
-        if (match[2] && !match[2].startsWith('-')) {
-          pathsToScan.push(match[2].trim());
+      
+      const simpleCommands = commandOrPattern.split(/(?:&&|\|\||;|<|>|\|)/);
+      let hasUnsupportedCmd = false;
+      const tokenRegex = /"([^"\\]*(?:\\.[^"\\]*)*)"|'([^'\\]*(?:\\.[^'\\]*)*)'|([^\s"']+)/g;
+      
+      for (const cmd of simpleCommands) {
+        const tokens = [];
+        let tokenMatch;
+        while ((tokenMatch = tokenRegex.exec(cmd)) !== null) {
+           tokens.push(tokenMatch[1] || tokenMatch[2] || tokenMatch[3]);
+        }
+        
+        if (tokens.length === 0) continue;
+        
+        const baseCmd = tokens[0].toLowerCase();
+        const readCmds = ['cat', 'head', 'tail', 'less', 'more', 'vi', 'vim', 'nano', 'get-content', 'gc', 'type'];
+        
+        if (readCmds.includes(baseCmd)) {
+          let foundFiles = 0;
+          for (let i = 1; i < tokens.length; i++) {
+             if (!tokens[i].startsWith('-')) {
+                pathsToScan.push(tokens[i]);
+                foundFiles++;
+             }
+          }
+          if (foundFiles === 0) hasUnsupportedCmd = true;
+        } else if (baseCmd === 'grep') {
+          let patternFound = false;
+          let foundFiles = 0;
+          for (let i = 1; i < tokens.length; i++) {
+             if (!tokens[i].startsWith('-')) {
+                if (!patternFound) {
+                   patternFound = true;
+                } else {
+                   pathsToScan.push(tokens[i]);
+                   foundFiles++;
+                }
+             }
+          }
+          // grep reading from stdin is fine if preceded by | but we can't reliably track that
+          if (foundFiles === 0) hasUnsupportedCmd = true;
+        } else {
+          hasUnsupportedCmd = true;
         }
       }
-      
-      if (pathsToScan.length === 0) {
-        if (mode === 'strict') {
-          return outputDecision('deny', `ClipCloak strict mode: Could not reliably extract file paths from ${toolName} command.`);
-        }
-        return outputDecision('allow');
+
+      const isComplex = /(\$|`|\$\(|\{|\})/.test(commandOrPattern);
+
+      const uniquePaths = Array.from(new Set(pathsToScan));
+      pathsToScan.length = 0;
+      pathsToScan.push(...uniquePaths);
+
+      if (mode === 'strict') {
+         if (isComplex || hasUnsupportedCmd || pathsToScan.length === 0) {
+            return outputDecision('deny', `ClipCloak strict mode: Could not reliably extract all file paths from ${toolName} command.`);
+         }
+      } else if (pathsToScan.length === 0) {
+         return outputDecision('allow');
       }
     } else if (toolName === 'Grep') {
       const filePath = toolInput.path || toolInput.filePath || toolInput.file_path;

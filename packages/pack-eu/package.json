@@ -9,8 +9,7 @@
     "test": "vitest run"
   },
   "dependencies": {
-    "@clipcloak/core": "workspace:*",
-    "commander": "^15.0.0"
+    "@clipcloak/core": "workspace:*"
   },
   "publishConfig": {
     "access": "public"

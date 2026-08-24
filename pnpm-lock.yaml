@@ -68,9 +68,6 @@ importers:
       '@clipcloak/pack-generic':
         specifier: workspace:*
         version: link:../../packages/pack-generic
-      commander:
-        specifier: ^15.0.0
-        version: 15.0.0
     devDependencies:
       '@types/node':
         specifier: ^20.12.7
@@ -96,9 +93,6 @@ importers:
       '@clipcloak/pack-generic':
         specifier: workspace:*
         version: link:../../packages/pack-generic
-      commander:
-        specifier: ^15.0.0
-        version: 15.0.0
     devDependencies:
       '@types/vscode':
         specifier: ^1.80.0
@@ -121,42 +115,26 @@ importers:
       '@clipcloak/pack-generic':
         specifier: workspace:*
         version: link:../../packages/pack-generic
-      commander:
-        specifier: ^15.0.0
-        version: 15.0.0
 
-  packages/core:
-    dependencies:
-      commander:
-        specifier: ^15.0.0
-        version: 15.0.0
+  packages/core: {}
 
   packages/pack-br:
     dependencies:
       '@clipcloak/core':
         specifier: workspace:*
         version: link:../core
-      commander:
-        specifier: ^15.0.0
-        version: 15.0.0
 
   packages/pack-eu:
     dependencies:
       '@clipcloak/core':
         specifier: workspace:*
         version: link:../core
-      commander:
-        specifier: ^15.0.0
-        version: 15.0.0
 
   packages/pack-generic:
     dependencies:
       '@clipcloak/core':
         specifier: workspace:*
         version: link:../core
-      commander:
-        specifier: ^15.0.0
-        version: 15.0.0
 
 packages:
 

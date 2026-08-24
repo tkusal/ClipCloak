@@ -5,11 +5,9 @@ import { getIgnoreFilter, walkDir } from '../utils/ignore.js';
 import { getPacks, scanFile, scanBuffer, scanText } from '../utils/scanner.js';
 import type { Severity, ScanResult } from '@clipcloak/core';
 import { loadAndResolveConfig } from '@clipcloak/core';
-import fs2 from 'node:fs';
-import path2 from 'node:path';
 
-const pkgPath = path2.join(__dirname, '../../package.json');
-const pkg = JSON.parse(fs2.readFileSync(pkgPath, 'utf8'));
+const pkgPath = path.join(__dirname, '../../package.json');
+const pkg = JSON.parse(fs.readFileSync(pkgPath, 'utf8'));
 const VERSION = pkg.version;
 
 export interface ScanOptions {

@@ -33,8 +33,5 @@
     "type": "git",
     "url": "https://github.com/tkusal/ClipCloak.git",
     "directory": "packages/core"
-  },
-  "dependencies": {
-    "commander": "^15.0.0"
   }
 }

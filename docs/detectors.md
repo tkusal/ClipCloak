@@ -29,7 +29,7 @@ Designed to detect Brazilian regional identifier formats with deterministic veri
 | Detector ID | Emitted Finding IDs | Category | Severity | Confidence | Description |
 | ----------- | ------------------- | -------- | -------- | ---------- | ----------- |
 | `cpf-cnpj` | `cpf`<br>`cnpj` | `pii` | `medium` | `0.9` | Brazilian CPF and CNPJ validated mathematically |
-| `pix-key` | `pix-evp`<br>`pix-contextual` | `financial` | `high` | `0.8` | Brazilian PIX payment keys |
+| `pix-key` | `pix-evp`<br>`pix-contextual` | `financial` | `medium` | `0.3 - 0.9` | Brazilian PIX payment keys |
 | `phone-br` | `phone-br` | `pii` | `low` | `0.7` | Brazilian mobile and landline formats |
 
 ---

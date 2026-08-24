@@ -33,8 +33,7 @@
     "@clipcloak/core": "workspace:*",
     "@clipcloak/pack-br": "workspace:*",
     "@clipcloak/pack-eu": "workspace:*",
-    "@clipcloak/pack-generic": "workspace:*",
-    "commander": "^15.0.0"
+    "@clipcloak/pack-generic": "workspace:*"
   },
   "devDependencies": {
     "@types/vscode": "^1.80.0",
